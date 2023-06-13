@@ -1,0 +1,13 @@
+# Files
+.DS_Store
+.md
+
+
+# Folders
+.vscode/
+bin/
+obj/
+
+
+# Exclude
+!README.md
