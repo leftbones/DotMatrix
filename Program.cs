@@ -13,7 +13,7 @@ class Program {
         int MatrixScale = 4;
 
         SetTraceLogLevel(LOG_WARNING | LOG_ERROR | LOG_FATAL);
-        InitWindow(WindowSize.X, WindowSize.Y, "DotMatrix");
+        InitWindow(WindowSize.X, WindowSize.Y, "PixelMatrix");
         SetExitKey(KeyboardKey.KEY_NULL);
         SetTargetFPS(240);
 

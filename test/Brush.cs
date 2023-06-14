@@ -36,8 +36,8 @@ class Brush {
 
             if (Engine.Matrix.InBounds(Point)) {
                 var C = ID > -1 ? Color.WHITE : Color.BLACK;
-                var Dot = new Dot(ID, Point, C);
-                Engine.Matrix.Set(Point, Dot);
+                var Pixel = new Pixel(ID, Point, C);
+                Engine.Matrix.Set(Point, Pixel);
             }
         }
     }
