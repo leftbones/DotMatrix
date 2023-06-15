@@ -17,9 +17,9 @@ class Matrix {
     private Rectangle SourceRec;                            // Actual size of the Matrix texture
     private Rectangle DestRec;                              // Scaled size of the Matrix texture
 
-    public Matrix(Engine engine, int scale) {
+    public Matrix(Engine engine) {
         Engine = engine;
-        Scale = scale;
+        Scale = Engine.MatrixScale;
 
         // Calculate the Matrix size from the window size and scale
         Size = new Vector2i(Engine.WindowSize.X / Scale, Engine.WindowSize.Y / Scale);
@@ -55,6 +55,7 @@ class Matrix {
     public void Set(Vector2i pos, Pixel pixel) {
         Pixels[pos.X, pos.Y] = pixel;
         pixel.Position = pos;
+        pixel.Color = pixel.BaseColor;
     }
 
     // Place a Pixel in the Matrix and update it's position
@@ -104,10 +105,26 @@ class Matrix {
 
         for (int y = Size.Y - 1; y >= 0; y--) {
             for (int x = IsEvenTick ? 0 : Size.X - 1; IsEvenTick ? x < Size.X : x >= 0; x += IsEvenTick ? 1 : -1) {
-                var D = Get(x, y);
-                if (D.ID > -1)
-                    D.Step(this);
+                var P = Get(x, y);
+                if (P.ID > -1) {
+                    P.Step(this);
+                    P.Stepped = true;
+
+                    P.Tick(this);
+                    P.Ticked = true;
+
+                    if (P.Active && P.Position != P.LastPosition)
+                        P.ActOnNeighbors(this);
+                }
             }
+        }
+    }
+
+    // Final actions performed at the end of the Update
+    public void UpdateEnd() {
+        foreach (var P in Pixels) {
+            P.Stepped = false;
+            P.Ticked = false;
         }
     }
 
@@ -116,8 +133,11 @@ class Matrix {
         // Update Texture
         ImageClearBackground(ref Buffer, Color.BLACK);
 
-        foreach (var D in Pixels)
-            ImageDrawPixel(ref Buffer, D.Position.X, D.Position.Y, D.Color);
+        foreach (var P in Pixels) {
+            // Color C = P.Active ? P.Color : Color.RED;
+            Color C = P.Color;
+            ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, C);
+        }
 
         UpdateTexture(Texture, Buffer.data);
 

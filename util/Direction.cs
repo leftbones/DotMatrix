@@ -26,6 +26,9 @@ public static class Direction {
     public static readonly List<Vector2i> UpperHalf = new List<Vector2i>() { Direction.Left, Direction.UpLeft, Direction.Up, Direction.UpRight, Direction.Right };
     public static readonly List<Vector2i> LowerHalf = new List<Vector2i>() { Direction.Left, Direction.DownLeft, Direction.Down, Direction.DownRight, Direction.Right };
 
+    public static readonly List<Vector2i> CardinalUp = new List<Vector2i>() { Direction.Left, Direction.Up, Direction.Right };
+    public static readonly List<Vector2i> CardinalDown = new List<Vector2i>() { Direction.Left, Direction.Down, Direction.Right };
+
     public static readonly List<Vector2i> Cardinal = new List<Vector2i>() { Direction.Left, Direction.Right, Direction.Up, Direction.Down };
     public static readonly List<Vector2i> Diagonal = new List<Vector2i>() { Direction.UpLeft, Direction.UpRight, Direction.DownLeft, Direction.DownRight };
 
@@ -42,6 +45,8 @@ public static class Direction {
     public static List<Vector2i> ShuffledDiagonalDown { get { return DiagonalDown.OrderBy(a => RNG.Random.Next()).ToList(); } }
     public static List<Vector2i> ShuffledUpperHalf { get { return UpperHalf.OrderBy(a => RNG.Random.Next()).ToList(); } }
     public static List<Vector2i> ShuffledLowerHalf { get { return LowerHalf.OrderBy(a => RNG.Random.Next()).ToList(); } }
+    public static List<Vector2i> ShuffledCardinalUp { get { return CardinalUp.OrderBy(a => RNG.Random.Next()).ToList(); } }
+    public static List<Vector2i> ShuffledCardinalDown { get { return CardinalDown.OrderBy(a => RNG.Random.Next()).ToList(); } }
     public static List<Vector2i> ShuffledCardinal { get { return Cardinal.OrderBy(a => RNG.Random.Next()).ToList(); } }
     public static List<Vector2i> ShuffledDiagonal { get { return Diagonal.OrderBy(a => RNG.Random.Next()).ToList(); } }
     public static List<Vector2i> ShuffledFull { get { return Full.OrderBy(a => RNG.Random.Next()).ToList(); } }
@@ -55,6 +60,8 @@ public static class Direction {
     public static Vector2i RandomDiagonalDown { get { return Direction.DiagonalDown[RNG.Range(0, 1)]; } }
     public static Vector2i RandomUpperHalf { get { return Direction.UpperHalf[RNG.Range(0, 4)]; } }
     public static Vector2i RandomLowerHalf{ get { return Direction.LowerHalf[RNG.Range(0, 4)]; } }
+    public static Vector2i RandomCardinalUp { get { return Direction.CardinalUp[RNG.Range(0, 2)]; } }
+    public static Vector2i RandomCardinalDown { get { return Direction.CardinalDown[RNG.Range(0, 2)]; } }
     public static Vector2i RandomCardinal { get { return Direction.Cardinal[RNG.Range(0, 3)]; } }
     public static Vector2i RandomDiagonal { get { return Direction.Diagonal[RNG.Range(0, 3)]; } }
     public static Vector2i RandomFull { get { return Direction.Full[RNG.Range(0, 7)]; } }

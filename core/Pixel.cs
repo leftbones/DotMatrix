@@ -3,9 +3,11 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+enum PixelType { Element, Particle };
+
 class Pixel {
     // Attributes
-    public int ID { get; private set; }             = -1;                           // Unique identifier for comparison with other Pixels
+    public int ID { get; set; }                     = -1;                           // Unique identifier for comparison with other Pixels
     public Body? Body { get; set; }                 = null;                         // Physics body this Pixel belongs to (null when not part of a Body)
 
     // Position
@@ -13,9 +15,12 @@ class Pixel {
     public Vector2i LastPosition { get; set; }      = Vector2i.Zero;                // Previous position within the Matrix
 
     // State
+    public PixelType PixelType { get; set; }        = PixelType.Element;            // Determines which rules are used when performing the Step method
     public int Health {  get; set; }                = 1;                            // How much "damage" a Pixel can take before it is destroyed
     public int Lifetime { get; set; }               = -1;                           // How long a Pixel will live before expiring naturally (-1 is no lifetime)
-    public bool Stepped { get; set; }               = false;                        // If a Pixel has already had its Step method called in the current tick
+    public int TicksLived { get; set; }             = 0;                            // How many game ticks a Pixel has been alive for
+    public bool Stepped { get; set; }               = false;                        // If a Pixel has already had it's Step method called in the current tick
+    public bool Ticked { get; set; }                = false;                        // If a Pixel has already had it's Tick method called in the current tick
     public bool Active { get; set; }                = true;                         // If true, call Step once each time Engine is updated
 
     // Properties
@@ -36,8 +41,8 @@ class Pixel {
 
     // Rendering
     public Color Color { get; set; }                = new Color(0, 0, 0, 0);        // RGBA color used to render a Pixel
-    public Color BaseColor { get; private set; }    = new Color(0, 0, 0, 0);        // Default color of a Pixel
-    public int ColorOffset { get; private set; }    = 0;                            // Maximum offset that can be applied to a Pixel's color (in both directions)
+    public Color BaseColor { get; set; }            = new Color(0, 0, 0, 0);        // Default color of a Pixel
+    public int ColorOffset { get; set; }            = 0;                            // Maximum offset that can be applied to a Pixel's color (in both directions)
 
 
     public Pixel(int? id=null, Vector2i? position=null, Color? color=null) {
@@ -46,12 +51,34 @@ class Pixel {
         Color = color ?? Color;
     }
 
+    // Act on neighboring Pixels
+    public void ActOnNeighbors(Matrix M) {
+        foreach (var Dir in Direction.ShuffledCardinal) {
+            if (M.InBounds(Position + Dir)) {
+                var P = M.Get(Position + Dir);
+                if (ActOnOther(M, P)) return;
+            }
+        }
+    }
+
+    // Act on another Pixel, return true on success
+    public virtual bool ActOnOther(Matrix M, Pixel O) {
+        return false;
+    }
+
     // Performed once each time the Engine updates, as long as Active is set to true
     public virtual void Step(Matrix M) {
 
     }
 
-    // Lighten or darken the Pixel's Color by the given amount
+    // Performed once each time the Engine updates, after the Step method, as long as Active is set to true
+    public void Tick(Matrix M) {
+        TicksLived++;
+        if (Lifetime > -1 && TicksLived >= Lifetime)
+            Expire(M);
+    }
+
+    // Lighten or darken a Pixel's Color by the given amount
     public void ShiftColorValue(int amount) {
         Color = new Color(
             Math.Clamp(Color.r + amount, 0, 255),
@@ -59,5 +86,10 @@ class Pixel {
             Math.Clamp(Color.b + amount, 0, 255),
             255
         );
+    }
+
+    // Remove a Pixel from the Matrix
+    public virtual void Expire(Matrix M) {
+        M.Set(Position, new Pixel());
     }
 }

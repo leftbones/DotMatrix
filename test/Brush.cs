@@ -7,7 +7,7 @@ class Brush {
     public Engine Engine { get; private set; }
 
     public int ID { get; set; }     = 0;
-    public int Size { get; set; }   = 8;
+    public int Size { get; set; }   = 10;
 
     public Vector2i WindowSize { get { return Engine.WindowSize; } }
     public Vector2i MatrixSize { get { return Engine.Matrix.Size; } }
@@ -16,6 +16,7 @@ class Brush {
     public Vector2i MousePrev { get; set; }
 
     public bool Painting { get; set; } = false;
+    public bool Erasing { get; set; } = false;
 
     public Brush(Engine engine) {
         Engine = engine;
@@ -31,12 +32,19 @@ class Brush {
         var PointCache = new List<Vector2i>();
 
         foreach (var Point in LinePoints) {
+            if (!Erasing && ID > 0 && RNG.Roll(0.95)) continue;
+
             if (PointCache.Contains(Point)) continue;
             PointCache.Add(Point);
 
             if (Engine.Matrix.InBounds(Point)) {
-                var C = ID > -1 ? Color.WHITE : Color.BLACK;
-                var Pixel = new Pixel(ID, Point, C);
+                var Pixel = new Pixel();
+                if (!Erasing) {
+                    if (ID == 0) Pixel = new Solid(Point);
+                    if (ID == 1) Pixel = new Liquid(Point);
+                    if (ID == 2) Pixel = new Gas(Point);
+                    if (ID == 3) Pixel = new Powder(Point);
+                }
                 Engine.Matrix.Set(Point, Pixel);
             }
         }

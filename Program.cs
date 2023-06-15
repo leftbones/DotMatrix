@@ -9,11 +9,12 @@ class Program {
         ////
         // Init
 
-        var WindowSize = new Vector2i(1600, 900);
+        var WindowTitle = "DotMatrix";
+        var WindowSize = new Vector2i(1280, 720);
         int MatrixScale = 4;
 
         SetTraceLogLevel(LOG_WARNING | LOG_ERROR | LOG_FATAL);
-        InitWindow(WindowSize.X, WindowSize.Y, "PixelMatrix");
+        InitWindow(WindowSize.X, WindowSize.Y, $"{WindowTitle} - {GetFPS()} FPS");
         SetExitKey(KeyboardKey.KEY_NULL);
         SetTargetFPS(240);
 
@@ -22,6 +23,7 @@ class Program {
         // Setup
 
         var Engine = new Engine(WindowSize, MatrixScale);
+        Engine.AddTimer(2, () => { SetWindowTitle($"{WindowTitle} - {GetFPS()} FPS"); }, repeat: true);
 
 
         ////
@@ -51,7 +53,7 @@ class Program {
 
 
             ////
-            // Check
+            // Exit Check
 
             if (Engine.ShouldExit)
                 break;
