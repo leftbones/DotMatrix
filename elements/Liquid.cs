@@ -16,7 +16,7 @@ class Liquid : Pixel {
     public override void Step(Matrix M) {
         if (!Active) {
             foreach (var Dir in Direction.CardinalDown) {
-                if (M.IsValid(Position + Dir)) {
+                if (M.IsValid(Position, Position + Dir)) {
                     Active = true;
                     break;
                 }
@@ -25,6 +25,9 @@ class Liquid : Pixel {
             if (!Active)
                 return;
         }
+
+        if (M.InBoundsAndEmpty(Position + Direction.Up)) ShiftColor(50);
+        else if (RNG.CoinFlip()) Color = BaseColor;
 
         if (RNG.Roll(5) && M.SwapIfValid(Position, Position + Direction.RandomHorizontal)) return;
         if (M.SwapIfValid(Position, Position + Direction.Down)) return;

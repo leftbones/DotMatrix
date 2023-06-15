@@ -32,7 +32,8 @@ class Matrix {
         Pixels = new Pixel[Size.X, Size.Y];
         for (int y = Size.Y - 1; y >= 0; y--) {
             for (int x = 0; x < Size.X; x++) {
-                Pixels[x, y] = new Pixel(-1, new Vector2i(x, y));
+                // Pixels[x, y] = new Pixel(-1, new Vector2i(x, y));
+                Set(new Vector2i(x, y), new Pixel());
             }
         }
 
@@ -55,7 +56,6 @@ class Matrix {
     public void Set(Vector2i pos, Pixel pixel) {
         Pixels[pos.X, pos.Y] = pixel;
         pixel.Position = pos;
-        pixel.Color = pixel.BaseColor;
     }
 
     // Place a Pixel in the Matrix and update it's position
@@ -65,6 +65,7 @@ class Matrix {
         pixel.Position = new Vector2i(x, y);
     }
 
+<<<<<<< Updated upstream
     // Swap two Pixels in the Matrix (Vector2i pos)
     public void Swap(Vector2i pos1, Vector2i pos2) {
         var P1 = Get(pos1);
@@ -79,22 +80,104 @@ class Matrix {
         var Pos2 = p2.Position;
         Set(Pos2, p1);
         Set(Pos1, p2);
+=======
+    // Swap two Pixels in the Matrix, checking if the destination is in bounds
+    public bool Swap(Vector2i pos1, Vector2i pos2) {
+        if (!InBounds(pos2))
+            return false;
+
+        var D1 = Get(pos1);
+        var D2 = Get(pos2);
+        Set(pos2, D1);
+        Set(pos1, D2);
+
+        return true;
+>>>>>>> Stashed changes
     }
 
-    // Swap a Pixel with another Pixel if the destination is in bounds and empty
+    // Swap two Pixels in the Matrix without checking if the destination is in bounds, always returns true (or crashes if used wrong)
+    public bool QuickSwap(Pixel p1, Pixel p2) {
+        var Pos1 = p1.Position;
+        var Pos2 = p2.Position;
+        Set(Pos2, p1);
+        Set(Pos1, p2);
+        return true;
+    }
+
+    // Swap a Pixel with another Pixel if the destination is in bounds and a valid move (based on weight/type)
     public bool SwapIfValid(Vector2i pos1, Vector2i pos2) {
-        if (IsValid(pos2)) {
-            Swap(pos1, pos2);
-            return true;
+        // Destination is out of bounds
+        if (!InBounds(pos2))
+            return false;
+
+        var P1 = Get(pos1);
+        var P2 = Get(pos2);
+
+        // Destination is empty
+        if (P2.ID == -1)
+            return QuickSwap(P1, P2);
+
+        // Pixel 2 is Solid 
+        if (P2 is Solid)
+            return false;
+
+        // Both Pixels are Gas and P1 is less faded than P2
+        if (RNG.Roll(75) && P1 is Gas) {
+            if (P2 is Gas && P1.ColorFade > P2.ColorFade)
+                return QuickSwap(P1, P2);
         }
-        return false;
+
+        var MoveDir = Direction.GetMovementDirection(P1.Position, P2.Position);
+
+        switch (MoveDir.Y) {
+            case 0: // Horizontal only movement
+                return QuickSwap(P1, P2);
+            case 1: // Downward Y movement
+                if (P1.Weight > P2.Weight)
+                    return QuickSwap(P1, P2);
+                return false;
+            case -1: // Upward Y movement
+                if (P1.Weight < P2.Weight)
+                    return QuickSwap(P1, P2);
+                return false;
+            default:
+                return false;
+        }
     }
 
-    // Check if a position in the Matrix is in bounds and empty
-    public bool IsValid(Vector2i pos) {
-        if (InBounds(pos))
-            return (IsEmpty(pos));
-        return false;
+    // Check if a movement is valid (based on weight/type)
+    public bool IsValid(Vector2i pos1, Vector2i pos2) {
+        // Destination is out of bounds
+        if (!InBounds(pos2))
+            return false;
+
+        var P1 = Get(pos1);
+        var P2 = Get(pos2);
+
+        // Destination is empty
+        if (P2.ID == -1)
+            return true;
+
+        // Pixel 2 is Solid 
+        if (P2 is Solid)
+            return false;
+
+        var MoveDir = Direction.GetMovementDirection(P1.Position, P2.Position);
+
+        switch (MoveDir.Y) {
+            case 0: // Horizontal only movement
+                return QuickSwap(P1, P2);
+            case 1: // Downward Y movement
+                if (P1.Weight > P2.Weight)
+                    return true;
+                return false;
+            case -1: // Upward Y movement
+                if (P1.Weight < P2.Weight)
+                    return true;
+                return false;
+            default:
+                return false;
+        }
     }
 
     // Check if a position is within the bounds of the Matrix
@@ -105,6 +188,13 @@ class Matrix {
     // Check if a position in the Matrix is empty (ID -1)
     public bool IsEmpty(Vector2i pos) {
         return Get(pos).ID == -1;
+    }
+
+    // Check if a position is in bounds and empty
+    public bool InBoundsAndEmpty(Vector2i pos) {
+        if (InBounds(pos))
+            return IsEmpty(pos);
+        return false;
     }
 
     // Update each Pixel in the Matrix
@@ -142,8 +232,8 @@ class Matrix {
         ImageClearBackground(ref Buffer, Color.BLACK);
 
         foreach (var P in Pixels) {
-            // Color C = P.Active ? P.Color : Color.RED;
-            Color C = P.Color;
+            Color C = P.Active ? P.Color : Color.RED;
+            // Color C = P.Color;
             ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, C);
         }
 

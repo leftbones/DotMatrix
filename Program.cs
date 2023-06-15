@@ -18,12 +18,10 @@ class Program {
         SetExitKey(KeyboardKey.KEY_NULL);
         SetTargetFPS(240);
 
-
         ////
         // Setup
 
         var Engine = new Engine(WindowSize, MatrixScale);
-        Engine.AddTimer(2, () => { SetWindowTitle($"{WindowTitle} - {GetFPS()} FPS"); }, repeat: true);
 
 
         ////

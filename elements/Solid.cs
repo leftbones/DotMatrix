@@ -10,6 +10,7 @@ class Solid : Pixel {
         Active = false;
 
         BaseColor = new Color(127, 128, 118, 255);
+        ColorOffset = 15;
     }
 
     public override void Step(Matrix M) {

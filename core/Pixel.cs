@@ -42,7 +42,9 @@ class Pixel {
     // Rendering
     public Color Color { get; set; }                = new Color(0, 0, 0, 0);        // RGBA color used to render a Pixel
     public Color BaseColor { get; set; }            = new Color(0, 0, 0, 0);        // Default color of a Pixel
+    public bool ColorSet { get; set; }              = false;                        // If a Pixel's color has already been set
     public int ColorOffset { get; set; }            = 0;                            // Maximum offset that can be applied to a Pixel's color (in both directions)
+    public double ColorFade { get; set; }           = 255.0;                        // Used for fading opacity for Pixels with a limited Lifetime
 
 
     public Pixel(int? id=null, Vector2i? position=null, Color? color=null) {
@@ -76,16 +78,29 @@ class Pixel {
         TicksLived++;
         if (Lifetime > -1 && TicksLived >= Lifetime)
             Expire(M);
+
+        if (!ColorSet) {
+            int Offset = RNG.Range(-ColorOffset, ColorOffset);
+            Color = BaseColor;
+            ShiftColor(Offset);
+            ColorSet = true;
+        }
     }
 
     // Lighten or darken a Pixel's Color by the given amount
-    public void ShiftColorValue(int amount) {
+    public void ShiftColor(int amount) {
         Color = new Color(
             Math.Clamp(Color.r + amount, 0, 255),
             Math.Clamp(Color.g + amount, 0, 255),
             Math.Clamp(Color.b + amount, 0, 255),
             255
         );
+    }
+
+    // Fade a Pixel's opacity relative to the amount of remaining Lifetime
+    public void FadeOpacity() {
+        ColorFade -= ColorFade / (Lifetime - TicksLived);
+        Color = new Color(Color.r, Color.g, Color.b, (byte)ColorFade);
     }
 
     // Remove a Pixel from the Matrix

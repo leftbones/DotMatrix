@@ -11,11 +11,12 @@ class Powder : Pixel {
         Friction = 45;
 
         BaseColor = new Color(255, 206, 92, 255);
+        ColorOffset = 15;
     }
 
     public override void Step(Matrix M) {
         if (!Active) {
-            if (!M.IsValid(Position + Direction.Down)) return;
+            if (!M.IsValid(Position, Position + Direction.Down)) return;
             else Active = true;
         }
 

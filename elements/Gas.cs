@@ -6,29 +6,29 @@ namespace DotMatrix;
 class Gas : Pixel {
     public Gas(Vector2i position) : base(position: position){
         ID = 2;
-        Lifetime = RNG.Range(750, 1250);
+        Lifetime = RNG.Range(1200, 1600);
 
-        Weight = -50;
+        Weight = -20;
         Diffusion = 25;
 
-        BaseColor = new Color(132, 136, 132, 150);
+        BaseColor = new Color(125, 125, 125, 150);
+        ColorOffset = 10;
+        ColorFade = 150.0;
     }
 
     public override void Step(Matrix M) {
+        // Color Shift (even when not Active)
+        FadeOpacity();
+
         if (!Active) {
             foreach (var Dir in Direction.Cardinal) {
-                if (M.IsValid(Position + Dir)) {
+                if (M.IsValid(Position, Position + Dir)) {
                     Active = true;
                     break;
 		        }
 	        }
             if (!Active) return;
 	    }
-
-        // Color Shift
-        if (TicksLived >= Lifetime - 150) {
-            Color = new Color(Color.r, Color.g, Color.b, Lifetime - TicksLived);
-        }
 
         // Weight + Diffusion
         var WeightDir = Direction.None;
