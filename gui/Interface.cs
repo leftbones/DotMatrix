@@ -10,6 +10,8 @@ class Interface {
 
     public List<Container> Containers { get; private set; } = new List<Container>();
 
+    public Theme Theme { get; private set; } = new Theme("res/pixantiqua.png");
+
     public Interface(Engine engine) {
         Engine = engine;
     }

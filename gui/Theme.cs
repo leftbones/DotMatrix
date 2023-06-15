@@ -10,6 +10,9 @@ class Theme {
     public Color ButtonForeground { get; set; }                 = new Color(255, 255, 255, 255);    // Button foreground color
     public Color ButtonBackground { get; set; }                 = new Color(90, 95, 105, 255);      // Button background color
 
+    public Color ButtonHoverBackground { get; set; }            = new Color(110, 115, 125, 255);    // Button hover background color
+    public Color ButtonActiveBackground { get; set; }           = new Color(80, 85, 95, 255);       // Button active background color
+
     public Color HeaderForeground { get; set; }                 = new Color(255, 255, 255, 255);    // Header foreground color
     public Color HeaderBackground { get; set; }                 = new Color(90, 95, 105, 255);      // Header background color
 

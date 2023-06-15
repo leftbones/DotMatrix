@@ -24,15 +24,6 @@ class Engine {
         Matrix = new Matrix(this);
         Interface = new Interface(this);
         Brush = new Brush(this);
-
-        Interface.AddContainer(
-            new Container(
-                parent: Interface,
-                position: new Vector2i(10, 10),
-                size: new Vector2i(100, 100),
-                background: Color.DARKGRAY
-            )
-        );
     }
 
     public void AddTimer(int seconds, Action action, bool start=true, bool repeat=false, bool fire=false) {

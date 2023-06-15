@@ -43,4 +43,13 @@ class Liquid : Pixel {
         if (!RNG.Roll(Fluidity))
             Active = false;
     }
+
+    public override bool ActOnOther(Matrix M, Pixel O) {
+        if (O is Powder && !O.Active && !RNG.Roll(O.Friction)) {
+            O.Active = true;
+            return true;
+        }
+
+        return false;
+    }
 }

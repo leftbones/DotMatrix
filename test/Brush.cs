@@ -18,8 +18,23 @@ class Brush {
     public bool Painting { get; set; } = false;
     public bool Erasing { get; set; } = false;
 
+    public Container Menu { get; private set; }
+
     public Brush(Engine engine) {
         Engine = engine;
+
+        // Brush Menu
+        Menu = new Container(
+            parent: Engine.Interface,
+            position: new Vector2i(10, 10)
+        );
+
+        Menu.AddWidget(new Button(Menu, "Stone", () => { ID = 0; }, new Vector2i(80, 35)));
+        Menu.AddWidget(new Button(Menu, "Water", () => { ID = 1; }, new Vector2i(80, 35)));
+        Menu.AddWidget(new Button(Menu, "Smoke", () => { ID = 2; }, new Vector2i(80, 35)));
+        Menu.AddWidget(new Button(Menu, "Sand", () => { ID = 3; }, new Vector2i(80, 35)));
+
+        Engine.Interface.AddContainer(Menu);
     }
 
     public void Update() {

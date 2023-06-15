@@ -67,10 +67,18 @@ class Matrix {
 
     // Swap two Pixels in the Matrix (Vector2i pos)
     public void Swap(Vector2i pos1, Vector2i pos2) {
-        var D1 = Get(pos1);
-        var D2 = Get(pos2);
-        Set(pos2, D1);
-        Set(pos1, D2);
+        var P1 = Get(pos1);
+        var P2 = Get(pos2);
+        Set(pos2, P1);
+        Set(pos1, P2);
+    }
+
+    // Swap two Pixels in the Matrix (p1, p2)
+    public void Swap(Pixel p1, Pixel p2) {
+        var Pos1 = p1.Position;
+        var Pos2 = p2.Position;
+        Set(Pos2, p1);
+        Set(Pos1, p2);
     }
 
     // Swap a Pixel with another Pixel if the destination is in bounds and empty
