@@ -26,7 +26,8 @@ class Brush {
         // Brush Menu
         Menu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(10, 10)
+            position: new Vector2i(5, 5)
+            // position: new Vector2i(10, WindowSize.Y - ((45 * 4) - 5))
         );
 
         Menu.AddWidget(new Button(Menu, "Stone", () => { ID = 0; }, new Vector2i(80, 35)));

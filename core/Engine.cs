@@ -26,11 +26,6 @@ class Engine {
         Brush = new Brush(this);
     }
 
-    public void AddTimer(int seconds, Action action, bool start=true, bool repeat=false, bool fire=false) {
-        var T = new Timer(seconds, action, start, repeat, fire);
-        Timers.Add(T);
-    }
-
     public void HandleInput() {
         var Events = new List<Event>();
 
@@ -97,9 +92,9 @@ class Engine {
     }
 
     public void Update() {
+        Brush.Update();
         Matrix.Update();
         Interface.Update();
-        Brush.Update();
 
         // Timers
         for (int i = Timers.Count() - 1; i >= 0; i--) {

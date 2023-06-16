@@ -65,34 +65,17 @@ class Matrix {
         pixel.Position = new Vector2i(x, y);
     }
 
-<<<<<<< Updated upstream
-    // Swap two Pixels in the Matrix (Vector2i pos)
-    public void Swap(Vector2i pos1, Vector2i pos2) {
-        var P1 = Get(pos1);
-        var P2 = Get(pos2);
-        Set(pos2, P1);
-        Set(pos1, P2);
-    }
-
-    // Swap two Pixels in the Matrix (p1, p2)
-    public void Swap(Pixel p1, Pixel p2) {
-        var Pos1 = p1.Position;
-        var Pos2 = p2.Position;
-        Set(Pos2, p1);
-        Set(Pos1, p2);
-=======
     // Swap two Pixels in the Matrix, checking if the destination is in bounds
     public bool Swap(Vector2i pos1, Vector2i pos2) {
         if (!InBounds(pos2))
             return false;
 
-        var D1 = Get(pos1);
-        var D2 = Get(pos2);
-        Set(pos2, D1);
-        Set(pos1, D2);
+        var P1 = Get(pos1);
+        var P2 = Get(pos2);
+        Set(pos2, P1);
+        Set(pos1, P2);
 
         return true;
->>>>>>> Stashed changes
     }
 
     // Swap two Pixels in the Matrix without checking if the destination is in bounds, always returns true (or crashes if used wrong)
@@ -131,7 +114,7 @@ class Matrix {
 
         switch (MoveDir.Y) {
             case 0: // Horizontal only movement
-                return QuickSwap(P1, P2);
+                return false;
             case 1: // Downward Y movement
                 if (P1.Weight > P2.Weight)
                     return QuickSwap(P1, P2);
@@ -232,9 +215,8 @@ class Matrix {
         ImageClearBackground(ref Buffer, Color.BLACK);
 
         foreach (var P in Pixels) {
-            Color C = P.Active ? P.Color : Color.RED;
-            // Color C = P.Color;
-            ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, C);
+            if (P.ID == -1) continue;
+            ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, P.Color);
         }
 
         UpdateTexture(Texture, Buffer.data);

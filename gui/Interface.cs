@@ -38,5 +38,9 @@ class Interface {
     public void Draw() {
         foreach (var C in Containers)
             C.Draw();
+
+        var FPS = $"{GetFPS()} FPS";
+        var Pos = new Vector2i(WindowSize.X - ((int)MeasureTextEx(Theme.Font, FPS, Theme.FontSize, Theme.FontSpacing).X + 5), 5);
+        DrawTextEx(Theme.Font, $"{GetFPS()} FPS", Pos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.Foreground);
     }
 }
