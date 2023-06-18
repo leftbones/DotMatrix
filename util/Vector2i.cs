@@ -25,6 +25,11 @@ public struct Vector2i : IEquatable<Vector2i> {
 		Y = (int)y;
 	}
 
+	public Vector2i(double x, double y) {
+		X = (int)x;
+		Y = (int)y;
+	}
+
 	public Vector2i(Vector2 vec2) {
 		X = (int)vec2.X;
 		Y = (int)vec2.Y;
@@ -36,7 +41,7 @@ public struct Vector2i : IEquatable<Vector2i> {
 			if (index == 0) return X;
 			if (index == 1) return Y;
 
-			throw new IndexOutOfRangeException("Tried to access this Vector2i at index: " + index);
+			throw new IndexOutOfRangeException("Tried to access Vector2i at index: " + index);
 		}
 
 		set {
@@ -45,7 +50,7 @@ public struct Vector2i : IEquatable<Vector2i> {
 			} else if (index == 1) {
 				Y = value;
 			} else {
-				throw new IndexOutOfRangeException("Tried to set this Vector2i at index: " + index);
+				throw new IndexOutOfRangeException("Tried to set Vector2i at index: " + index);
 			}
 		}
 	}

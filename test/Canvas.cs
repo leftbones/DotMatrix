@@ -3,7 +3,9 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
-class Brush {
+// TODO: Add "freeze" mode to brush painting (painted Pixels are static until mouse button is released)
+
+class Canvas {
     public Engine Engine { get; private set; }
 
     public int ID { get; set; }     = 0;
@@ -18,24 +20,36 @@ class Brush {
     public bool Painting { get; set; } = false;
     public bool Erasing { get; set; } = false;
 
-    public Container Menu { get; private set; }
+    public Container BrushMenu { get; private set; }
+    // public Container SceneMenu { get; private set; }
 
-    public Brush(Engine engine) {
+    public Canvas(Engine engine) {
         Engine = engine;
 
         // Brush Menu
-        Menu = new Container(
+        BrushMenu = new Container(
             parent: Engine.Interface,
             position: new Vector2i(5, 5)
             // position: new Vector2i(10, WindowSize.Y - ((45 * 4) - 5))
         );
 
-        Menu.AddWidget(new Button(Menu, "Stone", () => { ID = 0; }, new Vector2i(80, 35)));
-        Menu.AddWidget(new Button(Menu, "Water", () => { ID = 1; }, new Vector2i(80, 35)));
-        Menu.AddWidget(new Button(Menu, "Smoke", () => { ID = 2; }, new Vector2i(80, 35)));
-        Menu.AddWidget(new Button(Menu, "Sand", () => { ID = 3; }, new Vector2i(80, 35)));
+        BrushMenu.AddWidget(new Label(BrushMenu, "Scene", new Vector2i(100, 20)));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Save", () => { }, new Vector2i(100, 20)));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Load", () => { }, new Vector2i(100, 20)));
 
-        Engine.Interface.AddContainer(Menu);
+        BrushMenu.AddWidget(new Label(BrushMenu, "Brush", new Vector2i(100, 20), new Quad(15, 5, 0, 0)));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { ID = 0; }, new Vector2i(100, 20)));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { ID = 1; }, new Vector2i(100, 20)));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { ID = 2; }, new Vector2i(100, 20)));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { ID = 3; }, new Vector2i(100, 20)));
+
+        Engine.Interface.AddContainer(BrushMenu);
+
+        // // Scene Menu
+        // SceneMenu = new Container(
+        //     parent: Engine.Interface,
+        //     position: new 
+        // );
     }
 
     public void Update() {

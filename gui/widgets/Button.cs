@@ -6,7 +6,7 @@ namespace DotMatrix;
 class Button : Widget {
     public string Text { get; set; }
     public Action Action { get; set; }
-    public Quad Margin { get; set; }
+    public Anchor TextAnchor { get; set; }
 
     public Theme Theme { get { return Parent.Parent.Theme; } }
 
@@ -15,11 +15,12 @@ class Button : Widget {
 
     public Vector2i TextSize { get { return new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing)); } }
 
-    public Button(Container parent, string text, Action action, Vector2i size, Quad? margin=null) : base(parent) {
+    public Button(Container parent, string text, Action action, Vector2i size, Quad? padding=null, Anchor? text_anchor=null) : base(parent) {
         Text = text;
         Action = action;
         Size = size;
-        Margin = margin ?? new Quad(5, 5, 10, 10);
+        Padding = padding ?? Padding;
+        TextAnchor = text_anchor ?? Anchor.Center;
     }
 
     public override bool FireEvent(Event E) {
@@ -40,6 +41,11 @@ class Button : Widget {
         DrawRectangleRec(ClickBox, BG);
 
         // Text
-        DrawTextEx(Theme.Font, Text, new Vector2i(Position.X + (Size.X / 2) - (TextSize.X / 2), Position.Y + (Size.Y / 2) - (TextSize.Y / 2)).ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.ButtonForeground);
+        var Pos = new Vector2i(
+            x: Position.X + (Size.X / 2) - (TextSize.X / 2) + Padding.X,
+            y: Position.Y + (Size.Y / 2) - (TextSize.Y / 2) + Padding.Y
+        ).ToVector2();
+
+        DrawTextEx(Theme.Font, Text, Pos, Theme.FontSize, Theme.FontSpacing, Theme.ButtonForeground);
     }
 }

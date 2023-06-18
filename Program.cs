@@ -10,13 +10,14 @@ class Program {
         // Init
 
         var WindowTitle = "DotMatrix";
-        var WindowSize = new Vector2i(1280, 720);
+        var VersionString = "1.0.0-alpha";
+        var WindowSize = new Vector2i(640, 480);
         int MatrixScale = 4;
 
         SetTraceLogLevel(LOG_WARNING | LOG_ERROR | LOG_FATAL);
-        InitWindow(WindowSize.X, WindowSize.Y, $"{WindowTitle} - {GetFPS()} FPS");
+        InitWindow(WindowSize.X, WindowSize.Y, $"{WindowTitle} - {VersionString}");
         SetExitKey(KeyboardKey.KEY_NULL);
-        SetTargetFPS(240);
+        SetTargetFPS(1000);
 
         ////
         // Setup

@@ -10,7 +10,7 @@ class Engine {
     public int Tick { get; private set; }
     public Matrix Matrix { get; private set; }
     public Interface Interface { get; private set; }
-    public Brush Brush { get; private set; }
+    public Canvas Canvas { get; private set; }
 
     public bool ShouldExit { get; private set; }
 
@@ -23,7 +23,7 @@ class Engine {
 
         Matrix = new Matrix(this);
         Interface = new Interface(this);
-        Brush = new Brush(this);
+        Canvas = new Canvas(this);
     }
 
     public void HandleInput() {
@@ -53,8 +53,8 @@ class Engine {
             (int)Math.Round((double)GetMouseY() / MatrixScale) * MatrixScale
         );
 
-        Brush.MousePrev = Brush.MousePos;
-        Brush.MousePos = MousePos;
+        Canvas.MousePrev = Canvas.MousePos;
+        Canvas.MousePos = MousePos;
 
         int MouseWheelMove = (int)GetMouseWheelMove();
         if (MouseWheelMove != 0) Events.Add(new MouseWheelEvent(MouseWheelMove));
@@ -76,23 +76,23 @@ class Engine {
                 ShouldExit = true;
 
             // Paint
-            else if (E.Name == "MouseDown:MOUSE_BUTTON_LEFT") Brush.Painting = true;
-            else if (E.Name == "MouseUp:MOUSE_BUTTON_LEFT") Brush.Painting = false;
+            else if (E.Name == "MouseDown:MOUSE_BUTTON_LEFT") Canvas.Painting = true;
+            else if (E.Name == "MouseUp:MOUSE_BUTTON_LEFT") Canvas.Painting = false;
 
             // Erase
-            else if (E.Name == "MouseDown:MOUSE_BUTTON_RIGHT") { Brush.Painting = true; Brush.Erasing = true; }
-            else if (E.Name == "MouseUp:MOUSE_BUTTON_RIGHT") { Brush.Painting = false; Brush.Erasing = false; }
+            else if (E.Name == "MouseDown:MOUSE_BUTTON_RIGHT") { Canvas.Painting = true; Canvas.Erasing = true; }
+            else if (E.Name == "MouseUp:MOUSE_BUTTON_RIGHT") { Canvas.Painting = false; Canvas.Erasing = false; }
 
-            // Brush ID
-            else if (E.Name == "KeyPress:KEY_ONE") Brush.ID = 0;
-            else if (E.Name == "KeyPress:KEY_TWO") Brush.ID = 1;
-            else if (E.Name == "KeyPress:KEY_THREE") Brush.ID = 2;
-            else if (E.Name == "KeyPress:KEY_FOUR") Brush.ID = 3;
+            // Canvas ID
+            else if (E.Name == "KeyPress:KEY_ONE") Canvas.ID = 0;
+            else if (E.Name == "KeyPress:KEY_TWO") Canvas.ID = 1;
+            else if (E.Name == "KeyPress:KEY_THREE") Canvas.ID = 2;
+            else if (E.Name == "KeyPress:KEY_FOUR") Canvas.ID = 3;
         }
     }
 
     public void Update() {
-        Brush.Update();
+        Canvas.Update();
         Matrix.Update();
         Interface.Update();
 

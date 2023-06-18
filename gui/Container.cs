@@ -3,20 +3,6 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
-struct Quad {
-    public int U;
-    public int D;
-    public int L;
-    public int R;
-
-    public Quad(int u, int d, int l, int r) {
-        U = u;
-        D = d;
-        L = l;
-        R = r;
-    }
-}
-
 class Container {
     public Interface Parent { get; private set; }
     public Vector2i Position { get; private set; }
@@ -85,8 +71,8 @@ class Container {
         int MinHeight = 0;
 
         foreach (var W in Widgets) {
-            if (W.Size.X > MinWidth) MinWidth = W.Size.X + 5;
-            MinHeight += W.Size.Y + 5;
+            if (W.Size.X > MinWidth) MinWidth = W.Size.X + W.Padding.X + 5;
+            MinHeight += W.Size.Y + W.Padding.Y + 5;
         }
 
         Size = new Vector2i(Math.Max(Size.X, MinWidth + 5), Math.Max(Size.Y, MinHeight + 5));
@@ -103,7 +89,7 @@ class Container {
 
             W.Draw();
 
-            Offset += W.Size.Y + 5;
+            Offset += W.Size.Y + W.Padding.Y + 5;
         }
 
         // Scroll
