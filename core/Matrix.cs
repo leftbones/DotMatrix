@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Numerics;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
@@ -10,6 +11,11 @@ class Matrix {
 
     public Vector2i Size { get; private set; }              // Size of the Matrix (in Pixels)
     public Pixel[,] Pixels { get; private set; }            // 2D array that stores the Pixels
+
+    public Chunk[,] Chunks { get; private set; }            // 2D array that stores Chunks
+    public Vector2i ChunkSize { get; private set; }         // Size for each Chunk
+    public int MaxChunksX { get; private set; }             // Number of Chunks in a row
+    public int MaxChunksY { get; private set; }             // Number of Chunks in a column
 
     public Texture2D Texture { get; private set; }          // Render texture that Pixels are drawn to
     private Image Buffer;                                   // Buffer image used to create the render texture
@@ -32,14 +38,25 @@ class Matrix {
         Pixels = new Pixel[Size.X, Size.Y];
         for (int y = Size.Y - 1; y >= 0; y--) {
             for (int x = 0; x < Size.X; x++) {
-                // Pixels[x, y] = new Pixel(-1, new Vector2i(x, y));
-                Set(new Vector2i(x, y), new Pixel());
+                Set(new Vector2i(x, y), new Pixel(), wake_chunk: false);
             }
         }
 
         // Generate the Buffer and Texture
         Buffer = GenImageColor(Size.X, Size.Y, Color.BLACK);
         Texture = LoadTextureFromImage(Buffer);
+
+        // Setup Chunks
+        ChunkSize = new Vector2i(20, 20);
+        MaxChunksX = Size.X / ChunkSize.X;
+        MaxChunksY = Size.Y / ChunkSize.Y;
+        Chunks = new Chunk[MaxChunksX, MaxChunksY];
+        for (int x = 0; x < MaxChunksX; x++) {
+            for (int y = 0; y < MaxChunksY; y++) {
+                var Pos = new Vector2i(x * ChunkSize.X, y * ChunkSize.Y);
+                Chunks[x, y] = new Chunk(Pos, ChunkSize);
+            }
+        }
     }
 
     // Get a Pixel from the Matrix (Vector2i pos)
@@ -52,17 +69,23 @@ class Matrix {
         return Pixels[x, y];
     }
 
-    // Set a Pixel in the Matrix (Vector2i pos)
-    public void Set(Vector2i pos, Pixel pixel) {
+    // Place a Pixel in the Matrix and update it's position (Vector2i pos)
+    public void Set(Vector2i pos, Pixel pixel, bool wake_chunk=true) {
         Pixels[pos.X, pos.Y] = pixel;
         pixel.Position = pos;
+
+        if (wake_chunk)
+            WakeChunk(pos);
     }
 
     // Place a Pixel in the Matrix and update it's position
-    public void Set(int x, int y, Pixel pixel) {
+    public void Set(int x, int y, Pixel pixel, bool wake_chunk=true) {
         Pixels[x, y] = pixel;
         pixel.LastPosition = pixel.Position;
         pixel.Position = new Vector2i(x, y);
+
+        if (wake_chunk)
+            WakeChunk(pixel.Position);
     }
 
     // Swap two Pixels in the Matrix, checking if the destination is in bounds
@@ -105,8 +128,8 @@ class Matrix {
             return false;
 
         // Both Pixels are Gas and P1 is less faded than P2
-        if (RNG.Roll(75) && P1 is Gas) {
-            if (P2 is Gas && P1.ColorFade > P2.ColorFade)
+        if (P1 is Gas && P2 is Gas) {
+            if (RNG.Roll(75) && P1.ColorFade > P2.ColorFade)
                 return QuickSwap(P1, P2);
         }
 
@@ -114,6 +137,8 @@ class Matrix {
 
         switch (MoveDir.Y) {
             case 0: // Horizontal only movement
+                if (P1.GetType() != P2.GetType() && P1.Weight > P2.Weight)
+                    return QuickSwap(P1, P2);
                 return false;
             case 1: // Downward Y movement
                 if (P1.Weight > P2.Weight)
@@ -145,11 +170,19 @@ class Matrix {
         if (P2 is Solid)
             return false;
 
+        // Both Pixels are Gas and P1 is less faded than P2
+        if (P1 is Gas && P2 is Gas) {
+            if (RNG.Roll(75) && P1.ColorFade > P2.ColorFade)
+                return QuickSwap(P1, P2);
+        }
+
         var MoveDir = Direction.GetMovementDirection(P1.Position, P2.Position);
 
         switch (MoveDir.Y) {
             case 0: // Horizontal only movement
-                return QuickSwap(P1, P2);
+                if (P1.GetType() != P2.GetType() && P1.Weight > P2.Weight)
+                    return true;
+                return false;
             case 1: // Downward Y movement
                 if (P1.Weight > P2.Weight)
                     return true;
@@ -186,8 +219,17 @@ class Matrix {
 
         for (int y = Size.Y - 1; y >= 0; y--) {
             for (int x = IsEvenTick ? 0 : Size.X - 1; IsEvenTick ? x < Size.X : x >= 0; x += IsEvenTick ? 1 : -1) {
+                // Skip sleeping chunks
+                var C = GetChunk(x, y);
+                if (!C.Awake) continue;
+
+                // Step all non-empty Pixels
                 var P = Get(x, y);
                 if (P.ID > -1) {
+                    // Skip Pixels that have already stepped
+                    if (P.Stepped)
+                        continue;
+
                     P.Step(this);
                     P.Stepped = true;
 
@@ -201,12 +243,46 @@ class Matrix {
         }
     }
 
-    // Final actions performed at the end of the Update
+    // Actions performed before the start of the normal Update
+    public void UpdateStart() {
+
+    }
+
+    // Actions performed at the end of the normal Update
     public void UpdateEnd() {
+        // Reset Pixel Stepped and Ticked flags
         foreach (var P in Pixels) {
             P.Stepped = false;
             P.Ticked = false;
+            P.Acted = false;
         }
+
+        // Step Chunks
+        foreach (var C in Chunks) {
+            C.Step();
+        }
+    }
+
+    // Return the chunk containing the given position (Vector2i pos)
+    public Chunk GetChunk(Vector2i pos) {
+        return Chunks[pos.X / ChunkSize.X, pos.Y / ChunkSize.Y];
+    }
+
+    // Return the chunk containing the given position (int x, int y)
+    public Chunk GetChunk(int x, int y) {
+        return Chunks[x / ChunkSize.X, y / ChunkSize.Y];
+    }
+
+    // Wake the chunk at the given position
+    public void WakeChunk(Vector2i pos) {
+        var Chunk = GetChunk(pos);
+        Chunk.Wake();
+
+        // Wake appropriate neighbor chunks if the position is on a border
+        if (pos.X == Chunk.Position.X + Chunk.Size.X - 1 && InBounds(pos + Direction.Right)) GetChunk(pos + Direction.Right).Wake();
+        if (pos.X == Chunk.Position.X && InBounds(pos + Direction.Left)) GetChunk(pos + Direction.Left).Wake();
+        if (pos.Y == Chunk.Position.Y + Chunk.Size.Y - 1 && InBounds(pos + Direction.Down)) GetChunk(pos + Direction.Down).Wake();
+        if (pos.Y == Chunk.Position.Y && InBounds(pos + Direction.Up)) GetChunk(pos + Direction.Up).Wake();
     }
 
     // Draw each Pixel in the Matrix to the render texture
@@ -216,7 +292,9 @@ class Matrix {
 
         foreach (var P in Pixels) {
             if (P.ID == -1) continue;
-            ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, P.Color);
+            Color C = P.Color;
+            // Color C = P.Active ? P.Color : Color.RED;
+            ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, C);
         }
 
         UpdateTexture(Texture, Buffer.data);
@@ -224,10 +302,20 @@ class Matrix {
         // Draw Texture
         DrawTexturePro(Texture, SourceRec, DestRec, Vector2.Zero, 0, Color.WHITE);
 
-        // Matrix Lines (Debug)
-        // for (int x = 0; x < Engine.WindowSize.X / Scale; x++)
+        // Pixel Grid
+        // for (int y = 0; y < Engine.WindowSize.Y / Scale; y++) {
         //     DrawLine(x * Scale, 0, x * Scale, Engine.WindowSize.Y, Color.DARKGRAY);
-        // for (int y = 0; y < Engine.WindowSize.Y / Scale; y++)
         //     DrawLine(0, y * Scale, Engine.WindowSize.X, y * Scale, Color.DARKGRAY);
+        // }
+
+        // Chunk Borders
+        if (Engine.Canvas.DrawChunks) {
+            foreach (var C in Chunks) {
+                var Col = C.Awake ? Color.WHITE : Color.DARKGRAY;
+                var Str = $"{C.Position.X / ChunkSize.X}, {C.Position.Y / ChunkSize.Y}";
+                DrawRectangleLines(C.Position.X * Scale, C.Position.Y * Scale, C.Size.X * Scale, C.Size.Y * Scale, Col);
+                DrawTextEx(Engine.Theme.Font, Str, new Vector2i((C.Position.X * Scale) + 5, (C.Position.Y * Scale) + 5).ToVector2(), Engine.Theme.FontSize, Engine.Theme.FontSpacing, Col);
+            }
+        }
     }
 }

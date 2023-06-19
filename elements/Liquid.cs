@@ -26,22 +26,17 @@ class Liquid : Pixel {
                 return;
         }
 
-        if (M.InBoundsAndEmpty(Position + Direction.Up)) ShiftColor(50);
-        else if (RNG.CoinFlip()) Color = BaseColor;
+        M.WakeChunk(Position);
 
         if (RNG.Roll(5) && M.SwapIfValid(Position, Position + Direction.RandomHorizontal)) return;
         if (M.SwapIfValid(Position, Position + Direction.Down)) return;
 
-
-        // var HorizDir = Direction.GetMovementDirection(LastPosition, Position);
-        // if (!Direction.Horizontal.Contains(HorizDir)) HorizDir = Direction.RandomHorizontal;
 
         var HorizDir = M.Engine.Tick % 2 == 0 ? Direction.Left : Direction.Right;
 
         for (int i = 0; i < 10; i++) {
             if (!RNG.Roll(Fluidity) && !M.SwapIfValid(Position, Position + HorizDir)) return;
         }
-        // else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(HorizDir))) return;
 
         if (!RNG.Roll(Fluidity))
             Active = false;

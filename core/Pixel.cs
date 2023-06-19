@@ -21,6 +21,7 @@ class Pixel {
     public int TicksLived { get; set; }             = 0;                            // How many game ticks a Pixel has been alive for
     public bool Stepped { get; set; }               = false;                        // If a Pixel has already had it's Step method called in the current tick
     public bool Ticked { get; set; }                = false;                        // If a Pixel has already had it's Tick method called in the current tick
+    public bool Acted { get; set; }                 = false;                        // If a Pixel has already had it's ActOnOther method called (successfully) in the current tick
     public bool Active { get; set; }                = true;                         // If true, call Step once each time Engine is updated
 
     // Properties
@@ -55,10 +56,15 @@ class Pixel {
 
     // Act on neighboring Pixels
     public void ActOnNeighbors(Matrix M) {
-        foreach (var Dir in Direction.ShuffledCardinal) {
-            if (M.InBounds(Position + Dir)) {
-                var P = M.Get(Position + Dir);
-                if (ActOnOther(M, P)) return;
+        if (!Acted) {
+            foreach (var Dir in Direction.ShuffledFull) {
+                if (M.InBounds(Position + Dir)) {
+                    var P = M.Get(Position + Dir);
+                    if (ActOnOther(M, P)) {
+                        Acted = true;
+                        return;
+                    }
+                }
             }
         }
     }

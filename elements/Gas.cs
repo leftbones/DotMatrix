@@ -6,7 +6,7 @@ namespace DotMatrix;
 class Gas : Pixel {
     public Gas(Vector2i position) : base(position: position){
         ID = 2;
-        Lifetime = RNG.Range(1200, 1600);
+        Lifetime = RNG.Range(1000, 1500);
 
         Weight = -20;
         Diffusion = 25;
@@ -21,7 +21,7 @@ class Gas : Pixel {
         FadeOpacity();
 
         if (!Active) {
-            foreach (var Dir in Direction.Cardinal) {
+            foreach (var Dir in Direction.ShuffledCardinal) {
                 if (M.IsValid(Position, Position + Dir)) {
                     Active = true;
                     break;
@@ -29,6 +29,8 @@ class Gas : Pixel {
 	        }
             if (!Active) return;
 	    }
+
+        M.WakeChunk(Position);
 
         // Weight + Diffusion
         var WeightDir = Direction.None;

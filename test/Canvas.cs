@@ -20,30 +20,36 @@ class Canvas {
     public bool Painting { get; set; } = false;
     public bool Erasing { get; set; } = false;
 
-    public Container BrushMenu { get; private set; }
-    // public Container SceneMenu { get; private set; }
+    public Container CanvasMenu { get; private set; }
+
+    // Tools + Properties
+    public bool DrawChunks = false;
+    public bool UncapFPS = false;
 
     public Canvas(Engine engine) {
         Engine = engine;
 
         // Brush Menu
-        BrushMenu = new Container(
+        CanvasMenu = new Container(
             parent: Engine.Interface,
             position: new Vector2i(5, 5)
             // position: new Vector2i(10, WindowSize.Y - ((45 * 4) - 5))
         );
 
-        BrushMenu.AddWidget(new Label(BrushMenu, "Scene", new Vector2i(100, 20)));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Save", () => { }, new Vector2i(100, 20)));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Load", () => { }, new Vector2i(100, 20)));
+        CanvasMenu.AddWidget(new Label(CanvasMenu, "Scene", new Vector2i(100, 20)));
+        CanvasMenu.AddWidget(new Button(CanvasMenu, "Save", () => { }, new Vector2i(100, 20)));
+        CanvasMenu.AddWidget(new Button(CanvasMenu, "Load", () => { }, new Vector2i(100, 20)));
 
-        BrushMenu.AddWidget(new Label(BrushMenu, "Brush", new Vector2i(100, 20), new Quad(15, 5, 0, 0)));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { ID = 0; }, new Vector2i(100, 20)));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { ID = 1; }, new Vector2i(100, 20)));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { ID = 2; }, new Vector2i(100, 20)));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { ID = 3; }, new Vector2i(100, 20)));
+        CanvasMenu.AddWidget(new Label(CanvasMenu, "Brush", new Vector2i(100, 20), new Quad(15, 5, 0, 0)));
+        CanvasMenu.AddWidget(new Button(CanvasMenu, "Stone", () => { ID = 0; }, new Vector2i(100, 20)));
+        CanvasMenu.AddWidget(new Button(CanvasMenu, "Water", () => { ID = 1; }, new Vector2i(100, 20)));
+        CanvasMenu.AddWidget(new Button(CanvasMenu, "Smoke", () => { ID = 2; }, new Vector2i(100, 20)));
+        CanvasMenu.AddWidget(new Button(CanvasMenu, "Sand", () => { ID = 3; }, new Vector2i(100, 20)));
 
-        Engine.Interface.AddContainer(BrushMenu);
+        CanvasMenu.AddWidget(new Label(CanvasMenu, "Tools", new Vector2i(100, 20), new Quad(15, 5, 0, 0)));
+        CanvasMenu.AddWidget(new Button(CanvasMenu, "Chunks", () => { DrawChunks = !DrawChunks; }, new Vector2i(100, 20)));
+
+        Engine.Interface.AddContainer(CanvasMenu);
 
         // // Scene Menu
         // SceneMenu = new Container(

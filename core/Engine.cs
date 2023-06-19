@@ -14,6 +14,8 @@ class Engine {
 
     public bool ShouldExit { get; private set; }
 
+    public Theme Theme { get { return Interface.Theme; } }
+
     private List<Timer> Timers = new List<Timer>();
     private List<KeyboardKey> HeldKeys = new List<KeyboardKey>();
 
@@ -92,6 +94,10 @@ class Engine {
     }
 
     public void Update() {
+        // Start Update
+        Matrix.UpdateStart();
+
+        // Normal Update
         Canvas.Update();
         Matrix.Update();
         Interface.Update();
@@ -104,6 +110,9 @@ class Engine {
             if (T.Done && !T.Repeat)
                 Timers.Remove(T);
         }
+
+        // End Update
+        Matrix.UpdateEnd();
 
         // Advance Tick
         Tick++;
