@@ -85,11 +85,8 @@ class Engine {
             else if (E.Name == "MouseDown:MOUSE_BUTTON_RIGHT") { Canvas.Painting = true; Canvas.Erasing = true; }
             else if (E.Name == "MouseUp:MOUSE_BUTTON_RIGHT") { Canvas.Painting = false; Canvas.Erasing = false; }
 
-            // Canvas ID
-            else if (E.Name == "KeyPress:KEY_ONE") Canvas.ID = 0;
-            else if (E.Name == "KeyPress:KEY_TWO") Canvas.ID = 1;
-            else if (E.Name == "KeyPress:KEY_THREE") Canvas.ID = 2;
-            else if (E.Name == "KeyPress:KEY_FOUR") Canvas.ID = 3;
+            // Brush Size
+            else if (E.Name.Contains("MouseWheel")) { Canvas.BrushSize = Math.Clamp(Canvas.BrushSize - ((MouseWheelEvent)E).Amount, 1, 100); }
         }
     }
 
@@ -98,8 +95,8 @@ class Engine {
         Matrix.UpdateStart();
 
         // Normal Update
-        Canvas.Update();
         Matrix.Update();
+        Canvas.Update();
         Interface.Update();
 
         // Timers
@@ -120,6 +117,7 @@ class Engine {
 
     public void Draw() {
         Matrix.Draw();
+        Canvas.Draw();
         Interface.Draw();
     }
 }

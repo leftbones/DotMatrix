@@ -22,6 +22,19 @@ class Interface {
     }
 
     public bool FireEvent(Event E) {
+        // Close any open containers
+        if (E.Name == "KeyPress:KEY_ESCAPE") {
+            bool Fired = false;
+            foreach (Container C in Containers) {
+                if (C.Active && C != Engine.Canvas.Toolbar) {
+                    Fired = true;
+                    C.Toggle();
+                }
+            }
+            if (Fired) return true;
+        }
+
+        // Pass event to all containers
         foreach (var C in Containers) {
             if (C.FireEvent(E))
                 return true;
@@ -39,6 +52,7 @@ class Interface {
         foreach (var C in Containers)
             C.Draw();
 
+        // FPS
         var FPS = $"{GetFPS()} FPS";
         var Pos = new Vector2i(WindowSize.X - ((int)MeasureTextEx(Theme.Font, FPS, Theme.FontSize, Theme.FontSpacing).X + 5), 5);
         DrawTextEx(Theme.Font, $"{GetFPS()} FPS", Pos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.Foreground);

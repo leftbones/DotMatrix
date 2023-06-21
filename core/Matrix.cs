@@ -23,6 +23,9 @@ class Matrix {
     private Rectangle SourceRec;                            // Actual size of the Matrix texture
     private Rectangle DestRec;                              // Scaled size of the Matrix texture
 
+    private int ChunkWidth = 40;
+    private int ChunkHeight = 40;
+
     public Matrix(Engine engine) {
         Engine = engine;
         Scale = Engine.MatrixScale;
@@ -47,7 +50,7 @@ class Matrix {
         Texture = LoadTextureFromImage(Buffer);
 
         // Setup Chunks
-        ChunkSize = new Vector2i(20, 20);
+        ChunkSize = new Vector2i(ChunkWidth, ChunkHeight);
         MaxChunksX = Size.X / ChunkSize.X;
         MaxChunksY = Size.Y / ChunkSize.Y;
         Chunks = new Chunk[MaxChunksX, MaxChunksY];
@@ -292,6 +295,14 @@ class Matrix {
 
         foreach (var P in Pixels) {
             if (P.ID == -1) continue;
+
+            if (!P.ColorSet) {
+                int Offset = RNG.Range(-P.ColorOffset, P.ColorOffset);
+                P.Color = P.BaseColor;
+                P.ShiftColor(Offset);
+                P.ColorSet = true;
+            }
+
             Color C = P.Color;
             // Color C = P.Active ? P.Color : Color.RED;
             ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, C);

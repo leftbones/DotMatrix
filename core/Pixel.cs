@@ -84,13 +84,6 @@ class Pixel {
         TicksLived++;
         if (Lifetime > -1 && TicksLived >= Lifetime)
             Expire(M);
-
-        if (!ColorSet) {
-            int Offset = RNG.Range(-ColorOffset, ColorOffset);
-            Color = BaseColor;
-            ShiftColor(Offset);
-            ColorSet = true;
-        }
     }
 
     // Lighten or darken a Pixel's Color by the given amount

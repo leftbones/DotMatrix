@@ -9,7 +9,7 @@ class Canvas {
     public Engine Engine { get; private set; }
 
     public int ID { get; set; }     = 0;
-    public int Size { get; set; }   = 10;
+    public int BrushSize { get; set; }   = 10;
 
     public Vector2i WindowSize { get { return Engine.WindowSize; } }
     public Vector2i MatrixSize { get { return Engine.Matrix.Size; } }
@@ -20,7 +20,9 @@ class Canvas {
     public bool Painting { get; set; } = false;
     public bool Erasing { get; set; } = false;
 
-    public Container CanvasMenu { get; private set; }
+    public Container Toolbar { get; private set; }
+    public Container SceneMenu { get; private set; }
+    public Container BrushMenu { get; private set; }
 
     // Tools + Properties
     public bool DrawChunks = false;
@@ -29,42 +31,51 @@ class Canvas {
     public Canvas(Engine engine) {
         Engine = engine;
 
-        // Brush Menu
-        CanvasMenu = new Container(
+
+        // Containers
+        Toolbar = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(5, 5)
-            // position: new Vector2i(10, WindowSize.Y - ((45 * 4) - 5))
+            position: Vector2i.Zero,
+            background: true,
+            horizontal: true
         );
 
-        CanvasMenu.AddWidget(new Label(CanvasMenu, "Scene", new Vector2i(100, 20)));
-        CanvasMenu.AddWidget(new Button(CanvasMenu, "Save", () => { }, new Vector2i(100, 20)));
-        CanvasMenu.AddWidget(new Button(CanvasMenu, "Load", () => { }, new Vector2i(100, 20)));
+        SceneMenu = new Container(
+            parent: Engine.Interface,
+            position: new Vector2i(0, 30),
+            activated: false
+        );
 
-        CanvasMenu.AddWidget(new Label(CanvasMenu, "Brush", new Vector2i(100, 20), new Quad(15, 5, 0, 0)));
-        CanvasMenu.AddWidget(new Button(CanvasMenu, "Stone", () => { ID = 0; }, new Vector2i(100, 20)));
-        CanvasMenu.AddWidget(new Button(CanvasMenu, "Water", () => { ID = 1; }, new Vector2i(100, 20)));
-        CanvasMenu.AddWidget(new Button(CanvasMenu, "Smoke", () => { ID = 2; }, new Vector2i(100, 20)));
-        CanvasMenu.AddWidget(new Button(CanvasMenu, "Sand", () => { ID = 3; }, new Vector2i(100, 20)));
+        BrushMenu = new Container(
+            parent: Engine.Interface,
+            position: new Vector2i(105, 30),
+            activated: false
+        );
 
-        CanvasMenu.AddWidget(new Label(CanvasMenu, "Tools", new Vector2i(100, 20), new Quad(15, 5, 0, 0)));
-        CanvasMenu.AddWidget(new Button(CanvasMenu, "Chunks", () => { DrawChunks = !DrawChunks; }, new Vector2i(100, 20)));
+        Engine.Interface.AddContainer(Toolbar);
+        Engine.Interface.AddContainer(SceneMenu);
+        Engine.Interface.AddContainer(BrushMenu);
 
-        Engine.Interface.AddContainer(CanvasMenu);
+        // Toolbar
+        Toolbar.AddWidget(new Button(Toolbar, "Scene", () => { SceneMenu.Toggle(); }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "Brush", () => { BrushMenu.Toggle(); }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "View", () => { }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "Cheats", () => { }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "Debug", () => { }, new Vector2i(100, 20)));
 
-        // // Scene Menu
-        // SceneMenu = new Container(
-        //     parent: Engine.Interface,
-        //     position: new 
-        // );
-    }
+        // Scene Menu
+        SceneMenu.AddWidget(new Button(SceneMenu, "Save", () => { }, new Vector2i(100, 20)));
+        SceneMenu.AddWidget(new Button(SceneMenu, "Load", () => { }, new Vector2i(100, 20)));
 
-    public void Update() {
-        if (Painting)
-            Paint();
+        // Brush Menu
+        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { ID = 0; }, new Vector2i(100, 20)));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { ID = 1; }, new Vector2i(100, 20)));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { ID = 2; }, new Vector2i(100, 20)));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { ID = 3; }, new Vector2i(100, 20)));
     }
 
     public void Paint() {
-        var LinePoints = GetLinePoints(MousePrev, MousePos, Size);
+        var LinePoints = GetLinePoints(MousePrev, MousePos, BrushSize);
         var PointCache = new List<Vector2i>();
 
         foreach (var Point in LinePoints) {
@@ -133,5 +144,19 @@ class Canvas {
         }
 
         return Points.Distinct().ToList();
+    }
+
+    public void Update() {
+        if (Painting)
+            Paint();
+    }
+
+    public void Draw() {
+        // Brush Indicator
+        int Offset = BrushSize % 2 == 0 ? 0 : Engine.MatrixScale / 2;
+        int MX = MousePos.X - ((BrushSize * Engine.MatrixScale) / 2) + Offset;
+        int MY = MousePos.Y - ((BrushSize * Engine.MatrixScale) / 2) + Offset;
+
+        DrawRectangleLines(MX, MY, BrushSize * Engine.MatrixScale, BrushSize * Engine.MatrixScale, Engine.Theme.Foreground);
     }
 }

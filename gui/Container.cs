@@ -9,6 +9,7 @@ class Container {
     public Vector2i Size { get; private set; }
     public Quad Margin { get; private set; }
     public bool Background { get; private set; }
+    public bool Horizontal { get; private set; }
 
     public bool Scroll { get; private set; } = false;
     public float ScrollOffset { get; private set; } = 0.0f;
@@ -23,12 +24,14 @@ class Container {
 
     public bool Active { get; private set; } = true;
 
-    public Container(Interface parent, Vector2i position, Vector2i? size=null, Quad? margin=null, bool background=true) {
+    public Container(Interface parent, Vector2i position, Vector2i? size=null, Quad? margin=null, bool background=true, bool horizontal=false, bool activated=true) {
         Parent = parent;
         Position = position;
         Size = size ?? Vector2i.Zero;
         Margin = margin ?? new Quad(5, 5, 5, 5);
         Background = background;
+        Horizontal = horizontal;
+        Active = activated;
     }
 
     public void Toggle() {
@@ -61,39 +64,72 @@ class Container {
     }
 
     public virtual void Update() {
+        if (!Active) return;
+
         foreach (var W in Widgets)
             W.Update();
     }
 
     public virtual void Draw() {
+        if (!Active) return;
+
         // Size
         int MinWidth = 0;
         int MinHeight = 0;
 
-        foreach (var W in Widgets) {
-            if (W.Size.X > MinWidth) MinWidth = W.Size.X + W.Padding.X + 5;
-            MinHeight += W.Size.Y + W.Padding.Y + 5;
+        if (Horizontal)
+        {
+            // Calculate size
+            foreach (var W in Widgets) {
+                MinWidth += W.Size.X + W.Padding.X + 5;
+                if (W.Size.Y > MinHeight) MinHeight = W.Size.Y + W.Padding.Y + 5;
+            }
+
+            Size = new Vector2i(Math.Max(Size.X, MinWidth + 5), Math.Max(Size.Y, MinHeight + 5));
+
+            // Background
+            if (Background)
+                DrawRectangleV(Position.ToVector2(), Size.ToVector2(), Theme.Background);
+
+            // Widgets
+            int Offset = 0;
+            foreach (var W in Widgets) {
+                var Pos = new Vector2i(Origin.X + Offset, Origin.Y);
+                W.Position = Pos;
+
+                W.Draw();
+
+                Offset += W.Size.X + W.Padding.X + 5;
+            }
         }
+        else
+        {
+            // Calculate size
+            foreach (var W in Widgets) {
+                if (W.Size.X > MinWidth) MinWidth = W.Size.X + W.Padding.X + 5;
+                MinHeight += W.Size.Y + W.Padding.Y + 5;
+            }
 
-        Size = new Vector2i(Math.Max(Size.X, MinWidth + 5), Math.Max(Size.Y, MinHeight + 5));
+            Size = new Vector2i(Math.Max(Size.X, MinWidth + 5), Math.Max(Size.Y, MinHeight + 5));
 
-        // Background
-        if (Background)
-            DrawRectangleV(Position.ToVector2(), Size.ToVector2(), Theme.Background);
+            // Background
+            if (Background)
+                DrawRectangleV(Position.ToVector2(), Size.ToVector2(), Theme.Background);
 
-        // Widgets
-        int Offset = 0;
-        foreach (var W in Widgets) {
-            var Pos = new Vector2i(Origin.X, Origin.Y + Offset - (ScrollOffset));
-            W.Position = Pos;
+            // Widgets
+            int Offset = 0;
+            foreach (var W in Widgets) {
+                var Pos = new Vector2i(Origin.X, Origin.Y + Offset - (ScrollOffset));
+                W.Position = Pos;
 
-            W.Draw();
+                W.Draw();
 
-            Offset += W.Size.Y + W.Padding.Y + 5;
+                Offset += W.Size.Y + W.Padding.Y + 5;
+            }
+
+            // Scroll
+            if (Offset > Size.Y) Scroll = true;
+            else Scroll = false;
         }
-
-        // Scroll
-        if (Offset > Size.Y) Scroll = true;
-        else Scroll = false;
     }
 }
