@@ -12,9 +12,13 @@ class Engine {
     public Interface Interface { get; private set; }
     public Canvas Canvas { get; private set; }
 
-    public bool ShouldExit { get; private set; }
+    public bool Active { get; private set; }        = true;
+    public bool StepOnce { get; private set; }      = false;
+    public bool ShouldExit { get; private set; }    = false;
 
     public Theme Theme { get { return Interface.Theme; } }
+
+    public Pepper Pepper { get; private set; }
 
     private List<Timer> Timers = new List<Timer>();
     private List<KeyboardKey> HeldKeys = new List<KeyboardKey>();
@@ -22,6 +26,9 @@ class Engine {
     public Engine(Vector2i window_size, int matrix_scale) {
         WindowSize = window_size;
         MatrixScale = matrix_scale;
+
+        Pepper = new Pepper(this);
+        Pepper.Log(LogType.ENGINE, LogLevel.MESSAGE, "Engine initialized.");
 
         Matrix = new Matrix(this);
         Interface = new Interface(this);
@@ -77,6 +84,16 @@ class Engine {
             else if (E.Name == "KeyPress:KEY_ESCAPE")
                 ShouldExit = true;
 
+            // Pause
+            else if (E.Name == "KeyPress:KEY_SPACE")
+                Active = !Active;
+
+            // Advance
+            else if (!Active && E.Name == "KeyPress:KEY_T") {
+                Active = true;
+                StepOnce = true;
+            }
+
             // Paint
             else if (E.Name == "MouseDown:MOUSE_BUTTON_LEFT") Canvas.Painting = true;
             else if (E.Name == "MouseUp:MOUSE_BUTTON_LEFT") Canvas.Painting = false;
@@ -91,13 +108,20 @@ class Engine {
     }
 
     public void Update() {
+        if (!Active) {
+            Canvas.Update();
+            Interface.Update();
+            return;
+        }
+
+        Canvas.Update();
+        Interface.Update();
+
         // Start Update
         Matrix.UpdateStart();
 
         // Normal Update
         Matrix.Update();
-        Canvas.Update();
-        Interface.Update();
 
         // Timers
         for (int i = Timers.Count() - 1; i >= 0; i--) {
@@ -113,11 +137,25 @@ class Engine {
 
         // Advance Tick
         Tick++;
+
+        if (StepOnce) {
+            Active = false;
+            StepOnce = false;
+        }
     }
 
     public void Draw() {
         Matrix.Draw();
+
         Canvas.Draw();
         Interface.Draw();
+
+        // Misc. HUD/Overlays
+        if (!Active) {
+            var PauseText = "[PAUSED]";
+            var CenterPos = new Vector2i((WindowSize.X / 2) - (MeasureTextEx(Theme.Font, PauseText, Theme.FontSize, Theme.FontSpacing).X / 2), 5);
+
+            DrawTextEx(Theme.Font, PauseText, CenterPos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.Foreground);
+        }
     }
 }

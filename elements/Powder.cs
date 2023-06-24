@@ -10,7 +10,7 @@ class Powder : Pixel {
         Weight = 90;
         Friction = 45;
 
-        BaseColor = new Color(255, 206, 92, 255);
+        BaseColor = new Color(230, 188, 92, 255);
         ColorOffset = 15;
     }
 
@@ -40,7 +40,7 @@ class Powder : Pixel {
         //     else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
         // }
 
-        if (RNG.Roll(Friction))
+        if (!RNG.Roll(Friction))
             Active = false;
     }
 

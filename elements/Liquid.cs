@@ -26,8 +26,6 @@ class Liquid : Pixel {
                 return;
         }
 
-        M.WakeChunk(Position);
-
         if (RNG.Roll(5) && M.SwapIfValid(Position, Position + Direction.RandomHorizontal)) return;
         if (M.SwapIfValid(Position, Position + Direction.Down)) return;
 
@@ -38,7 +36,7 @@ class Liquid : Pixel {
             if (!RNG.Roll(Fluidity) && !M.SwapIfValid(Position, Position + HorizDir)) return;
         }
 
-        if (!RNG.Roll(Fluidity))
+        if (Position == LastPosition && !RNG.Roll(Fluidity))
             Active = false;
     }
 

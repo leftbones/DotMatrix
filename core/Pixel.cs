@@ -51,6 +51,7 @@ class Pixel {
     public Pixel(int? id=null, Vector2i? position=null, Color? color=null) {
         ID = id ?? ID;
         Position = position ?? Position;
+        LastPosition = Position;
         Color = color ?? Color;
     }
 

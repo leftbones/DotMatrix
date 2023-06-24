@@ -30,8 +30,6 @@ class Gas : Pixel {
             if (!Active) return;
 	    }
 
-        M.WakeChunk(Position);
-
         // Weight + Diffusion
         var WeightDir = Direction.None;
         if (Weight != 0)

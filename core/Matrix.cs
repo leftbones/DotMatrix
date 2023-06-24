@@ -7,6 +7,8 @@ namespace DotMatrix;
 
 class Matrix {
     public Engine Engine { get; private set; }              // Reference to the parent Engine instance
+    public Theme Theme { get { return Engine.Theme; } }     // Reference to the Theme class instance of the parent Engine
+    public Pepper Pepper { get { return Engine.Pepper; } }  // Reference to the Pepper class instanace of the parent Engine
     public int Scale { get; private set; }                  // Scale of the Matrix texture (Matrix pixel to screen pixel)
 
     public Vector2i Size { get; private set; }              // Size of the Matrix (in Pixels)
@@ -60,6 +62,8 @@ class Matrix {
                 Chunks[x, y] = new Chunk(Pos, ChunkSize);
             }
         }
+
+        Pepper.Log(LogType.MATRIX, LogLevel.MESSAGE, "Matrix initialized.");
     }
 
     // Get a Pixel from the Matrix (Vector2i pos)
@@ -77,6 +81,9 @@ class Matrix {
         Pixels[pos.X, pos.Y] = pixel;
         pixel.Position = pos;
 
+        if (pixel.ID > -1)
+            pixel.Active = true;
+
         if (wake_chunk)
             WakeChunk(pos);
     }
@@ -86,6 +93,9 @@ class Matrix {
         Pixels[x, y] = pixel;
         pixel.LastPosition = pixel.Position;
         pixel.Position = new Vector2i(x, y);
+
+        if (pixel.ID == -1)
+            pixel.Active = false;
 
         if (wake_chunk)
             WakeChunk(pixel.Position);
@@ -110,6 +120,7 @@ class Matrix {
         var Pos2 = p2.Position;
         Set(Pos2, p1);
         Set(Pos1, p2);
+
         return true;
     }
 
@@ -220,27 +231,38 @@ class Matrix {
     public void Update() {
         bool IsEvenTick = Engine.Tick % 2 == 0;
 
-        for (int y = Size.Y - 1; y >= 0; y--) {
-            for (int x = IsEvenTick ? 0 : Size.X - 1; IsEvenTick ? x < Size.X : x >= 0; x += IsEvenTick ? 1 : -1) {
+        for (int r = MaxChunksY - 1; r >= 0; r--) {
+            for (int c = IsEvenTick ? 0 : MaxChunksX - 1; IsEvenTick ? c < MaxChunksX : c >= 0; c += IsEvenTick ? 1 : -1) {
+                var C = Chunks[c, r];
+
                 // Skip sleeping chunks
-                var C = GetChunk(x, y);
                 if (!C.Awake) continue;
 
-                // Step all non-empty Pixels
-                var P = Get(x, y);
-                if (P.ID > -1) {
-                    // Skip Pixels that have already stepped
-                    if (P.Stepped)
-                        continue;
+                // Process pixels within dirty rect
+                for (int y = C.Y2; y >= C.Y1; y--) {
+                    for (int x = IsEvenTick ? C.X1 : C.X2; IsEvenTick ? x <= C.X2 : x >= C.X1; x += IsEvenTick ? 1 : -1) {
+                        var P = Get(C.Position.X + x, C.Position.Y + y);
 
-                    P.Step(this);
-                    P.Stepped = true;
+                        if (P.ID > -1) {
+                            // Skip already stepped Pixels
+                            if (P.Stepped)
+                                continue;
 
-                    P.Tick(this);
-                    P.Ticked = true;
+                            P.Step(this);
+                            P.Stepped = true;
 
-                    if (P.Active && P.Position != P.LastPosition)
-                        P.ActOnNeighbors(this);
+                            P.Tick(this);
+                            P.Ticked = true;
+
+                            if (P.Active) {
+                                WakeChunk(P.Position);
+
+                                if (P.Position != P.LastPosition) {
+                                    P.ActOnNeighbors(this);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -248,7 +270,38 @@ class Matrix {
 
     // Actions performed before the start of the normal Update
     public void UpdateStart() {
+        // Calculate chunk dirty rectangles
+        foreach (var C in Chunks) {
+            // Skip sleeping chunks
+            if (!C.Awake) continue;
 
+            if (C.CheckAll) {
+                C.CheckAll = false;
+
+                C.X1 = 0;
+                C.Y1 = 0;
+                C.X2 = C.Size.X - 1;
+                C.Y2 = C.Size.Y - 1;
+            } else {
+                var XStart = false;
+                var YStart = false;
+                C.X2 = 0;
+                C.Y2 = 0;
+
+                for (int y = ChunkSize.Y - 1; y >= 0; y--) {
+                    for (int x = 0; x < ChunkSize.X; x++) {
+                        var P = Get(C.Position.X + x, C.Position.Y + y);
+                        if (P.ID > -1 && P.Active) {
+                            if (!XStart || x < C.X1) { C.X1 = x; XStart = true; }
+                            if (!YStart || y < C.Y1) { C.Y1 = y; YStart = true; }
+
+                            if (x > C.X2) C.X2 = x;
+                            if (y > C.Y2) C.Y2 = y;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Actions performed at the end of the normal Update
@@ -260,7 +313,7 @@ class Matrix {
             P.Acted = false;
         }
 
-        // Step Chunks
+        // Step chunks
         foreach (var C in Chunks) {
             C.Step();
         }
@@ -279,13 +332,14 @@ class Matrix {
     // Wake the chunk at the given position
     public void WakeChunk(Vector2i pos) {
         var Chunk = GetChunk(pos);
-        Chunk.Wake();
+
+        Chunk.Wake(pos);
 
         // Wake appropriate neighbor chunks if the position is on a border
-        if (pos.X == Chunk.Position.X + Chunk.Size.X - 1 && InBounds(pos + Direction.Right)) GetChunk(pos + Direction.Right).Wake();
-        if (pos.X == Chunk.Position.X && InBounds(pos + Direction.Left)) GetChunk(pos + Direction.Left).Wake();
-        if (pos.Y == Chunk.Position.Y + Chunk.Size.Y - 1 && InBounds(pos + Direction.Down)) GetChunk(pos + Direction.Down).Wake();
-        if (pos.Y == Chunk.Position.Y && InBounds(pos + Direction.Up)) GetChunk(pos + Direction.Up).Wake();
+        if (pos.X == Chunk.Position.X + Chunk.Size.X - 1 && InBounds(pos + Direction.Right)) GetChunk(pos + Direction.Right).Wake(pos + Direction.Right, check_all: false);
+        if (pos.X == Chunk.Position.X && InBounds(pos + Direction.Left)) GetChunk(pos + Direction.Left).Wake(pos + Direction.Left, check_all: false);
+        if (pos.Y == Chunk.Position.Y + Chunk.Size.Y - 1 && InBounds(pos + Direction.Down)) GetChunk(pos + Direction.Down).Wake(pos + Direction.Down, check_all: false);
+        if (pos.Y == Chunk.Position.Y && InBounds(pos + Direction.Up)) GetChunk(pos + Direction.Up).Wake(pos + Direction.Up, check_all: false);
     }
 
     // Draw each Pixel in the Matrix to the render texture
@@ -303,8 +357,8 @@ class Matrix {
                 P.ColorSet = true;
             }
 
-            Color C = P.Color;
-            // Color C = P.Active ? P.Color : Color.RED;
+            // Color C = P.Color;
+            Color C = P.Active ? P.Color : Color.RED;
             ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, C);
         }
 
@@ -313,19 +367,24 @@ class Matrix {
         // Draw Texture
         DrawTexturePro(Texture, SourceRec, DestRec, Vector2.Zero, 0, Color.WHITE);
 
-        // Pixel Grid
-        // for (int y = 0; y < Engine.WindowSize.Y / Scale; y++) {
-        //     DrawLine(x * Scale, 0, x * Scale, Engine.WindowSize.Y, Color.DARKGRAY);
-        //     DrawLine(0, y * Scale, Engine.WindowSize.X, y * Scale, Color.DARKGRAY);
-        // }
-
         // Chunk Borders
         if (Engine.Canvas.DrawChunks) {
             foreach (var C in Chunks) {
-                var Col = C.Awake ? Color.WHITE : Color.DARKGRAY;
-                var Str = $"{C.Position.X / ChunkSize.X}, {C.Position.Y / ChunkSize.Y}";
+                var Col = C.Awake ? new Color(255, 255, 255, 150) : new Color(255, 255, 255, 50);
+                var Str = $"{C.Position.X / ChunkSize.X}, {C.Position.Y / ChunkSize.Y} - {C.SleepTimer}";
                 DrawRectangleLines(C.Position.X * Scale, C.Position.Y * Scale, C.Size.X * Scale, C.Size.Y * Scale, Col);
                 DrawTextEx(Engine.Theme.Font, Str, new Vector2i((C.Position.X * Scale) + 5, (C.Position.Y * Scale) + 5).ToVector2(), Engine.Theme.FontSize, Engine.Theme.FontSpacing, Col);
+            }
+        }
+
+        // Chunk DirtyRect
+        if (Engine.Canvas.DrawDirtyRects) {
+            foreach (var C in Chunks) {
+                if (C.Awake) {
+                    var R = C.DirtyRect;
+                    var Rec = new Rectangle(R.x * Scale, R.y * Scale, (R.width + 1) * Scale, (R.height + 1) * Scale);
+                    DrawRectangleLines((int)Rec.x, (int)Rec.y, (int)Rec.width, (int)Rec.height, Color.GREEN);
+                }
             }
         }
     }

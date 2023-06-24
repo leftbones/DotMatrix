@@ -7,8 +7,9 @@ namespace DotMatrix;
 
 class Canvas {
     public Engine Engine { get; private set; }
+    public Pepper Pepper { get { return Engine.Pepper; } }
 
-    public int ID { get; set; }     = 0;
+    public int ID { get; set; }     = 3;
     public int BrushSize { get; set; }   = 10;
 
     public Vector2i WindowSize { get { return Engine.WindowSize; } }
@@ -23,14 +24,16 @@ class Canvas {
     public Container Toolbar { get; private set; }
     public Container SceneMenu { get; private set; }
     public Container BrushMenu { get; private set; }
+    public Container CheatsMenu { get; private set; }
+    public Container DebugMenu { get; private set; }
 
     // Tools + Properties
-    public bool DrawChunks = false;
-    public bool UncapFPS = false;
+    public bool DrawChunks          = true;
+    public bool DrawDirtyRects      = true;
+    public bool UncapFPS            = false;
 
     public Canvas(Engine engine) {
         Engine = engine;
-
 
         // Containers
         Toolbar = new Container(
@@ -52,16 +55,29 @@ class Canvas {
             activated: false
         );
 
+        CheatsMenu = new Container(
+            parent: Engine.Interface,
+            position: new Vector2i(210, 30),
+            activated: false
+        );
+
+        DebugMenu = new Container(
+            parent: Engine.Interface,
+            position: new Vector2i(315, 30),
+            activated: false
+        );
+
         Engine.Interface.AddContainer(Toolbar);
         Engine.Interface.AddContainer(SceneMenu);
         Engine.Interface.AddContainer(BrushMenu);
+        Engine.Interface.AddContainer(CheatsMenu);
+        Engine.Interface.AddContainer(DebugMenu);
 
         // Toolbar
         Toolbar.AddWidget(new Button(Toolbar, "Scene", () => { SceneMenu.Toggle(); }, new Vector2i(100, 20)));
         Toolbar.AddWidget(new Button(Toolbar, "Brush", () => { BrushMenu.Toggle(); }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "View", () => { }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "Cheats", () => { }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "Debug", () => { }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "Cheats", () => { CheatsMenu.Toggle(); }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "Debug", () => { DebugMenu.Toggle(); }, new Vector2i(100, 20)));
 
         // Scene Menu
         SceneMenu.AddWidget(new Button(SceneMenu, "Save", () => { }, new Vector2i(100, 20)));
@@ -72,6 +88,16 @@ class Canvas {
         BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { ID = 1; }, new Vector2i(100, 20)));
         BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { ID = 2; }, new Vector2i(100, 20)));
         BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { ID = 3; }, new Vector2i(100, 20)));
+
+        // Cheats Menu
+        CheatsMenu.AddWidget(new Label(CheatsMenu, "(dust)", new Vector2i(100, 20)));
+
+        // Debug Menu
+        DebugMenu.AddWidget(new Button(DebugMenu, "Show Chunks", () => { DrawChunks = !DrawChunks; }, new Vector2i(100, 20)));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Show Rects", () => { DrawDirtyRects = !DrawDirtyRects; }, new Vector2i(100, 20)));
+
+        // Finish
+        Pepper.Log(LogType.OTHER, LogLevel.MESSAGE, "Canvas initialized.");
     }
 
     public void Paint() {
@@ -157,6 +183,7 @@ class Canvas {
         int MX = MousePos.X - ((BrushSize * Engine.MatrixScale) / 2) + Offset;
         int MY = MousePos.Y - ((BrushSize * Engine.MatrixScale) / 2) + Offset;
 
-        DrawRectangleLines(MX, MY, BrushSize * Engine.MatrixScale, BrushSize * Engine.MatrixScale, Engine.Theme.Foreground);
+        var Col = Painting ? Color.RED : Color.WHITE;
+        DrawRectangleLines(MX, MY, BrushSize * Engine.MatrixScale, BrushSize * Engine.MatrixScale, Col);
     }
 }

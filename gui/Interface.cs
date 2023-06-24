@@ -6,6 +6,7 @@ namespace DotMatrix;
 class Interface {
     public Engine Engine { get; private set; }
     public Matrix Matrix { get { return Engine.Matrix; } }
+    public Pepper Pepper { get { return Engine.Pepper; } }
     public Vector2i WindowSize { get { return Engine.WindowSize; } }
 
     public List<Container> Containers { get; private set; } = new List<Container>();
@@ -14,6 +15,8 @@ class Interface {
 
     public Interface(Engine engine) {
         Engine = engine;
+
+        Pepper.Log(LogType.GUI, LogLevel.MESSAGE, "Interface initialized.");
     }
 
     public void AddContainer(Container C) {
@@ -55,6 +58,11 @@ class Interface {
         // FPS
         var FPS = $"{GetFPS()} FPS";
         var Pos = new Vector2i(WindowSize.X - ((int)MeasureTextEx(Theme.Font, FPS, Theme.FontSize, Theme.FontSpacing).X + 5), 5);
-        DrawTextEx(Theme.Font, $"{GetFPS()} FPS", Pos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.Foreground);
+        DrawTextEx(Theme.Font, FPS, Pos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.Foreground);
+
+        // Tick
+        var Tick = $"T: {Engine.Tick}";
+        Pos = new Vector2i(WindowSize.X - ((int)MeasureTextEx(Theme.Font, Tick, Theme.FontSize, Theme.FontSpacing).X + 5), 20);
+        DrawTextEx(Theme.Font, Tick, Pos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.Foreground);
     }
 }
