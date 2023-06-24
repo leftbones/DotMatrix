@@ -85,6 +85,8 @@ class Pixel {
         TicksLived++;
         if (Lifetime > -1 && TicksLived >= Lifetime)
             Expire(M);
+
+        LastPosition = Position;
     }
 
     // Lighten or darken a Pixel's Color by the given amount

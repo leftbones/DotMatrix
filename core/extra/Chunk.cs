@@ -13,14 +13,14 @@ class Chunk {
     public int Y2 { get; set; }
 
     public int SleepTimer { get; private set; }
-    private int WaitTime = 10;
+    private int WaitTime = 30;
 
     public Rectangle DirtyRect { get { return new Rectangle(Position.X + X1, Position.Y + Y1, X2 - X1, Y2 - Y1); } }
 
-    public bool Awake { get; private set; } = true;
+    public bool Awake { get; private set; } = false;
     public bool WakeNextStep { get; private set; } = false;
 
-    public bool CheckAll { get; set; }
+    public bool CheckAll { get; set; } = false;
 
     public Chunk(Vector2i position, Vector2i size) {
         Position = position;
@@ -29,10 +29,12 @@ class Chunk {
         SleepTimer = WaitTime;
     }
 
-    public void Wake(Vector2i pos, bool check_all=false) {
+    public void Wake(Vector2i pos) {
         WakeNextStep = true;
         SleepTimer = WaitTime;
-        CheckAll = check_all;
+
+        if (!Awake || (X2 == 0 && Y2 == 0))
+            CheckAll = true;
     }
 
     public void Step() {

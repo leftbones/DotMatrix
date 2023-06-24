@@ -8,7 +8,7 @@ class Powder : Pixel {
         ID = 3;
 
         Weight = 90;
-        Friction = 45;
+        Friction = 60;
 
         BaseColor = new Color(230, 188, 92, 255);
         ColorOffset = 15;
@@ -26,21 +26,21 @@ class Powder : Pixel {
         if (M.SwapIfValid(Position, Position + DiagDir)) return;
         else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(DiagDir))) return;
 
-        // if (RNG.Roll(50)) {
-        //     var MoveDir = Direction.GetMovementDirection(Position, LastPosition);
-        //     if (!Direction.Horizontal.Contains(MoveDir)) MoveDir = Direction.RandomHorizontal;
+        if (RNG.Roll(50)) {
+            var MoveDir = Direction.GetMovementDirection(Position, LastPosition);
+            if (!Direction.Horizontal.Contains(MoveDir)) MoveDir = Direction.RandomHorizontal;
 
-        //     if (M.SwapIfValid(Position, Position + MoveDir)) return;
-        //     else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
-        // } else {
-        //     var MoveDir = Direction.GetMovementDirection(Position, LastPosition);
-        //     if (!Direction.DiagonalDown.Contains(MoveDir)) MoveDir = Direction.RandomDiagonalDown;
+            if (M.SwapIfValid(Position, Position + MoveDir)) return;
+            else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
+        } else {
+            var MoveDir = Direction.GetMovementDirection(Position, LastPosition);
+            if (!Direction.DiagonalDown.Contains(MoveDir)) MoveDir = Direction.RandomDiagonalDown;
 
-        //     if (M.SwapIfValid(Position, Position + MoveDir)) return;
-        //     else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
-        // }
+            if (M.SwapIfValid(Position, Position + MoveDir)) return;
+            else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
+        }
 
-        if (!RNG.Roll(Friction))
+        if (RNG.Roll(Friction))
             Active = false;
     }
 
