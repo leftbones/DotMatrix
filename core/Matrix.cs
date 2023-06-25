@@ -228,6 +228,9 @@ class Matrix {
             for (int c = IsEvenTick ? 0 : MaxChunksX - 1; IsEvenTick ? c < MaxChunksX : c >= 0; c += IsEvenTick ? 1 : -1) {
                 var C = Chunks[c, r];
 
+                // Skip sleeping chunks
+                if (!C.Awake) continue;
+
                 // Process pixels within dirty rect
                 for (int y = C.Y2; y >= C.Y1; y--) {
                     for (int x = IsEvenTick ? C.X1 : C.X2; IsEvenTick ? x <= C.X2 : x >= C.X1; x += IsEvenTick ? 1 : -1) {
@@ -267,6 +270,9 @@ class Matrix {
     public void UpdateEnd() {
         // Calculate chunk dirty rectangles
         foreach (var C in Chunks) {
+            // Skip sleeping chunks
+            if (!C.Awake) continue;
+
             if (C.CheckAll) {
                 C.CheckAll = false;
 
@@ -313,7 +319,6 @@ class Matrix {
     // Wake the chunk at the given position
     public void WakeChunk(Vector2i pos) {
         var Chunk = GetChunk(pos);
-
         Chunk.Wake(pos);
 
         // Wake appropriate neighbor chunks if the position is on a border
@@ -338,8 +343,8 @@ class Matrix {
                 P.ColorSet = true;
             }
 
-            // Color C = P.Color;
-            Color C = P.Active ? P.Color : Color.RED;
+            Color C = P.Color;
+            if (Engine.Canvas.DrawActiveOverlay && !P.Active) C = Color.RED;
             ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, C);
         }
 

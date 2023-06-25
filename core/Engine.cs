@@ -114,9 +114,6 @@ class Engine {
             return;
         }
 
-        Canvas.Update();
-        Interface.Update();
-
         // Start Update
         Matrix.UpdateStart();
 
@@ -134,6 +131,10 @@ class Engine {
 
         // End Update
         Matrix.UpdateEnd();
+
+        // Other Updates
+        Canvas.Update();
+        Interface.Update();
 
         // Advance Tick
         Tick++;

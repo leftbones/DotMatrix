@@ -20,11 +20,7 @@ class Powder : Pixel {
             else Active = true;
         }
 
-        if (M.SwapIfValid(Position, Position + Direction.Down)) return;
-
-        var DiagDir = Direction.RandomDiagonalDown;
-        if (M.SwapIfValid(Position, Position + DiagDir)) return;
-        else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(DiagDir))) return;
+        if (RNG.Roll(75) && M.SwapIfValid(Position, Position + Direction.Down)) return;
 
         if (RNG.Roll(50)) {
             var MoveDir = Direction.GetMovementDirection(Position, LastPosition);
@@ -42,6 +38,34 @@ class Powder : Pixel {
 
         if (RNG.Roll(Friction))
             Active = false;
+
+        // if (!Active) {
+        //     if (!M.IsValid(Position, Position + Direction.Down)) return;
+        //     else Active = true;
+        // }
+
+        // if (M.SwapIfValid(Position, Position + Direction.Down)) return;
+
+        // var DiagDir = Direction.RandomDiagonalDown;
+        // if (M.SwapIfValid(Position, Position + DiagDir)) return;
+        // else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(DiagDir))) return;
+
+        // if (RNM.Roll(50)) {
+        //     var MoveDir = Direction.M.tMovementDirection(Position, LastPosition);
+        //     if (!Direction.Horizontal.Contains(MoveDir)) MoveDir = Direction.RandomHorizontal;
+
+        //     if (M.SwapIfValid(Position, Position + MoveDir)) return;
+        //     else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
+        // } else {
+        //     var MoveDir = Direction.M.tMovementDirection(Position, LastPosition);
+        //     if (!Direction.DiagonalDown.Contains(MoveDir)) MoveDir = Direction.RandomDiagonalDown;
+
+        //     if (M.SwapIfValid(Position, Position + MoveDir)) return;
+        //     else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
+        // }
+
+        // if (RNM.Roll(Friction))
+        //     Active = false;
     }
 
     public override bool ActOnOther(Matrix M, Pixel O) {

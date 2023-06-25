@@ -58,13 +58,11 @@ class Pixel {
     // Act on neighboring Pixels
     public void ActOnNeighbors(Matrix M) {
         if (!Acted) {
-            foreach (var Dir in Direction.ShuffledFull) {
-                if (M.InBounds(Position + Dir)) {
+            foreach (var Dir in Direction.ShuffledCardinal) {
+                if (RNG.CoinFlip() && M.InBounds(Position + Dir)) {
                     var P = M.Get(Position + Dir);
-                    if (ActOnOther(M, P)) {
+                    if (ActOnOther(M, P))
                         Acted = true;
-                        return;
-                    }
                 }
             }
         }
@@ -86,7 +84,20 @@ class Pixel {
         if (Lifetime > -1 && TicksLived >= Lifetime)
             Expire(M);
 
+        if (Position != LastPosition)
+            WakeNeighbors(M, LastPosition);
+
         LastPosition = Position;
+    }
+
+    // Wake all neighboring Pixels at the given position or the Pixel's position
+    public void WakeNeighbors(Matrix M, Vector2i? pos=null) {
+        var Pos = pos ?? Position;
+
+        foreach (var Dir in Direction.ShuffledCardinal) {
+            if (M.InBounds(Pos + Dir))
+                M.Get(Pos + Dir).Active = true;
+        }
     }
 
     // Lighten or darken a Pixel's Color by the given amount

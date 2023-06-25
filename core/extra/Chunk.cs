@@ -48,4 +48,8 @@ class Chunk {
 
         WakeNextStep = false;
     }
+
+    public bool InBounds(Vector2i pos) {
+        return pos.X >= Position.X && pos.X < Position.X + Size.X && pos.Y >= Position.Y && pos.Y < Position.Y;
+    }
 }

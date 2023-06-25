@@ -22,15 +22,17 @@ class Canvas {
     public bool Erasing { get; set; } = false;
 
     public Container Toolbar { get; private set; }
+    public List<Container> Menus { get; private set; }
+
     public Container SceneMenu { get; private set; }
     public Container BrushMenu { get; private set; }
     public Container CheatsMenu { get; private set; }
     public Container DebugMenu { get; private set; }
 
     // Tools + Properties
-    public bool DrawChunks          = true;
-    public bool DrawDirtyRects      = true;
-    public bool UncapFPS            = false;
+    public bool DrawChunks          = false;
+    public bool DrawDirtyRects      = false;
+    public bool DrawActiveOverlay   = false;
 
     public Canvas(Engine engine) {
         Engine = engine;
@@ -45,25 +47,25 @@ class Canvas {
 
         SceneMenu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(0, 30),
+            position: new Vector2i(0, 25),
             activated: false
         );
 
         BrushMenu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(105, 30),
+            position: new Vector2i(105, 25),
             activated: false
         );
 
         CheatsMenu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(210, 30),
+            position: new Vector2i(210, 25),
             activated: false
         );
 
         DebugMenu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(315, 30),
+            position: new Vector2i(315, 25),
             activated: false
         );
 
@@ -73,31 +75,53 @@ class Canvas {
         Engine.Interface.AddContainer(CheatsMenu);
         Engine.Interface.AddContainer(DebugMenu);
 
+        Menus = new List<Container>();
+        Menus.Add(SceneMenu);
+        Menus.Add(BrushMenu);
+        Menus.Add(CheatsMenu);
+        Menus.Add(DebugMenu);
+
         // Toolbar
-        Toolbar.AddWidget(new Button(Toolbar, "Scene", () => { SceneMenu.Toggle(); }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "Brush", () => { BrushMenu.Toggle(); }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "Cheats", () => { CheatsMenu.Toggle(); }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "Debug", () => { DebugMenu.Toggle(); }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "Scene", () => { ChangeMenu(SceneMenu); }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "Brush", () => { ChangeMenu(BrushMenu); }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "Cheats", () => { ChangeMenu(CheatsMenu); }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "Debug", () => { ChangeMenu(DebugMenu); }, new Vector2i(100, 20)));
 
         // Scene Menu
-        SceneMenu.AddWidget(new Button(SceneMenu, "Save", () => { }, new Vector2i(100, 20)));
-        SceneMenu.AddWidget(new Button(SceneMenu, "Load", () => { }, new Vector2i(100, 20)));
+        SceneMenu.AddWidget(new Button(SceneMenu, "Save", () => { SaveScene(); ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        SceneMenu.AddWidget(new Button(SceneMenu, "Load", () => { LoadScene(); ChangeMenu(); }, new Vector2i(100, 20), background: false));
 
         // Brush Menu
-        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { ID = 0; }, new Vector2i(100, 20)));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { ID = 1; }, new Vector2i(100, 20)));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { ID = 2; }, new Vector2i(100, 20)));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { ID = 3; }, new Vector2i(100, 20)));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { ID = 0; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { ID = 1; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { ID = 2; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { ID = 3; ChangeMenu(); }, new Vector2i(100, 20), background: false));
 
         // Cheats Menu
         CheatsMenu.AddWidget(new Label(CheatsMenu, "(dust)", new Vector2i(100, 20)));
 
         // Debug Menu
-        DebugMenu.AddWidget(new Button(DebugMenu, "Show Chunks", () => { DrawChunks = !DrawChunks; }, new Vector2i(100, 20)));
-        DebugMenu.AddWidget(new Button(DebugMenu, "Show Rects", () => { DrawDirtyRects = !DrawDirtyRects; }, new Vector2i(100, 20)));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Active Overlay", () => { DrawActiveOverlay = !DrawActiveOverlay; ChangeMenu(); }, new Vector2i(150, 20), background: false));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Borders", () => { DrawChunks = !DrawChunks; ChangeMenu(); }, new Vector2i(150, 20), background: false));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Dirty Rects", () => { DrawDirtyRects = !DrawDirtyRects; ChangeMenu(); }, new Vector2i(150, 20), background: false));
 
         // Finish
         Pepper.Log(LogType.OTHER, LogLevel.MESSAGE, "Canvas initialized.");
+    }
+
+    public void ChangeMenu(Container? menu=null) {
+        foreach (var M in Menus) {
+            if (M == menu) M.Toggle();
+            else if (M.Active) M.Toggle();
+        }
+    }
+
+    public void SaveScene() {
+
+    }
+
+    public void LoadScene() {
+
     }
 
     public void Paint() {

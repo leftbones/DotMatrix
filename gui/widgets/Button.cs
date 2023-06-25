@@ -7,6 +7,7 @@ class Button : Widget {
     public string Text { get; set; }
     public Action Action { get; set; }
     public Anchor TextAnchor { get; set; }
+    public bool Background { get; set; }
 
     public Theme Theme { get { return Parent.Parent.Theme; } }
 
@@ -15,12 +16,13 @@ class Button : Widget {
 
     public Vector2i TextSize { get { return new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing)); } }
 
-    public Button(Container parent, string text, Action action, Vector2i size, Quad? padding=null, Anchor? text_anchor=null) : base(parent) {
+    public Button(Container parent, string text, Action action, Vector2i size, Quad? padding=null, Anchor? text_anchor=null, bool background=true) : base(parent) {
         Text = text;
         Action = action;
         Size = size;
         Padding = padding ?? Padding;
         TextAnchor = text_anchor ?? Anchor.Center;
+        Background = background;
     }
 
     public override bool FireEvent(Event E) {
@@ -34,7 +36,7 @@ class Button : Widget {
 
     public override void Draw() {
         // Background
-        Color BG = Theme.ButtonBackground;
+        Color BG = Background ? Theme.ButtonBackground : new Color(0, 0, 0, 0);
         if (Hovered) BG = Theme.ButtonHoverBackground;
         if (Clicked) BG = Theme.ButtonActiveBackground;
 
