@@ -119,45 +119,13 @@ class Matrix {
 
     // Swap a Pixel with another Pixel if the destination is in bounds and a valid move (based on weight/type)
     public bool SwapIfValid(Vector2i pos1, Vector2i pos2) {
-        // Destination is out of bounds
-        if (!InBounds(pos2))
-            return false;
-
-        var P1 = Get(pos1);
-        var P2 = Get(pos2);
-
-        // Destination is empty
-        if (P2.ID == -1)
+        if (IsValid(pos1, pos2)) {
+            var P1 = Get(pos1);
+            var P2 = Get(pos2);
             return QuickSwap(P1, P2);
-
-        // Pixel 2 is Solid 
-        if (P2 is Solid)
-            return false;
-
-        // Both Pixels are Gas and P1 is less faded than P2
-        if (P1 is Gas && P2 is Gas) {
-            if (RNG.Roll(75) && P1.ColorFade > P2.ColorFade)
-                return QuickSwap(P1, P2);
         }
 
-        var MoveDir = Direction.GetMovementDirection(P1.Position, P2.Position);
-
-        switch (MoveDir.Y) {
-            case 0: // Horizontal only movement
-                if (P1.GetType() != P2.GetType() && P1.Weight > P2.Weight)
-                    return QuickSwap(P1, P2);
-                return false;
-            case 1: // Downward Y movement
-                if (P1.Weight > P2.Weight)
-                    return QuickSwap(P1, P2);
-                return false;
-            case -1: // Upward Y movement
-                if (P1.Weight < P2.Weight)
-                    return QuickSwap(P1, P2);
-                return false;
-            default:
-                return false;
-        }
+        return false;
     }
 
     // Check if a movement is valid (based on weight/type)
@@ -169,38 +137,10 @@ class Matrix {
         var P1 = Get(pos1);
         var P2 = Get(pos2);
 
-        // Destination is empty
-        if (P2.ID == -1)
+        if (P1.Weight > P2.Weight)
             return true;
 
-        // Pixel 2 is Solid 
-        if (P2 is Solid)
-            return false;
-
-        // Both Pixels are Gas and P1 is less faded than P2
-        if (P1 is Gas && P2 is Gas) {
-            if (RNG.Roll(75) && P1.ColorFade > P2.ColorFade)
-                return QuickSwap(P1, P2);
-        }
-
-        var MoveDir = Direction.GetMovementDirection(P1.Position, P2.Position);
-
-        switch (MoveDir.Y) {
-            case 0: // Horizontal only movement
-                if (P1.GetType() != P2.GetType() && P1.Weight > P2.Weight)
-                    return true;
-                return false;
-            case 1: // Downward Y movement
-                if (P1.Weight > P2.Weight)
-                    return true;
-                return false;
-            case -1: // Upward Y movement
-                if (P1.Weight < P2.Weight)
-                    return true;
-                return false;
-            default:
-                return false;
-        }
+        return false;
     }
 
     // Check if a position is within the bounds of the Matrix
@@ -270,16 +210,31 @@ class Matrix {
     public void UpdateEnd() {
         // Calculate chunk dirty rectangles
         foreach (var C in Chunks) {
+            C.Step();
+
             // Skip sleeping chunks
             if (!C.Awake) continue;
 
             if (C.CheckAll) {
                 C.CheckAll = false;
 
-                C.X1 = 0;
-                C.Y1 = 0;
-                C.X2 = C.Size.X - 1;
-                C.Y2 = C.Size.Y - 1;
+                var XStart = false;
+                var YStart = false;
+                C.X2 = 0;
+                C.Y2 = 0;
+
+                for (int y = ChunkSize.Y - 1; y >= 0; y--) {
+                    for (int x = 0; x < ChunkSize.X; x++) {
+                        var P = Get(C.Position.X + x, C.Position.Y + y);
+                        if (P.ID > -1) {
+                            if (!XStart || x < C.X1) { C.X1 = x; XStart = true; }
+                            if (!YStart || y < C.Y1) { C.Y1 = y; YStart = true; }
+
+                            if (x > C.X2) C.X2 = x;
+                            if (y > C.Y2) C.Y2 = y;
+                        }
+                    }
+                }
             } else {
                 var XStart = false;
                 var YStart = false;
@@ -300,10 +255,6 @@ class Matrix {
                 }
             }
         }
-
-        // Step chunks
-        foreach (var C in Chunks)
-            C.Step();
     }
 
     // Return the chunk containing the given position (Vector2i pos)

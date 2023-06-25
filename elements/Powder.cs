@@ -69,7 +69,7 @@ class Powder : Pixel {
     }
 
     public override bool ActOnOther(Matrix M, Pixel O) {
-        if (O is Powder && !O.Active && !RNG.Roll(O.Friction)) {
+        if (O is Powder && !O.Active && RNG.Roll(O.Friction)) {
             O.Active = true;
             return true;
         }

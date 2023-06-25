@@ -9,6 +9,8 @@ class Solid : Pixel {
 
         Active = false;
 
+        Weight = 9999;
+
         BaseColor = new Color(127, 128, 118, 255);
         ColorOffset = 15;
     }

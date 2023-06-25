@@ -10,9 +10,10 @@ class Pixel {
     public int ID { get; set; }                     = -1;                           // Unique identifier for comparison with other Pixels
     public Body? Body { get; set; }                 = null;                         // Physics body this Pixel belongs to (null when not part of a Body)
 
-    // Position
+    // Movement
     public Vector2i Position { get; set; }          = Vector2i.Zero;                // Current position within the Matrix
     public Vector2i LastPosition { get; set; }      = Vector2i.Zero;                // Previous position within the Matrix
+    public Vector2i LastDirection { get; set; }     = Direction.None;               // Previous direction of movement within the Matrix
 
     // State
     public PixelType PixelType { get; set; }        = PixelType.Element;            // Determines which rules are used when performing the Step method
@@ -61,8 +62,10 @@ class Pixel {
             foreach (var Dir in Direction.ShuffledCardinal) {
                 if (RNG.CoinFlip() && M.InBounds(Position + Dir)) {
                     var P = M.Get(Position + Dir);
-                    if (ActOnOther(M, P))
+                    if (ActOnOther(M, P)) {
                         Acted = true;
+                        return;
+                    }
                 }
             }
         }
@@ -84,8 +87,10 @@ class Pixel {
         if (Lifetime > -1 && TicksLived >= Lifetime)
             Expire(M);
 
-        if (Position != LastPosition)
+        if (Position != LastPosition) {
             WakeNeighbors(M, LastPosition);
+            LastDirection = Direction.GetMovementDirection(LastPosition, Position);
+        }
 
         LastPosition = Position;
     }

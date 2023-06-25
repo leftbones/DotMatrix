@@ -24,22 +24,27 @@ class Liquid : Pixel {
             if (!Active) return;
         }
 
-        if (RNG.Roll(90) && M.SwapIfValid(Position, Position + Direction.Down)) return;
+        if (RNG.Roll(95) && M.SwapIfValid(Position, Position + Direction.Down)) return;
 
-        var HorizDir = Direction.GetMovementDirection(LastPosition, Position);
-        if (!Direction.Horizontal.Contains(HorizDir)) HorizDir = Direction.RandomHorizontal;
+        if (M.InBoundsAndEmpty(Position + Direction.Down)) {
+            var MoveDir = Direction.GetMovementDirection(Position, LastPosition);
+            if (!Direction.Horizontal.Contains(MoveDir)) MoveDir = Direction.RandomHorizontal;
 
-        for (int i = 0; i < 10; i++) {
-            if (!RNG.Roll(Fluidity) && !M.SwapIfValid(Position, Position + HorizDir)) return;
+            if (M.SwapIfValid(Position, Position + MoveDir)) return;
+            else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
+        } else {
+            var HorizDir = Direction.GetMovementDirection(LastPosition, Position);
+            if (!Direction.Horizontal.Contains(HorizDir)) HorizDir = Direction.RandomHorizontal;
+
+            bool Moved = false;
+            for (int i = 0; i < 5; i++) {
+                if (!RNG.CoinFlip() && !M.SwapIfValid(Position, Position + HorizDir)) break;
+                Moved = true;
+            }
+
+            if (!Moved && !RNG.Roll(Fluidity))
+                Active = false;
         }
-
-        // var HorizDir = M.Engine.Tick % 2 == 0 ? Direction.Left : Direction.Right;
-        // for (int i = 0; i < 5; i++) {
-        //     if (!RNG.Roll(Fluidity) && !M.SwapIfValid(Position, Position + HorizDir)) return;
-        // }
-
-        if (!RNG.Roll(Fluidity))
-            Active = false;
     }
 
     public override bool ActOnOther(Matrix M, Pixel O) {
