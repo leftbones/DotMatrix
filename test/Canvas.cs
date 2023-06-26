@@ -30,7 +30,7 @@ class Canvas {
     public Container DebugMenu { get; private set; }
 
     // Tools + Properties
-    public bool DrawChunks          = false;
+    public bool DrawChunks          = true;
     public bool DrawDirtyRects      = false;
     public bool DrawActiveOverlay   = false;
 

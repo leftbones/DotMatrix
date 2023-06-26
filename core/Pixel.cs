@@ -99,7 +99,7 @@ class Pixel {
     public void WakeNeighbors(Matrix M, Vector2i? pos=null) {
         var Pos = pos ?? Position;
 
-        foreach (var Dir in Direction.ShuffledCardinal) {
+        foreach (var Dir in Direction.Cardinal) {
             if (M.InBounds(Pos + Dir))
                 M.Get(Pos + Dir).Active = true;
         }

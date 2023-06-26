@@ -59,7 +59,7 @@ class Matrix {
         for (int x = 0; x < MaxChunksX; x++) {
             for (int y = 0; y < MaxChunksY; y++) {
                 var Pos = new Vector2i(x * ChunkSize.X, y * ChunkSize.Y);
-                Chunks[x, y] = new Chunk(Pos, ChunkSize);
+                Chunks[x, y] = new Chunk(this, Pos, ChunkSize);
             }
         }
 
@@ -281,28 +281,55 @@ class Matrix {
 
     // Draw each Pixel in the Matrix to the render texture
     public unsafe void Draw() {
-        // Update Texture
-        ImageClearBackground(ref Buffer, Color.BLACK);
+        // Update and Draw Chunk Textures (Per Chunk Textures)
+        foreach (var C in Chunks) {
+            if (C.Awake) {
+                ImageClearBackground(ref C.Buffer, Color.BLACK);
 
-        foreach (var P in Pixels) {
-            if (P.ID == -1) continue;
+                for (int y = ChunkSize.Y - 1; y >= 0; y--) {
+                    for (int x = 0; x < ChunkSize.X; x++) {
+                        var P = Get(C.Position.X + x, C.Position.Y + y);
+                        if (P.ID == -1) continue;
 
-            if (!P.ColorSet) {
-                int Offset = RNG.Range(-P.ColorOffset, P.ColorOffset);
-                P.Color = P.BaseColor;
-                P.ShiftColor(Offset);
-                P.ColorSet = true;
+                        if (!P.ColorSet) {
+                            int Offset = RNG.Range(-P.ColorOffset, P.ColorOffset);
+                            P.Color = P.BaseColor;
+                            P.ShiftColor(Offset);
+                            P.ColorSet = true;
+                        }
+
+                        Color Col = P.Color;
+                        if (Engine.Canvas.DrawActiveOverlay && !P.Active) Col = Color.RED;
+                        ImageDrawPixel(ref C.Buffer, P.Position.X - C.Position.X, P.Position.Y - C.Position.Y, Col);
+                    }
+                }
+
+                UpdateTexture(C.Texture, C.Buffer.data);
             }
 
-            Color C = P.Color;
-            if (Engine.Canvas.DrawActiveOverlay && !P.Active) C = Color.RED;
-            ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, C);
+            DrawTexturePro(C.Texture, C.SourceRec, C.DestRec, Vector2.Zero, 0, Color.WHITE);
         }
 
-        UpdateTexture(Texture, Buffer.data);
+        // Update  and Draw Texture (Entire Matrix)
+        // ImageClearBackground(ref Buffer, Color.BLACK);
 
-        // Draw Texture
-        DrawTexturePro(Texture, SourceRec, DestRec, Vector2.Zero, 0, Color.WHITE);
+        // foreach (var P in Pixels) {
+        //     if (P.ID == -1) continue;
+
+        //     if (!P.ColorSet) {
+        //         int Offset = RNG.Range(-P.ColorOffset, P.ColorOffset);
+        //         P.Color = P.BaseColor;
+        //         P.ShiftColor(Offset);
+        //         P.ColorSet = true;
+        //     }
+
+        //     Color Col = P.Color;
+        //     if (Engine.Canvas.DrawActiveOverlay && !P.Active) Col = Color.RED;
+        //     ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, Col);
+        // }
+
+        // UpdateTexture(Texture, Buffer.data);
+        // DrawTexturePro(Texture, SourceRec, DestRec, Vector2.Zero, 0, Color.WHITE);
 
         // Chunk Borders
         if (Engine.Canvas.DrawChunks) {

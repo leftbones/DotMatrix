@@ -16,7 +16,7 @@ class Interface {
     public Interface(Engine engine) {
         Engine = engine;
 
-        Pepper.Log(LogType.GUI, LogLevel.MESSAGE, "Interface initialized.");
+        Pepper.Log(LogType.INTERFACE, LogLevel.MESSAGE, "Interface initialized.");
     }
 
     public void AddContainer(Container C) {
