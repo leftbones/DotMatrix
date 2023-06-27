@@ -24,6 +24,11 @@ class Program {
 
         var Engine = new Engine(WindowSize, MatrixScale);
 
+        foreach (var Element in Atlas.Elements) {
+            Console.WriteLine(Element);
+        }
+
+        Console.WriteLine(ColorToInt(Color.RED));
 
         ////
         // Loop

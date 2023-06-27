@@ -25,15 +25,15 @@ class Matrix {
     private Rectangle SourceRec;                            // Actual size of the Matrix texture
     private Rectangle DestRec;                              // Scaled size of the Matrix texture
 
-    private int ChunkWidth = 40;
-    private int ChunkHeight = 40;
+    private int ChunkWidth = 64;
+    private int ChunkHeight = 64;
 
     public Matrix(Engine engine) {
         Engine = engine;
         Scale = Engine.MatrixScale;
 
-        // Calculate the Matrix size from the window size and scale
-        Size = new Vector2i(Engine.WindowSize.X / Scale, Engine.WindowSize.Y / Scale);
+        // Set the Matrix size, scaled
+        Size = new Vector2i(1024 / Scale, 768 / Scale);
 
         // Size the source and destination rectangles
         SourceRec = new Rectangle(0, 0, Size.X, Size.Y);

@@ -8,7 +8,7 @@ class Powder : Pixel {
         ID = 3;
 
         Weight = 90;
-        Friction = 60;
+        Friction = 75;
 
         BaseColor = new Color(230, 188, 92, 255);
         ColorOffset = 15;

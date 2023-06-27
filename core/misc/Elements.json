@@ -1,0 +1,29 @@
+{
+    "Stone" : {
+        "ID" : 0,
+        "Name" : "Stone",
+        "Color" : "7F8076",
+        "Type" : "Solid"
+    },
+
+    "Water" : {
+        "ID" : 1,
+        "Name" : "Water",
+        "Color" : "0197F4",
+        "Type" : "Liquid"
+    },
+
+    "Smoke" : {
+        "ID" : 2,
+        "Name" : "Smoke",
+        "Color" : "646464",
+        "Type" : "Gas"
+    },
+
+    "Sand" : {
+        "ID" : 3,
+        "Name" : "Sand",
+        "Color" : "E6BC5C",
+        "Type" : "Powder"
+    }
+}

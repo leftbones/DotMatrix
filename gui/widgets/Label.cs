@@ -7,17 +7,24 @@ class Label : Widget {
     public string Text { get; set; }
     public Anchor TextAnchor { get; set; }
     public Color Background { get; set; }
+    public Action? UpdateAction { get; set; }
 
     public Theme Theme { get { return Parent.Parent.Theme; } }
 
     public Vector2i TextSize { get { return new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing)); } }
 
-    public Label(Container parent, string text, Vector2i? size=null, Quad? padding=null, Anchor? text_anchor=null, Color? background=null) : base(parent) {
+    public Label(Container parent, string text, Vector2i? size=null, Quad? padding=null, Anchor? text_anchor=null, Color? background=null, Action? update_action=null) : base(parent) {
         Text = text;
         Size = size ?? new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing));
         Padding = padding ?? Padding;
         TextAnchor = text_anchor ?? Anchor.Center;
         Background = background ?? new Color(0, 0, 0, 0);
+        UpdateAction = update_action;
+    }
+
+    public override void Update() {
+        if (UpdateAction is not null)
+            UpdateAction.Invoke();
     }
 
     public override void Draw() {

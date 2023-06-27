@@ -3,8 +3,6 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
-enum InputDirection { Down, Up };
-
 // Mouse Down
 class MouseDownEvent : Event {
     public MouseButton MouseButton;

@@ -11,6 +11,7 @@ class Engine {
     public Matrix Matrix { get; private set; }
     public Interface Interface { get; private set; }
     public Canvas Canvas { get; private set; }
+    public Camera Camera { get; private set; }
 
     public bool Active { get; private set; }        = true;
     public bool StepOnce { get; private set; }      = false;
@@ -33,6 +34,7 @@ class Engine {
         Matrix = new Matrix(this);
         Interface = new Interface(this);
         Canvas = new Canvas(this);
+        Camera = new Camera(this);
     }
 
     public void HandleInput() {
@@ -74,6 +76,10 @@ class Engine {
         if (IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT)) Events.Add(new MouseUpEvent(MouseButton.MOUSE_BUTTON_LEFT, MousePos));
         if (IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_RIGHT)) Events.Add(new MouseUpEvent(MouseButton.MOUSE_BUTTON_RIGHT, MousePos));
 
+        // Handle Held Keys (Temporary)
+        foreach (var Key in HeldKeys)
+            Events.Add(new KeyPressEvent(Key));
+
         // Handle Events (Temporary)
         foreach (var E in Events) {
             // Interface
@@ -104,6 +110,12 @@ class Engine {
 
             // Brush Size
             else if (E.Name.Contains("MouseWheel")) { Canvas.BrushSize = Math.Clamp(Canvas.BrushSize - ((MouseWheelEvent)E).Amount, 1, 100); }
+
+
+            else if (E.Name == "KeyPress:KEY_W") Camera.Pan(Direction.Up);
+            else if (E.Name == "KeyPress:KEY_S") Camera.Pan(Direction.Down);
+            else if (E.Name == "KeyPress:KEY_A") Camera.Pan(Direction.Left);
+            else if (E.Name == "KeyPress:KEY_D") Camera.Pan(Direction.Right);
         }
     }
 
@@ -111,6 +123,7 @@ class Engine {
         if (!Active) {
             Canvas.Update();
             Interface.Update();
+            Camera.Update();
             return;
         }
 
@@ -135,6 +148,7 @@ class Engine {
         // Other Updates
         Canvas.Update();
         Interface.Update();
+        Camera.Update();
 
         // Advance Tick
         Tick++;
@@ -146,7 +160,9 @@ class Engine {
     }
 
     public void Draw() {
+        BeginMode2D(Camera.Viewport);
         Matrix.Draw();
+        EndMode2D();
 
         Canvas.Draw();
         Interface.Draw();

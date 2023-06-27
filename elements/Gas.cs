@@ -11,9 +11,8 @@ class Gas : Pixel {
         Weight = -20;
         Diffusion = 25;
 
-        BaseColor = new Color(125, 125, 125, 150);
+        BaseColor = new Color(100, 100, 100, 255);
         ColorOffset = 10;
-        ColorFade = 150.0;
     }
 
     public override void Step(Matrix M) {

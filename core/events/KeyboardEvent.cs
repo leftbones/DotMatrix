@@ -3,6 +3,8 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+enum InputDirection { Down, Up };
+
 class KeyPressEvent : Event {
     public KeyboardKey Key { get; private set; }
 
