@@ -1,10 +1,12 @@
 # Files
+DotMatrix.sln
 .DS_Store
 .md
 
 
 # Folders
 .vscode/
+.vs/
 bin/
 obj/
 

@@ -8,6 +8,7 @@ namespace DotMatrix;
 class Canvas {
     public Engine Engine { get; private set; }
     public Pepper Pepper { get { return Engine.Pepper; } }
+    public Theme Theme { get { return Engine.Theme; } }
 
     public int ID { get; set; }     = 3;
     public int BrushSize { get; set; }   = 10;
@@ -31,6 +32,7 @@ class Canvas {
     public Container DebugMenu { get; private set; }
 
     public List<Container> Windows { get; private set; }
+    public Container ExceptionWindow { get; private set; }
     public Container StatsWindow { get; private set; }
 
     // Statistics
@@ -48,9 +50,20 @@ class Canvas {
 
         ////
         // Windows
+        ExceptionWindow = new Container(
+            parent: Engine.Interface,
+            position: new Vector2i(Engine.WindowSize.X / 2, Engine.WindowSize.Y / 2),
+            draw_anchor: Anchor.Center,
+            background: true,
+            activated: true
+        );
+
+        ExceptionWindow.AddWidget(new Label(ExceptionWindow, "Exception", new Vector2i(750, 20), background: Theme.HeaderBackground));
+
         StatsWindow = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(10, Engine.WindowSize.Y - 90),
+            position: new Vector2i(10, Engine.WindowSize.Y - 10),
+            draw_anchor: Anchor.Bottom,
             background: true,
             activated: true
         );
@@ -59,11 +72,13 @@ class Canvas {
         StatsMouseMatrixPos = new Label(StatsWindow, "", new Vector2i(300, 20), padding: new Quad(0, 0, 5, 0), text_anchor: Anchor.Left);
         StatsCameraPos = new Label(StatsWindow, "", new Vector2i(300, 20), padding: new Quad(0, 0, 5, 0), text_anchor: Anchor.Left);
 
+        StatsWindow.AddWidget(new Label(StatsWindow, "Statistics", new Vector2i(300, 20), background: Theme.HeaderBackground));
         StatsWindow.AddWidget(StatsMouseScreenPos);
         StatsWindow.AddWidget(StatsMouseMatrixPos);
         StatsWindow.AddWidget(StatsCameraPos);
 
         Windows = new List<Container>();
+        Windows.Add(ExceptionWindow);
         Windows.Add(StatsWindow);
 
 
@@ -144,14 +159,11 @@ class Canvas {
 
         ////
         // Finish
-        Engine.Interface.AddContainer(StatsWindow);
+        foreach (var W in Windows)
+            Engine.Interface.AddContainer(W);
 
-        Engine.Interface.AddContainer(Toolbar);
-        Engine.Interface.AddContainer(SceneMenu);
-        Engine.Interface.AddContainer(BrushMenu);
-        Engine.Interface.AddContainer(WindowMenu);
-        Engine.Interface.AddContainer(CheatsMenu);
-        Engine.Interface.AddContainer(DebugMenu);
+        foreach (var M in Menus)
+            Engine.Interface.AddContainer(M);
 
         Pepper.Log(LogType.DEBUG, LogLevel.MESSAGE, "Canvas initialized.");
     }

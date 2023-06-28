@@ -3,6 +3,8 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+enum Anchor { Left, Center, Right, Top, Bottom }; // TODO: Implement TopLeft, BottomLeft, TopCenter, BottomCenter, TopRight, BottomRight
+
 class Interface {
     public Engine Engine { get; private set; }
     public Matrix Matrix { get { return Engine.Matrix; } }

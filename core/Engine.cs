@@ -13,9 +13,10 @@ class Engine {
     public Canvas Canvas { get; private set; }
     public Camera Camera { get; private set; }
 
-    public bool Active { get; private set; }        = true;
-    public bool StepOnce { get; private set; }      = false;
-    public bool ShouldExit { get; private set; }    = false;
+    public bool Active { get; private set; }        = true;     // Simulation (Matrix) pause state
+    public bool StepOnce { get; private set; }      = false;    // (When paused) Reactivate Matrix, perform one step, pause again
+    public bool FullStop { get; private set; }      = false;    // Stop everything except the bare minimum, set only by Pepper.Throw()
+    public bool ShouldExit { get; private set; }    = false;    // Program will exit after the current update is completed
 
     public Theme Theme { get { return Interface.Theme; } }
 

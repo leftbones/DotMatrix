@@ -13,10 +13,11 @@ class Label : Widget {
 
     public Vector2i TextSize { get { return new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing)); } }
 
-    public Label(Container parent, string text, Vector2i? size=null, Quad? padding=null, Anchor? text_anchor=null, Color? background=null, Action? update_action=null) : base(parent) {
+    public Label(Container parent, string text, Vector2i? size=null, Quad? padding=null, Anchor? anchor=null, Anchor? text_anchor=null, Color? background=null, Action? update_action=null) : base(parent) {
         Text = text;
         Size = size ?? new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing));
         Padding = padding ?? Padding;
+        Anchor = anchor ?? Anchor;
         TextAnchor = text_anchor ?? Anchor.Center;
         Background = background ?? new Color(0, 0, 0, 0);
         UpdateAction = update_action;

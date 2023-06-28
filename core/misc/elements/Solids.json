@@ -1,0 +1,29 @@
+{
+    "Stone" : {
+        "ID" : 100,
+        "Name" : "Stone",
+        "Color" : "7F8076FF",
+        "Type" : "Solid"
+    },
+
+    "Iron" : {
+        "ID" : 101,
+        "Name" : "Iron",
+        "Color" : "A19D94FF",
+        "Type" : "Solid"
+    },
+
+    "Ice" : {
+        "ID" : 102,
+        "Name" : "Ice",
+        "Color" : "A5F2F3FF",
+        "Type" : "Solid"
+    },
+
+    "PackedSnow" : {
+        "ID" : 103,
+        "Name" : "Packed Snow",
+        "Color" : "FFFAFAFF",
+        "Type" : "Solid"
+    }
+}

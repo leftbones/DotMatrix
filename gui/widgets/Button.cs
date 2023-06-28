@@ -16,11 +16,12 @@ class Button : Widget {
 
     public Vector2i TextSize { get { return new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing)); } }
 
-    public Button(Container parent, string text, Action action, Vector2i size, Quad? padding=null, Anchor? text_anchor=null, bool background=true) : base(parent) {
+    public Button(Container parent, string text, Action action, Vector2i size, Quad? padding=null, Anchor? anchor=null, Anchor? text_anchor=null, bool background=true) : base(parent) {
         Text = text;
         Action = action;
         Size = size;
         Padding = padding ?? Padding;
+        Anchor = anchor ?? Anchor;
         TextAnchor = text_anchor ?? Anchor.Center;
         Background = background;
     }

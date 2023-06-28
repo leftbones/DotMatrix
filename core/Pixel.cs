@@ -28,11 +28,11 @@ class Pixel {
     // Properties
     public int Weight { get; set; }                 = 0;                            // Weight of a Pixel relative to air/empty space, used for Y-sorting
     public int Friction { get; set; }               = 0;                            // How likely a Pixel is to stop moving when not free falling (0 will stop only when unable to move)
-    public int Flammable { get; set; }              = 0;                            // How likely a Pixel is to ignite when contacting fire (0 is inflammable)
-    public int Explosive { get; set; }              = 0;                            // How likely a Pixel is to explode when on fire (0 is non-explosive) 
-    public int Conductive { get; set; }             = 0;                            // How well a Pixel conducts electricity
-    public int Dissolve { get; set; }               = 0;                            // How quickly a Powder will dissolve in a Liquid
-    public int Dillute { get; set; }                = 0;                            // How quickly a Liquid will dillute another Liquid
+    public int Flammable { get; set; }              = 0;                            // Flammability percentage (0-100)
+    public int Explosive { get; set; }              = 0;                            // Explosivity percentage (0-100)
+    public int Conductive { get; set; }             = 0;                            // Electricity conductivity percentage (0-100)
+    public int Dissolve { get; set; }               = 0;                            // Dissolvability percentage in liquids (0-100)
+    public int Dillute { get; set; }                = 0;                            // Dillutability percentage in liquids (0-100)
     public int Fluidity { get; set; }               = 0;                            // How easily a Liquid will flow horizontally
     public int Diffusion { get; set; }              = 0;                            // How much a Gas will "wiggle" horizontally
 

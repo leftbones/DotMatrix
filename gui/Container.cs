@@ -8,6 +8,7 @@ class Container {
     public Vector2i Position { get; private set; }
     public Vector2i Size { get; private set; }
     public Quad Margin { get; private set; }
+    public Anchor DrawAnchor { get; private set; } // NOTE: Container only supports Top, Bottom, and Center Anchors
     public bool Background { get; private set; }
     public bool Horizontal { get; private set; }
 
@@ -24,14 +25,18 @@ class Container {
 
     public bool Active { get; private set; } = true;
 
-    public Container(Interface parent, Vector2i position, Vector2i? size=null, Quad? margin=null, bool background=true, bool horizontal=false, bool activated=true) {
+    public Container(Interface parent, Vector2i position, Vector2i? size=null, Quad? margin=null, Anchor? draw_anchor=null, bool background=true, bool horizontal=false, bool activated=true) {
         Parent = parent;
         Position = position;
         Size = size ?? Vector2i.Zero;
         Margin = margin ?? new Quad(5, 5, 5, 5);
+        DrawAnchor = draw_anchor ?? Anchor.Top;
         Background = background;
         Horizontal = horizontal;
         Active = activated;
+
+        if (DrawAnchor != Anchor.Top && DrawAnchor != Anchor.Bottom && DrawAnchor != Anchor.Center)
+            DrawAnchor = Anchor.Top;
     }
 
     public void Toggle() {
@@ -73,13 +78,23 @@ class Container {
     public virtual void Draw() {
         if (!Active) return;
 
+        // Draw Anchor
+        Vector2i DrawPos = Position;
+        Vector2i DrawOffset = Vector2i.Zero;
+
+        if (DrawAnchor == Anchor.Bottom) {
+            DrawOffset = new Vector2i(0, Widgets.Sum(W => W.Size.Y + W.Padding.Y + 5) + Margin.U);
+            DrawPos = new Vector2i(Position.X - DrawOffset.X, Position.Y - DrawOffset.Y);
+        }
+
         // Size
         int MinWidth = 0;
         int MinHeight = 0;
 
-        if (Horizontal)
-        {
-            // Calculate size
+        ////
+        // Left to Right
+        if (Horizontal) {
+            // Calculate size -- TODO: Change to use Widgets.MaxBy(W => W.Size.X + W.Padding.X + 5)
             foreach (var W in Widgets) {
                 MinWidth += W.Size.X + W.Padding.X + 5;
                 if (W.Size.Y > MinHeight) MinHeight = W.Size.Y + W.Padding.Y + 5;
@@ -89,7 +104,7 @@ class Container {
 
             // Background
             if (Background)
-                DrawRectangleV(Position.ToVector2(), Size.ToVector2(), Theme.Background);
+                DrawRectangleV(DrawPos.ToVector2(), Size.ToVector2(), Theme.Background);
 
             // Widgets
             int Offset = 0;
@@ -102,25 +117,43 @@ class Container {
                 Offset += W.Size.X + W.Padding.X + 5;
             }
         }
-        else
-        {
+
+        ////
+        // Top to Bottom (Default)
+        else {
             // Calculate size
             foreach (var W in Widgets) {
                 if (W.Size.X > MinWidth) MinWidth = W.Size.X + W.Padding.X + 5;
                 MinHeight += W.Size.Y + W.Padding.Y + 5;
             }
 
+            if (DrawAnchor == Anchor.Center) {
+                DrawOffset = new Vector2i(MinWidth / 2, (Widgets.Sum(W => W.Size.Y + W.Padding.Y + 5) + Margin.U) / 2);
+                DrawPos = new Vector2i(Position.X - DrawOffset.X, Position.Y - DrawOffset.Y);
+            }
+
             Size = new Vector2i(Math.Max(Size.X, MinWidth + 5), Math.Max(Size.Y, MinHeight + 5));
 
             // Background
             if (Background)
-                DrawRectangleV(Position.ToVector2(), Size.ToVector2(), Theme.Background);
+                DrawRectangleV(DrawPos.ToVector2(), Size.ToVector2(), Theme.Background);
 
             // Widgets
             int Offset = 0;
+            Vector2i Pos;
             foreach (var W in Widgets) {
-                var Pos = new Vector2i(Origin.X, Origin.Y + Offset - (ScrollOffset));
-                W.Position = Pos;
+                switch (W.Anchor) {
+                    case Anchor.Left:
+                        Pos = new Vector2i(Origin.X, Origin.Y + Offset - ScrollOffset) - DrawOffset;
+                        W.Position = Pos;
+                        break;
+                    case Anchor.Right:
+                        Pos = new Vector2i(DrawPos.X + Size.X - W.Size.X - W.Padding.R, Origin.Y + Offset - ScrollOffset) - DrawOffset;
+                        W.Position = Pos;
+                        break;
+                    case Anchor.Center:
+                        break;
+                }
 
                 W.Draw();
 

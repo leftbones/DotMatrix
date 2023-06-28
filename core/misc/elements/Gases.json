@@ -1,0 +1,29 @@
+{
+    "Fire" : {
+        "ID" : 300,
+        "Name" : "Fire",
+        "Color" : "EB982AFF",
+        "Type" : "Gas"
+    },
+
+    "BlueFire" : {
+        "ID" : 301,
+        "Name" : "Blue Fire",
+        "Color" : "43C9FAFF",
+        "Type" : "Gas"
+    },
+
+    "Smoke" : {
+        "ID" : 302,
+        "Name" : "Smoke",
+        "Color" : "646464FF",
+        "Type" : "Gas"
+    },
+
+    "Steam" : {
+        "ID" : 303,
+        "Name" : "Steam",
+        "Color" : "E8EFEFFF",
+        "Type" : "Gas"
+    }
+}

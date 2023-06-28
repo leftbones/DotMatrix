@@ -7,24 +7,40 @@ namespace DotMatrix;
 
 // TODO: Implement Colorful.Console for nicer looking output (https://github.com/tomakita/Colorful.Console)
 
-enum LogType { ENGINE, MATRIX, INTERFACE, OTHER, DEBUG };
-enum LogLevel { MESSAGE, WARNING, ERROR, DEBUG };
+enum LogType { ENGINE, MATRIX, INTERFACE, DEBUG, OTHER };
+enum LogLevel { MESSAGE, WARNING, ERROR, EXCEPTION, DEBUG };
 
 class Pepper {
     public Engine Engine { get; private set; }
     public Matrix Matrix { get { return Engine.Matrix; } }
+    public Canvas Canvas { get { return Engine.Canvas; } }
     public Interface Interface { get { return Engine.Interface; } }
     public Theme Theme { get { return Engine.Theme; } }
 
+    private string LogPath = "logs/";
+    private string LogFile;
     // private int MaxLogs = 5; // Maxiumum number of log files to keep before they are overwritten by new ones
 
     public Pepper(Engine engine) {
         Engine = engine;
+
+        LogFile = $"{LogPath}{Timestamp(1)}_log.txt";
     }
 
     // Generate the current timestamp (for logs)
-    public string Timestamp() {
-        return DateTime.Now.ToString("[HH:mm:ss]");
+    public string? Timestamp(int type=0) {
+        switch (type) {
+            case 0: return DateTime.Now.ToString("[HH:mm:ss]");             // Log write format
+            case 1: return DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss");    // File name format
+            default: Throw(LogType.OTHER, LogLevel.EXCEPTION, "Invalid Timestamp type given (requires 0-1)"); return null;
+        }
+    }
+
+    // Throw an exception and write the exception to the current log file
+    public void Throw(LogType type, LogLevel level, string message) {
+        Log(type, level, message);
+        Canvas.ExceptionWindow.AddWidget(new Multiline(Canvas.ExceptionWindow, $"{type} {level} %N %N {message}", 750, new Quad(0, 20, 10, 10)));
+        Canvas.ExceptionWindow.AddWidget(new Button(Canvas.ExceptionWindow, "Exit", () => { Environment.Exit(0); }, new Vector2i(75, 20), anchor: Anchor.Right));
     }
 
     // Log a message to the console as well as the current log file
@@ -32,8 +48,8 @@ class Pepper {
         Console.WriteLine($"{Timestamp()} [{type}] {level}: {message}");
     }
 
-    // Write to the current log file, creating one if it doesn't exist already
-    public void WriteLogFile(string path) {
+    // Write to the current log file, create it if it doesn't exist, and delete the oldest log if MaxLogs is exceeded
+    public void Write() {
         // TODO: Write logs to a log file as they are written to the console
     }
 }
