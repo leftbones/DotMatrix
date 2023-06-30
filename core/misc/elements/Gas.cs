@@ -4,14 +4,13 @@ using static Raylib_cs.Raylib;
 namespace DotMatrix;
 
 class Gas : Pixel {
-    public Gas(Vector2i position) : base(position: position){
-        ID = 2;
+    public Gas(int id, Vector2i position) : base(id, position){
         Lifetime = RNG.Range(1000, 1500);
 
         Weight = -20;
         Diffusion = 25;
 
-        BaseColor = new Color(100, 100, 100, 255);
+        BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
         ColorOffset = 10;
     }
 

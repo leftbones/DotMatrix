@@ -4,13 +4,11 @@ using static Raylib_cs.Raylib;
 namespace DotMatrix;
 
 class Liquid : Pixel {
-    public Liquid(Vector2i position) : base(position: position){
-        ID = 1;
-
+    public Liquid(int id, Vector2i position) : base(id, position){
         Weight = 30;
         Fluidity = 75;
 
-        BaseColor = new Color(1, 151, 244, 255);
+        BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
     }
 
     public override void Step(Matrix M) {

@@ -7,11 +7,9 @@ namespace DotMatrix;
 
 class Canvas {
     public Engine Engine { get; private set; }
+    public Matrix Matrix { get { return Engine.Matrix; } }
     public Pepper Pepper { get { return Engine.Pepper; } }
     public Theme Theme { get { return Engine.Theme; } }
-
-    public int ID { get; set; }     = 3;
-    public int BrushSize { get; set; }   = 10;
 
     public Vector2i WindowSize { get { return Engine.WindowSize; } }
     public Vector2i MatrixSize { get { return Engine.Matrix.Size; } }
@@ -19,9 +17,14 @@ class Canvas {
     public Vector2i MousePos { get; set; }
     public Vector2i MousePrev { get; set; }
 
+    // Brush
     public bool Painting { get; set; } = false;
     public bool Erasing { get; set; } = false;
 
+    public int ID { get; set; }             = 400;
+    public int BrushSize { get; set; }      = 10;
+
+    // Menus + Windows
     public Container Toolbar { get; private set; }
     public List<Container> Menus { get; private set; }
 
@@ -35,15 +38,12 @@ class Canvas {
     public Container ExceptionWindow { get; private set; }
     public Container StatsWindow { get; private set; }
 
-    // Statistics
-    public Label StatsMouseScreenPos { get; private set; }
-    public Label StatsMouseMatrixPos { get; private set; }
-    public Label StatsCameraPos { get; private set; }
+    public Multiline StatsContent { get; private set; }
 
     // Tools + Properties
     public bool DrawChunks          = true;
-    public bool DrawDirtyRects      = false;
-    public bool DrawActiveOverlay   = false;
+    public bool DrawDirtyRects      = true;
+    public bool DrawActiveOverlay   = true;
 
     public Canvas(Engine engine) {
         Engine = engine;
@@ -55,7 +55,7 @@ class Canvas {
             position: new Vector2i(Engine.WindowSize.X / 2, Engine.WindowSize.Y / 2),
             draw_anchor: Anchor.Center,
             background: true,
-            activated: true
+            activated: false
         );
 
         ExceptionWindow.AddWidget(new Label(ExceptionWindow, "Exception", new Vector2i(750, 20), background: Theme.HeaderBackground));
@@ -65,17 +65,13 @@ class Canvas {
             position: new Vector2i(10, Engine.WindowSize.Y - 10),
             draw_anchor: Anchor.Bottom,
             background: true,
-            activated: true
+            activated: false
         );
 
-        StatsMouseScreenPos = new Label(StatsWindow, "", new Vector2i(300, 20), padding: new Quad(0, 0, 5, 0), text_anchor: Anchor.Left);
-        StatsMouseMatrixPos = new Label(StatsWindow, "", new Vector2i(300, 20), padding: new Quad(0, 0, 5, 0), text_anchor: Anchor.Left);
-        StatsCameraPos = new Label(StatsWindow, "", new Vector2i(300, 20), padding: new Quad(0, 0, 5, 0), text_anchor: Anchor.Left);
+        StatsContent = new Multiline(StatsWindow, "", 300, update_action: UpdateStats);
 
         StatsWindow.AddWidget(new Label(StatsWindow, "Statistics", new Vector2i(300, 20), background: Theme.HeaderBackground));
-        StatsWindow.AddWidget(StatsMouseScreenPos);
-        StatsWindow.AddWidget(StatsMouseMatrixPos);
-        StatsWindow.AddWidget(StatsCameraPos);
+        StatsWindow.AddWidget(StatsContent);
 
         Windows = new List<Container>();
         Windows.Add(ExceptionWindow);
@@ -140,10 +136,10 @@ class Canvas {
         SceneMenu.AddWidget(new Button(SceneMenu, "Load", () => { LoadScene(); ChangeMenu(); }, new Vector2i(100, 20), background: false));
 
         // Brush Menu
-        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { ID = 0; ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { ID = 1; ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { ID = 2; ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { ID = 3; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { ID = 100; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { ID = 200; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { ID = 300; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { ID = 400; ChangeMenu(); }, new Vector2i(100, 20), background: false));
 
         // Window Menu
         WindowMenu.AddWidget(new Button(WindowMenu, "Statistics", () => { StatsWindow.Toggle(); ChangeMenu(); }, new Vector2i(150, 20), background: false));
@@ -152,22 +148,22 @@ class Canvas {
         CheatsMenu.AddWidget(new Label(CheatsMenu, "(dust)", new Vector2i(100, 20)));
 
         // Debug Menu
-        DebugMenu.AddWidget(new Button(DebugMenu, "Active Overlay", () => { DrawActiveOverlay = !DrawActiveOverlay; ChangeMenu(); }, new Vector2i(150, 20), background: false));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Active Overlay", () => { DrawActiveOverlay = !DrawActiveOverlay; ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
         DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Borders", () => { DrawChunks = !DrawChunks; ChangeMenu(); }, new Vector2i(150, 20), background: false));
         DebugMenu.AddWidget(new Button(DebugMenu, "Dirty Rects", () => { DrawDirtyRects = !DrawDirtyRects; ChangeMenu(); }, new Vector2i(150, 20), background: false));
 
 
         ////
         // Finish
-        foreach (var W in Windows)
-            Engine.Interface.AddContainer(W);
+        Engine.Interface.AddContainer(Toolbar);
 
-        foreach (var M in Menus)
-            Engine.Interface.AddContainer(M);
+        foreach (var W in Windows) Engine.Interface.AddContainer(W);
+        foreach (var M in Menus) Engine.Interface.AddContainer(M);
 
         Pepper.Log(LogType.DEBUG, LogLevel.MESSAGE, "Canvas initialized.");
     }
 
+    // Close all active menus, if `menu` is given and not active, open that menu
     public void ChangeMenu(Container? menu=null) {
         foreach (var M in Menus) {
             if (M == menu) M.Toggle();
@@ -175,17 +171,49 @@ class Canvas {
         }
     }
 
-    public void SaveScene() {
-
+    // Update the Statistics menu Multiline widget
+    public void UpdateStats() {
+        StatsContent.Text = $"Mouse Pos (Screen): {MousePos / Engine.MatrixScale} %N " +
+                            $"Mouse Pos (Matrix): {((Engine.Camera.Position - (Engine.WindowSize / 2)) / Engine.MatrixScale) + (MousePos / Engine.MatrixScale)} %N " + 
+                            $"Camera Pos: {Engine.Camera.Position} %N %N " + 
+                            $"Pixels: {Matrix.TotalPixels:n0} ({Matrix.ActivePixels:n0} active) %N " +
+                            $"Chunks: {Matrix.TotalChunks:n0} ({Matrix.ActiveChunks:n0} active) %N %N " +
+                            $"Pixel Ops (Total): {Matrix.PixelsProcessed:n0} %N " + 
+                            $"Pixels Moved: {Matrix.PixelsMoved:n0}";
     }
 
-    public unsafe void LoadScene() {
+    // Save a Pixel Scene to a PNG image of a specified size from the origin position given
+    public void SaveScene(Vector2i? origin=null, int? width=null, int? height=null) {
+        var Origin = origin ?? Vector2i.Zero;
+        var Width = width ?? Matrix.Size.X;
+        var Height = height ?? Matrix.Size.Y;
+    }
+
+    // Load a Pixel Scene from a PNG image to the origin position given
+    public unsafe void LoadScene(Vector2i? origin=null) {
+        var Origin = origin ?? Vector2i.Zero;
+
         var SceneImage = LoadImage("test/ocean_tower.png");
         var SceneColors = LoadImageColors(SceneImage);
 
         for (int x = 0; x < SceneImage.width; x++) {
             for (int y = 0; y < SceneImage.height; y++) {
+                var Pos = new Vector2i(Origin.X + x, Origin.Y + y);
                 int Index = (y * SceneImage.width) + x;
+                int ID = Atlas.GetIDFromColor(SceneColors[Index]);
+                var Pixel = new Pixel();
+
+                if (ID > -1) {
+                    var STRID = ID.ToString();
+                    switch (STRID[0]) {
+                        case '1': Pixel = new Solid(ID, Pos); break;
+                        case '2': Pixel = new Liquid(ID, Pos); break;
+                        case '3': Pixel = new Gas(ID, Pos); break;
+                        case '4': Pixel = new Powder(ID, Pos); break;
+                    }
+                }
+
+                Matrix.Set(Pos, Pixel);
             }
         }
     }
@@ -197,22 +225,33 @@ class Canvas {
         var PointCache = new List<Vector2i>();
 
         foreach (var Point in LinePoints) {
-            if (!Erasing && ID > 0 && RNG.Roll(0.95)) continue;
+            if (!Erasing && ID >= 200 && RNG.Roll(0.95)) continue;
 
             var P = ((Engine.Camera.Position - (Engine.WindowSize / 2)) / Engine.MatrixScale) + Point;
 
             if (PointCache.Contains(P)) continue;
             PointCache.Add(P);
 
-            if (Engine.Matrix.InBounds(P)) {
+            if (Matrix.InBounds(P)) {
+                // Painting and point is not empty
+                if (!Erasing && !Matrix.IsEmpty(P))
+                    continue;
+
+                // Erasing and point is already empty
+                if (Erasing && Matrix.IsEmpty(P))
+                    continue;
+
                 var Pixel = new Pixel();
                 if (!Erasing) {
-                    if (ID == 0) Pixel = new Solid(P);
-                    if (ID == 1) Pixel = new Liquid(P);
-                    if (ID == 2) Pixel = new Gas(P);
-                    if (ID == 3) Pixel = new Powder(P);
+                    var STRID = ID.ToString();
+                    switch (STRID[0]) {
+                        case '1': Pixel = new Solid(ID, P); break;
+                        case '2': Pixel = new Liquid(ID, P); break;
+                        case '3': Pixel = new Gas(ID, P); break;
+                        case '4': Pixel = new Powder(ID, P); break;
+                    }
                 }
-                Engine.Matrix.Set(P, Pixel);
+                Matrix.Set(P, Pixel);
             }
         }
     }
@@ -269,12 +308,6 @@ class Canvas {
     public void Update() {
         if (Painting)
             Paint();
-
-            // var P = ((Engine.Camera.Position - (Engine.WindowSize / 2)) / Engine.MatrixScale) + Point;
-        // Statistics
-        StatsMouseScreenPos.Text = $"Mouse Pos (Screen): {MousePos / Engine.MatrixScale}";
-        StatsMouseMatrixPos.Text = $"Mouse Pos (Matrix): {((Engine.Camera.Position - (Engine.WindowSize / 2)) / Engine.MatrixScale) + (MousePos / Engine.MatrixScale)}";
-        StatsCameraPos.Text = $"CameraPos: {Engine.Camera.Position}";
     }
 
     public void Draw() {

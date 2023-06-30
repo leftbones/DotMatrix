@@ -8,22 +8,26 @@ class Engine {
     public int MatrixScale { get; private set; }
 
     public int Tick { get; private set; }
+
+    // Core
     public Matrix Matrix { get; private set; }
     public Interface Interface { get; private set; }
     public Canvas Canvas { get; private set; }
     public Camera Camera { get; private set; }
+    public Pepper Pepper { get; private set; }
 
+    public Theme Theme { get { return Interface.Theme; } }
+
+    // State
     public bool Active { get; private set; }        = true;     // Simulation (Matrix) pause state
     public bool StepOnce { get; private set; }      = false;    // (When paused) Reactivate Matrix, perform one step, pause again
     public bool FullStop { get; private set; }      = false;    // Stop everything except the bare minimum, set only by Pepper.Throw()
     public bool ShouldExit { get; private set; }    = false;    // Program will exit after the current update is completed
 
-    public Theme Theme { get { return Interface.Theme; } }
-
-    public Pepper Pepper { get; private set; }
-
+    // Extra
     private List<Timer> Timers = new List<Timer>();
     private List<KeyboardKey> HeldKeys = new List<KeyboardKey>();
+
 
     public Engine(Vector2i window_size, int matrix_scale) {
         WindowSize = window_size;
@@ -46,11 +50,14 @@ class Engine {
         while (K != 0) {
             var Key = (KeyboardKey)K;
             Events.Add(new KeyPressEvent(Key));
-            HeldKeys.Add(Key);
+
+            if (!HeldKeys.Contains(Key))
+                HeldKeys.Add(Key);
 
             K = GetKeyPressed();
         }
 
+        // Key Down
         for (int i = HeldKeys.Count() - 1; i >= 0; i--) {
             var Key = HeldKeys[i];
             if (!IsKeyDown(Key)) {
@@ -71,15 +78,16 @@ class Engine {
         int MouseWheelMove = (int)GetMouseWheelMove();
         if (MouseWheelMove != 0) Events.Add(new MouseWheelEvent(MouseWheelMove));
 
-        if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT)) Events.Add(new MouseDownEvent(MouseButton.MOUSE_BUTTON_LEFT, MousePos));
-        if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_RIGHT)) Events.Add(new MouseDownEvent(MouseButton.MOUSE_BUTTON_RIGHT, MousePos));
+        if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT)) Events.Add(new MousePressEvent(MouseButton.MOUSE_BUTTON_LEFT, MousePos));
+        if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_RIGHT)) Events.Add(new MousePressEvent(MouseButton.MOUSE_BUTTON_RIGHT, MousePos));
 
-        if (IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT)) Events.Add(new MouseUpEvent(MouseButton.MOUSE_BUTTON_LEFT, MousePos));
-        if (IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_RIGHT)) Events.Add(new MouseUpEvent(MouseButton.MOUSE_BUTTON_RIGHT, MousePos));
+        if (IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT)) Events.Add(new MouseReleaseEvent(MouseButton.MOUSE_BUTTON_LEFT, MousePos));
+        if (IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_RIGHT)) Events.Add(new MouseReleaseEvent(MouseButton.MOUSE_BUTTON_RIGHT, MousePos));
 
         // Handle Held Keys (Temporary)
-        foreach (var Key in HeldKeys)
-            Events.Add(new KeyPressEvent(Key));
+        foreach (var Key in HeldKeys) {
+            Events.Add(new KeyDownEvent(Key));
+        }
 
         // Handle Events (Temporary)
         foreach (var E in Events) {
@@ -102,21 +110,21 @@ class Engine {
             }
 
             // Paint
-            else if (E.Name == "MouseDown:MOUSE_BUTTON_LEFT") Canvas.Painting = true;
-            else if (E.Name == "MouseUp:MOUSE_BUTTON_LEFT") Canvas.Painting = false;
+            else if (E.Name == "MousePress:MOUSE_BUTTON_LEFT") Canvas.Painting = true;
+            else if (E.Name == "MouseRelease:MOUSE_BUTTON_LEFT") Canvas.Painting = false;
 
             // Erase
-            else if (E.Name == "MouseDown:MOUSE_BUTTON_RIGHT") { Canvas.Painting = true; Canvas.Erasing = true; }
-            else if (E.Name == "MouseUp:MOUSE_BUTTON_RIGHT") { Canvas.Painting = false; Canvas.Erasing = false; }
+            else if (E.Name == "MousePress:MOUSE_BUTTON_RIGHT") { Canvas.Painting = true; Canvas.Erasing = true; }
+            else if (E.Name == "MouseRelease:MOUSE_BUTTON_RIGHT") { Canvas.Painting = false; Canvas.Erasing = false; }
 
             // Brush Size
             else if (E.Name.Contains("MouseWheel")) { Canvas.BrushSize = Math.Clamp(Canvas.BrushSize - ((MouseWheelEvent)E).Amount, 1, 100); }
 
-
-            else if (E.Name == "KeyPress:KEY_W") Camera.Pan(Direction.Up);
-            else if (E.Name == "KeyPress:KEY_S") Camera.Pan(Direction.Down);
-            else if (E.Name == "KeyPress:KEY_A") Camera.Pan(Direction.Left);
-            else if (E.Name == "KeyPress:KEY_D") Camera.Pan(Direction.Right);
+            // Camera Movement
+            else if (E.Name == "KeyDown:KEY_W") Camera.Pan(Direction.Up);
+            else if (E.Name == "KeyDown:KEY_S") Camera.Pan(Direction.Down);
+            else if (E.Name == "KeyDown:KEY_A") Camera.Pan(Direction.Left);
+            else if (E.Name == "KeyDown:KEY_D") Camera.Pan(Direction.Right);
         }
     }
 

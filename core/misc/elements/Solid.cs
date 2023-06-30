@@ -4,14 +4,12 @@ using static Raylib_cs.Raylib;
 namespace DotMatrix;
 
 class Solid : Pixel {
-    public Solid(Vector2i position) : base(position: position){
-        ID = 0;
-
+    public Solid(int id, Vector2i position) : base(id, position){
         Active = false;
 
         Weight = 9999;
 
-        BaseColor = new Color(127, 128, 118, 255);
+        BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
         ColorOffset = 15;
     }
 

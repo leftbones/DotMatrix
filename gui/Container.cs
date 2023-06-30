@@ -148,10 +148,12 @@ class Container {
                         W.Position = Pos;
                         break;
                     case Anchor.Right:
-                        Pos = new Vector2i(DrawPos.X + Size.X - W.Size.X - W.Padding.R, Origin.Y + Offset - ScrollOffset) - DrawOffset;
+                        Pos = new Vector2i(Origin.X + Size.X - W.Size.X - W.Padding.X - Margin.X, Origin.Y + Offset - ScrollOffset) - DrawOffset;
                         W.Position = Pos;
                         break;
                     case Anchor.Center:
+                        Pos = new Vector2i(Origin.X + (Size.X / 2) - (W.Size.X / 2) - W.Padding.X - Margin.X, Origin.Y + Offset - ScrollOffset) - DrawOffset;
+                        W.Position = Pos;
                         break;
                 }
 

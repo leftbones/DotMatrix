@@ -88,7 +88,7 @@ class Pixel {
             Expire(M);
 
         if (Position != LastPosition) {
-            WakeNeighbors(M, LastPosition);
+            // WakeNeighbors(M, LastPosition); // FIXME: There has to be a better way to avoid chunks sleeping when pixels are active
             LastDirection = Direction.GetMovementDirection(LastPosition, Position);
         }
 

@@ -45,6 +45,9 @@ class Chunk {
 
     // Set the Chunk to be Awake for the next Matrix update
     public void Wake(Vector2i pos) {
+        if (!Awake && !WakeNextStep)
+            Matrix.ActiveChunks++;
+
         WakeNextStep = true;
         SleepTimer = WaitTime;
 
@@ -56,8 +59,10 @@ class Chunk {
     public void Step() {
         if (Awake && !WakeNextStep) {
             SleepTimer--;
-            if (SleepTimer == 0)
+            if (SleepTimer == 0) {
+                Matrix.ActiveChunks--;
                 Awake = false;
+            }
         } else {
             Awake = WakeNextStep;
         }

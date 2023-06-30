@@ -14,19 +14,34 @@ class Matrix {
     public Vector2i Size { get; private set; }              // Size of the Matrix (in Pixels)
     public Pixel[,] Pixels { get; private set; }            // 2D array that stores the Pixels
 
+    // Chunks
     public Chunk[,] Chunks { get; private set; }            // 2D array that stores Chunks
     public Vector2i ChunkSize { get; private set; }         // Size for each Chunk
     public int MaxChunksX { get; private set; }             // Number of Chunks in a row
     public int MaxChunksY { get; private set; }             // Number of Chunks in a column
 
+    public bool RedrawAllChunks { get; set; }               // Draw all Chunks on the next Draw call, including sleeping ones
+
+    private int ChunkWidth = 64;
+    private int ChunkHeight = 64;
+
+    // Statistics
+    public int TotalPixels = 0;
+    public int ActivePixels = 0;
+    public int PixelsProcessed = 0;
+    public int PixelsMoved = 0;
+
+    public int TotalChunks = 0;
+    public int ActiveChunks = 0;
+    public int ChunksProcessed = 0;
+
+    // Texture
     public Texture2D Texture { get; private set; }          // Render texture that Pixels are drawn to
     private Image Buffer;                                   // Buffer image used to create the render texture
 
     private Rectangle SourceRec;                            // Actual size of the Matrix texture
     private Rectangle DestRec;                              // Scaled size of the Matrix texture
 
-    private int ChunkWidth = 64;
-    private int ChunkHeight = 64;
 
     public Matrix(Engine engine) {
         Engine = engine;
@@ -47,6 +62,8 @@ class Matrix {
             }
         }
 
+        TotalPixels = 0;
+
         // Generate the Buffer and Texture
         Buffer = GenImageColor(Size.X, Size.Y, Color.BLACK);
         Texture = LoadTextureFromImage(Buffer);
@@ -62,6 +79,8 @@ class Matrix {
                 Chunks[x, y] = new Chunk(this, Pos, ChunkSize);
             }
         }
+
+        TotalChunks = MaxChunksX * MaxChunksY;
 
         Pepper.Log(LogType.MATRIX, LogLevel.MESSAGE, "Matrix initialized.");
     }
@@ -81,6 +100,9 @@ class Matrix {
         Pixels[pos.X, pos.Y] = pixel;
         pixel.Position = pos;
 
+        if (pixel.ID > -1) TotalPixels++;
+        else TotalPixels--;
+
         if (wake_chunk)
             WakeChunk(pos);
     }
@@ -89,6 +111,9 @@ class Matrix {
     public void Set(int x, int y, Pixel pixel, bool wake_chunk=true) {
         Pixels[x, y] = pixel;
         pixel.Position = new Vector2i(x, y);
+
+        if (pixel.ID > -1) TotalPixels++;
+        else TotalPixels--;
 
         if (wake_chunk)
             WakeChunk(pixel.Position);
@@ -104,6 +129,8 @@ class Matrix {
         Set(pos2, P1);
         Set(pos1, P2);
 
+        PixelsMoved++;
+
         return true;
     }
 
@@ -113,6 +140,8 @@ class Matrix {
         var Pos2 = p2.Position;
         Set(Pos2, p1);
         Set(Pos1, p2);
+
+        PixelsMoved++;
 
         return true;
     }
@@ -189,6 +218,8 @@ class Matrix {
 
                             if (P.Active)
                                 P.ActOnNeighbors(this);
+
+                            PixelsProcessed++;
                         }
                     }
                 }
@@ -198,8 +229,11 @@ class Matrix {
 
     // Actions performed before the start of the normal Update
     public void UpdateStart() {
+        ActivePixels = 0;
+
         // Reset Pixel Stepped and Ticked flags
         foreach (var P in Pixels) {
+            if (P.ID > -1 && P.Active) ActivePixels++;
             P.Stepped = false;
             P.Ticked = false;
             P.Acted = false;
@@ -268,9 +302,12 @@ class Matrix {
     }
 
     // Wake the chunk at the given position
-    public void WakeChunk(Vector2i pos) {
+    public void WakeChunk(Vector2i pos, bool check_all=false) {
         var Chunk = GetChunk(pos);
         Chunk.Wake(pos);
+
+        if (check_all)
+            Chunk.CheckAll = true;
 
         // Wake appropriate neighbor chunks if the position is on a border
         if (pos.X == Chunk.Position.X + Chunk.Size.X - 1 && InBounds(pos + Direction.Right)) GetChunk(pos + Direction.Right).Wake(pos + Direction.Right);
@@ -283,7 +320,7 @@ class Matrix {
     public unsafe void Draw() {
         // Update and Draw Chunk Textures (Per Chunk Textures)
         foreach (var C in Chunks) {
-            if (C.Awake) {
+            if (C.Awake || RedrawAllChunks) {
                 ImageClearBackground(ref C.Buffer, Color.BLACK);
 
                 for (int y = ChunkSize.Y - 1; y >= 0; y--) {
@@ -298,8 +335,10 @@ class Matrix {
                             P.ColorSet = true;
                         }
 
-                        Color Col = P.Color;
-                        if (Engine.Canvas.DrawActiveOverlay && !P.Active) Col = Color.RED;
+                        var Col = P.Color;
+                        if (Engine.Canvas.DrawActiveOverlay)
+                            Col = P.Active ? Color.BLUE : Color.RED;
+
                         ImageDrawPixel(ref C.Buffer, P.Position.X - C.Position.X, P.Position.Y - C.Position.Y, Col);
                     }
                 }
@@ -309,6 +348,9 @@ class Matrix {
 
             DrawTexturePro(C.Texture, C.SourceRec, C.DestRec, Vector2.Zero, 0, Color.WHITE);
         }
+
+        if (RedrawAllChunks)
+            RedrawAllChunks = false;
 
         // Update  and Draw Texture (Entire Matrix)
         // ImageClearBackground(ref Buffer, Color.BLACK);
