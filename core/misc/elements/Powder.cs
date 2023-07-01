@@ -6,16 +6,16 @@ namespace DotMatrix;
 class Powder : Pixel {
     public Powder(int id, Vector2i position) : base(id, position){
         Weight = 90;
-        Friction = 75;
+        Friction = 35;
 
         BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
         ColorOffset = 15;
     }
 
     public override void Step(Matrix M) {
-        if (!Active) {
+        if (Settled) {
             if (!M.IsValid(Position, Position + Direction.Down)) return;
-            else Active = true;
+            else Settled = false;
         }
 
         if (RNG.Roll(85) && M.SwapIfValid(Position, Position + Direction.Down)) return;
@@ -34,13 +34,13 @@ class Powder : Pixel {
             else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
         }
 
-        if (RNG.Roll(Friction))
-            Active = false;
+        if (RNG.Roll(Friction)) // && Position == LastPosition)
+            Settled = true;
     }
 
     public override bool ActOnOther(Matrix M, Pixel O) {
-        if (O is Powder && !O.Active && RNG.Roll(O.Friction)) {
-            O.Active = true;
+        if (!Settled && !RNG.Roll(O.Friction)) {
+            O.Settled = false;
             return true;
         }
 

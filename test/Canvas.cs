@@ -43,7 +43,7 @@ class Canvas {
     // Tools + Properties
     public bool DrawChunks          = true;
     public bool DrawDirtyRects      = true;
-    public bool DrawActiveOverlay   = true;
+    public bool DrawActiveOverlay   = false;
 
     public Canvas(Engine engine) {
         Engine = engine;

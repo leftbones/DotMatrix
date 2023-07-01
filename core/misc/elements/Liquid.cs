@@ -6,20 +6,18 @@ namespace DotMatrix;
 class Liquid : Pixel {
     public Liquid(int id, Vector2i position) : base(id, position){
         Weight = 30;
-        Fluidity = 75;
+        Fluidity = 95;
 
         BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
     }
 
     public override void Step(Matrix M) {
-        if (!Active) {
-            foreach (var Dir in Direction.CardinalDown) {
-                if (M.IsValid(Position, Position + Dir)) {
-                    Active = true;
-                    break;
-                }
-            }
-            if (!Active) return;
+        if (Settled) {
+            var HorizDir = Direction.RandomHorizontal;
+            if (M.IsValid(Position, Position + Direction.Down) ||
+                M.IsValid(Position, Position + HorizDir) ||
+                M.IsValid(Position, Position + Direction.MirrorHorizontal(HorizDir))) Settled = false;
+            else return;
         }
 
         if (RNG.Roll(95) && M.SwapIfValid(Position, Position + Direction.Down)) return;
@@ -34,20 +32,17 @@ class Liquid : Pixel {
             var HorizDir = Direction.GetMovementDirection(LastPosition, Position);
             if (!Direction.Horizontal.Contains(HorizDir)) HorizDir = Direction.RandomHorizontal;
 
-            bool Moved = false;
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 5; i++)
                 if (!RNG.CoinFlip() && !M.SwapIfValid(Position, Position + HorizDir)) break;
-                Moved = true;
-            }
 
-            if (!Moved && !RNG.Roll(Fluidity))
-                Active = false;
+            if (!RNG.Roll(Fluidity) && Position == LastPosition)
+                Settled = true;
         }
     }
 
     public override bool ActOnOther(Matrix M, Pixel O) {
-        if (O is Powder && !O.Active && !RNG.Roll(O.Friction)) {
-            O.Active = true;
+        if (!Settled && !RNG.Roll(O.Friction)) {
+            O.Settled = false;
             return true;
         }
 

@@ -201,7 +201,8 @@ class Matrix {
                 if (!C.Awake) continue;
 
                 // Process pixels within dirty rect
-                for (int y = C.Y2; y >= C.Y1; y--) {
+                // for (int y = C.Y1; y <= C.Y2; y++) { // Top to Bottom
+                for (int y = C.Y2; y >= C.Y1; y--) { // Bottom to Top
                     for (int x = IsEvenTick ? C.X1 : C.X2; IsEvenTick ? x <= C.X2 : x >= C.X1; x += IsEvenTick ? 1 : -1) {
                         var P = Get(C.Position.X + x, C.Position.Y + y);
 
@@ -237,57 +238,60 @@ class Matrix {
             P.Stepped = false;
             P.Ticked = false;
             P.Acted = false;
+
+            P.LastPosition = P.Position;
         }
     }
 
     // Actions performed at the end of the normal Update
     public void UpdateEnd() {
-        // Calculate chunk dirty rectangles
+        // Update Chunks
         foreach (var C in Chunks) {
+            // Calculate dirty rects of awake chunks
+            // if (C.Awake) {
+            //     if (C.CheckAll) {
+            //         C.CheckAll = false;
+
+            //         var XStart = false;
+            //         var YStart = false;
+            //         C.X2 = 0;
+            //         C.Y2 = 0;
+
+            //         for (int y = ChunkSize.Y - 1; y >= 0; y--) {
+            //             for (int x = 0; x < ChunkSize.X; x++) {
+            //                 var P = Get(C.Position.X + x, C.Position.Y + y);
+            //                 if (P.ID > -1) {
+            //                     if (!XStart || x < C.X1) { C.X1 = x; XStart = true; }
+            //                     if (!YStart || y < C.Y1) { C.Y1 = y; YStart = true; }
+
+            //                     if (x > C.X2) C.X2 = x;
+            //                     if (y > C.Y2) C.Y2 = y;
+            //                 }
+            //             }
+            //         }
+            //     } else {
+            //         var XStart = false;
+            //         var YStart = false;
+            //         C.X2 = 0;
+            //         C.Y2 = 0;
+
+            //         for (int y = ChunkSize.Y - 1; y >= 0; y--) {
+            //             for (int x = 0; x < ChunkSize.X; x++) {
+            //                 var P = Get(C.Position.X + x, C.Position.Y + y);
+            //                 if (P.ID > -1) {// && (P.Active || P.Position != P.LastPosition)) {
+            //                     if (!XStart || x < C.X1) { C.X1 = x; XStart = true; }
+            //                     if (!YStart || y < C.Y1) { C.Y1 = y; YStart = true; }
+
+            //                     if (x > C.X2) C.X2 = x;
+            //                     if (y > C.Y2) C.Y2 = y;
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+
+            // Step all chunks
             C.Step();
-
-            // Skip sleeping chunks
-            if (!C.Awake) continue;
-
-            if (C.CheckAll) {
-                C.CheckAll = false;
-
-                var XStart = false;
-                var YStart = false;
-                C.X2 = 0;
-                C.Y2 = 0;
-
-                for (int y = ChunkSize.Y - 1; y >= 0; y--) {
-                    for (int x = 0; x < ChunkSize.X; x++) {
-                        var P = Get(C.Position.X + x, C.Position.Y + y);
-                        if (P.ID > -1) {
-                            if (!XStart || x < C.X1) { C.X1 = x; XStart = true; }
-                            if (!YStart || y < C.Y1) { C.Y1 = y; YStart = true; }
-
-                            if (x > C.X2) C.X2 = x;
-                            if (y > C.Y2) C.Y2 = y;
-                        }
-                    }
-                }
-            } else {
-                var XStart = false;
-                var YStart = false;
-                C.X2 = 0;
-                C.Y2 = 0;
-
-                for (int y = ChunkSize.Y - 1; y >= 0; y--) {
-                    for (int x = 0; x < ChunkSize.X; x++) {
-                        var P = Get(C.Position.X + x, C.Position.Y + y);
-                        if (P.ID > -1 && (P.Active || P.Position != P.LastPosition)) {
-                            if (!XStart || x < C.X1) { C.X1 = x; XStart = true; }
-                            if (!YStart || y < C.Y1) { C.Y1 = y; YStart = true; }
-
-                            if (x > C.X2) C.X2 = x;
-                            if (y > C.Y2) C.Y2 = y;
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -336,8 +340,11 @@ class Matrix {
                         }
 
                         var Col = P.Color;
-                        if (Engine.Canvas.DrawActiveOverlay)
-                            Col = P.Active ? Color.BLUE : Color.RED;
+                        if (Engine.Canvas.DrawActiveOverlay) {
+                            if (!P.Active) Col = Color.RED;
+                            else if (P.Settled) Col = Color.ORANGE;
+                            else Col = Color.BLUE;
+                        }
 
                         ImageDrawPixel(ref C.Buffer, P.Position.X - C.Position.X, P.Position.Y - C.Position.Y, Col);
                     }

@@ -24,6 +24,7 @@ class Pixel {
     public bool Ticked { get; set; }                = false;                        // If a Pixel has already had it's Tick method called in the current tick
     public bool Acted { get; set; }                 = false;                        // If a Pixel has already had it's ActOnOther method called (successfully) in the current tick
     public bool Active { get; set; }                = true;                         // If true, call Step once each time Engine is updated
+    public bool Settled { get; set; }               = false;
 
     // Properties
     public int Weight { get; set; }                 = 0;                            // Weight of a Pixel relative to air/empty space, used for Y-sorting
@@ -64,7 +65,7 @@ class Pixel {
                     var P = M.Get(Position + Dir);
                     if (ActOnOther(M, P)) {
                         Acted = true;
-                        return;
+                        // return;
                     }
                 }
             }
@@ -91,8 +92,6 @@ class Pixel {
             // WakeNeighbors(M, LastPosition); // FIXME: There has to be a better way to avoid chunks sleeping when pixels are active
             LastDirection = Direction.GetMovementDirection(LastPosition, Position);
         }
-
-        LastPosition = Position;
     }
 
     // Wake all neighboring Pixels at the given position or the Pixel's position

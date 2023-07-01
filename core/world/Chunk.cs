@@ -14,10 +14,17 @@ class Chunk {
     public Rectangle SourceRec { get; private set; }                                                                    // Actual size of the Chunk Texture
     public Rectangle DestRec { get; private set; }                                                                      // Scaled size of the Chunk Texture
 
-    public int X1 { get; set; }                                                                                         // Top left X coordinate of the DirtyRect
-    public int Y1 { get; set; }                                                                                         // Top left Y coordinate of the DirtyRect
-    public int X2 { get; set; }                                                                                         // Bottom right X coordinate of the DirtyRect
-    public int Y2 { get; set; }                                                                                         // Bottom right Y coordinate of the DirtyRect
+    public int X1 { get; set; }                                                                                         // Top left X coord for the current dirty rectangle
+    public int Y1 { get; set; }                                                                                         // Top left Y coord for the current dirty rectangle
+    public int X2 { get; set; }                                                                                         // Bottom right X coord for the current dirty rectangle
+    public int Y2 { get; set; }                                                                                         // Bottom right Y coord for the current dirty rectangle
+
+    private int X1w = 0;                                                                                                // Top left X coord for the working dirty rectangle
+    private int Y1w = 0;                                                                                                // Top left Y coord for the working dirty rectangle
+    private int X2w = 0;                                                                                                // Bottom right X coord for the working dirty rectangle
+    private int Y2w = 0;                                                                                                // Bottom right Y coord for the working dirty rectangle
+
+    private int BD = 1;                                                                                                 // Buffer Distance - how far to extend the dirty rect past the actual active pixels (1 seems fine, 2 if there are floating pixels left behind)
 
     public int SleepTimer { get; private set; }                                                                         // Timer that counts down before a Chunk sleeps
     private int WaitTime = 30;                                                                                          // Number of ticks used for the SleepTimer
@@ -51,12 +58,35 @@ class Chunk {
         WakeNextStep = true;
         SleepTimer = WaitTime;
 
-        if (!Awake || (X2 == 0 && Y2 == 0))
-            CheckAll = true;
+        if (Awake) {
+            // Update working dirty rect
+            var X = pos.X - Position.X;
+            var Y = pos.Y - Position.Y;
+
+            X1w = Math.Clamp(Math.Min(X - BD, X1w), 0, Size.X);
+            Y1w = Math.Clamp(Math.Min(Y - BD, Y1w), 0, Size.Y);
+            X2w = Math.Clamp(Math.Max(X + BD, X2w), 0, Size.X - 1);
+            Y2w = Math.Clamp(Math.Max(Y + BD, Y2w), 0, Size.Y - 1);
+
+            // if (X < X1w) X1w = X;
+            // if (Y < Y1w) Y1w = Y;
+            // if (X > X2w) X2w = X;
+            // if (Y > Y2w) Y2w = Y;
+        } else {
+            X1w = 0;
+            Y1w = 0;
+            X2w = Size.X - 1;
+            Y2w = Size.Y - 1;
+        }
+
+        // if (!Awake || (X2 == 0 && Y2 == 0))
+        //     CheckAll = true;
     }
 
-    // Set the Chunk's Awake state, or tick down the SleepTimer
+    // Update the dirty rect then update the awake state or tick down the SleepTimer
     public void Step() {
+        UpdateRect();
+
         if (Awake && !WakeNextStep) {
             SleepTimer--;
             if (SleepTimer == 0) {
@@ -68,6 +98,14 @@ class Chunk {
         }
 
         WakeNextStep = false;
+    }
+
+    // Update the current dirty rect, reset the working dirty rect
+    public void UpdateRect() {
+        X1 = X1w; X1w = Size.X;
+        Y1 = Y1w; Y1w = Size.Y;
+        X2 = X2w; X2w = 0;
+        Y2 = Y2w; Y2w = 0;
     }
 
     // Check if a position is within the bounds of the Chunk
