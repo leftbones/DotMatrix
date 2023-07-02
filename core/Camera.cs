@@ -5,10 +5,13 @@ namespace DotMatrix;
 
 class Camera {
     public Engine Engine { get; private set; }
+    public Matrix Matrix { get { return Engine.Matrix; } }
     public Vector2i Position { get; private set; }
     public int PanSpeed { get; private set; }
 
     public Camera2D Viewport;
+
+    public Chunk Chunk { get { return Matrix.GetChunk(Position); } }        // Chunk containing the Camera
 
     public Camera(Engine engine) {
         Engine = engine;

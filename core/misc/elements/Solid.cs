@@ -5,8 +5,6 @@ namespace DotMatrix;
 
 class Solid : Pixel {
     public Solid(int id, Vector2i position) : base(id, position){
-        Active = false;
-
         Weight = 9999;
 
         BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
@@ -14,6 +12,6 @@ class Solid : Pixel {
     }
 
     public override void Step(Matrix M) {
-
+        Settled = true;
     }
 }

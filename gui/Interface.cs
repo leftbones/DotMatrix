@@ -61,10 +61,5 @@ class Interface {
         var FPS = $"{GetFPS()} FPS";
         var Pos = new Vector2i(WindowSize.X - ((int)MeasureTextEx(Theme.Font, FPS, Theme.FontSize, Theme.FontSpacing).X + 5), 5);
         DrawTextEx(Theme.Font, FPS, Pos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.Foreground);
-
-        // Tick
-        var Tick = $"T: {Engine.Tick}";
-        Pos = new Vector2i(WindowSize.X - ((int)MeasureTextEx(Theme.Font, Tick, Theme.FontSize, Theme.FontSpacing).X + 5), 20);
-        DrawTextEx(Theme.Font, Tick, Pos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.Foreground);
     }
 }

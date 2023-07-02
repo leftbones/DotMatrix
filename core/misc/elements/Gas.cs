@@ -5,7 +5,7 @@ namespace DotMatrix;
 
 class Gas : Pixel {
     public Gas(int id, Vector2i position) : base(id, position){
-        Lifetime = RNG.Range(1000, 1500);
+        Lifetime = RNG.Range(750, 1000);
 
         Weight = -20;
         Diffusion = 25;
@@ -18,15 +18,18 @@ class Gas : Pixel {
         // Color Shift (even when not Active)
         FadeOpacity();
 
-        if (!Active) {
-            foreach (var Dir in Direction.ShuffledCardinal) {
+        if (Settled) {
+            foreach (var Dir in Direction.Cardinal) {
                 if (M.IsValid(Position, Position + Dir)) {
-                    Active = true;
+                    Settled = false;
                     break;
-		        }
-	        }
-            if (!Active) return;
+                }
+            }
+
+            if (Settled) return;
 	    }
+
+        M.WakeChunk(Position);
 
         // Weight + Diffusion
         var WeightDir = Direction.None;
@@ -39,7 +42,7 @@ class Gas : Pixel {
         );
 
         if (MoveDir == Direction.None) {
-            Active = false;
+            Settled = true;
             return;
 	    }
 
@@ -49,30 +52,9 @@ class Gas : Pixel {
             var HorizDir = Direction.RandomHorizontal;
             if (M.SwapIfValid(Position, Position + HorizDir)) return;
             else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(HorizDir))) return;
-            else Active = false;
-        } else {
-            Active = false;
+            else if (RNG.Roll(Diffusion)) Settled = true;
+        } else if (RNG.Roll(Diffusion)) {
+            Settled = true;
         }
-
-        // if (!Active) {
-        //     foreach (var Dir in Direction.CardinalUp) {
-        //         if (M.IsValid(Position + Dir)) {
-        //             Active = true;
-        //             break;
-        //         }
-        //     }
-
-        //     if (!Active)
-        //         return;
-        // }
-
-        // if (M.SwapIfValid(Position, Position + Direction.Up)) return;
-
-        // var HorizDir = Direction.GetMovementDirection(LastPosition, Position);
-        // if (!Direction.Horizontal.Contains(HorizDir)) HorizDir = Direction.RandomHorizontal;
-        // if (M.SwapIfValid(Position, Position + HorizDir)) return;
-        // else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(HorizDir))) return;
-
-        // Active = false;
     }
 }

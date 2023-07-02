@@ -8,8 +8,8 @@ class Chunk {
     public Vector2i Position { get; private set; }                                                                      // Position of a Chunk within the parent Matrix
     public Vector2i Size { get; private set; }                                                                          // Size of a Chunk in Pixels
 
-    public Texture2D Texture { get; set; }                                                                              // Render texture that Pixels are drawn to
-    public Image Buffer;                                                                                                // Buffer image used to create the render texture
+    public Texture2D Texture { get; set; }                                                                              // Texture that Pixels are drawn to
+    public Image Buffer;                                                                                                // Buffer image used to create the texture
 
     public Rectangle SourceRec { get; private set; }                                                                    // Actual size of the Chunk Texture
     public Rectangle DestRec { get; private set; }                                                                      // Scaled size of the Chunk Texture

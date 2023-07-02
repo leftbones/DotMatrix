@@ -40,10 +40,10 @@ class Canvas {
 
     public Multiline StatsContent { get; private set; }
 
-    // Tools + Properties
-    public bool DrawChunks          = true;
-    public bool DrawDirtyRects      = true;
-    public bool DrawActiveOverlay   = false;
+    // Debug
+    public bool DrawChunks          = true;         // Draw lines on the border of each Chunk
+    public bool DrawDirtyRects      = false;        // Draw each Chunk's dirty rectangle
+    public bool DrawSettledOverlay  = false;        // Draw Pixels in red when settled and blue when not settled
 
     public Canvas(Engine engine) {
         Engine = engine;
@@ -148,7 +148,7 @@ class Canvas {
         CheatsMenu.AddWidget(new Label(CheatsMenu, "(dust)", new Vector2i(100, 20)));
 
         // Debug Menu
-        DebugMenu.AddWidget(new Button(DebugMenu, "Active Overlay", () => { DrawActiveOverlay = !DrawActiveOverlay; ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Settled Overlay", () => { DrawSettledOverlay = !DrawSettledOverlay; ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
         DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Borders", () => { DrawChunks = !DrawChunks; ChangeMenu(); }, new Vector2i(150, 20), background: false));
         DebugMenu.AddWidget(new Button(DebugMenu, "Dirty Rects", () => { DrawDirtyRects = !DrawDirtyRects; ChangeMenu(); }, new Vector2i(150, 20), background: false));
 
@@ -176,10 +176,11 @@ class Canvas {
         StatsContent.Text = $"Mouse Pos (Screen): {MousePos / Engine.MatrixScale} %N " +
                             $"Mouse Pos (Matrix): {((Engine.Camera.Position - (Engine.WindowSize / 2)) / Engine.MatrixScale) + (MousePos / Engine.MatrixScale)} %N " + 
                             $"Camera Pos: {Engine.Camera.Position} %N %N " + 
-                            $"Pixels: {Matrix.TotalPixels:n0} ({Matrix.ActivePixels:n0} active) %N " +
-                            $"Chunks: {Matrix.TotalChunks:n0} ({Matrix.ActiveChunks:n0} active) %N %N " +
+                            $"Chunks: {Matrix.TotalChunks:n0} ({Matrix.ActiveChunks:n0} awake) %N %N " +
+                            $"Pixels: {Matrix.TotalPixels:n0} %N " +
                             $"Pixel Ops (Total): {Matrix.PixelsProcessed:n0} %N " + 
-                            $"Pixels Moved: {Matrix.PixelsMoved:n0}";
+                            $"Pixels Moved: {Matrix.PixelsMoved:n0} %N %N " +
+                            $"Tick: {Engine.Tick:n0}";
     }
 
     // Save a Pixel Scene to a PNG image of a specified size from the origin position given

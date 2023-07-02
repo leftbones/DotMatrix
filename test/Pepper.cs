@@ -42,6 +42,7 @@ class Pepper {
         Canvas.ExceptionWindow.AddWidget(new Multiline(Canvas.ExceptionWindow, $"{type} {level} %N %N {message}", 750, new Quad(0, 20, 10, 10)));
         Canvas.ExceptionWindow.AddWidget(new Button(Canvas.ExceptionWindow, "Exit", () => { Environment.Exit(0); }, new Vector2i(75, 20), anchor: Anchor.Right));
         Canvas.ExceptionWindow.Toggle();
+        Engine.Halt();
     }
 
     // Log a message to the console as well as the current log file

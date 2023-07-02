@@ -23,7 +23,7 @@ class Pixel {
     public bool Stepped { get; set; }               = false;                        // If a Pixel has already had it's Step method called in the current tick
     public bool Ticked { get; set; }                = false;                        // If a Pixel has already had it's Tick method called in the current tick
     public bool Acted { get; set; }                 = false;                        // If a Pixel has already had it's ActOnOther method called (successfully) in the current tick
-    public bool Active { get; set; }                = true;                         // If true, call Step once each time Engine is updated
+    // public bool Active { get; set; }                = true;                         // If true, call Step once each time Engine is updated
     public bool Settled { get; set; }               = false;
 
     // Properties
@@ -88,20 +88,8 @@ class Pixel {
         if (Lifetime > -1 && TicksLived >= Lifetime)
             Expire(M);
 
-        if (Position != LastPosition) {
-            // WakeNeighbors(M, LastPosition); // FIXME: There has to be a better way to avoid chunks sleeping when pixels are active
+        if (Position != LastPosition)
             LastDirection = Direction.GetMovementDirection(LastPosition, Position);
-        }
-    }
-
-    // Wake all neighboring Pixels at the given position or the Pixel's position
-    public void WakeNeighbors(Matrix M, Vector2i? pos=null) {
-        var Pos = pos ?? Position;
-
-        foreach (var Dir in Direction.Cardinal) {
-            if (M.InBounds(Pos + Dir))
-                M.Get(Pos + Dir).Active = true;
-        }
     }
 
     // Lighten or darken a Pixel's Color by the given amount

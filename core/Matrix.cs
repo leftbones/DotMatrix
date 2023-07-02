@@ -27,7 +27,6 @@ class Matrix {
 
     // Statistics
     public int TotalPixels = 0;
-    public int ActivePixels = 0;
     public int PixelsProcessed = 0;
     public int PixelsMoved = 0;
 
@@ -36,11 +35,14 @@ class Matrix {
     public int ChunksProcessed = 0;
 
     // Texture
-    public Texture2D Texture { get; private set; }          // Render texture that Pixels are drawn to
-    private Image Buffer;                                   // Buffer image used to create the render texture
+    public Texture2D Texture { get; private set; }                              // Render texture that Pixels are drawn to
+    private Image Buffer;                                                       // Buffer image used to create the render texture
 
-    private Rectangle SourceRec;                            // Actual size of the Matrix texture
-    private Rectangle DestRec;                              // Scaled size of the Matrix texture
+    private Rectangle SourceRec;                                                // Actual size of the Matrix texture
+    private Rectangle DestRec;                                                  // Scaled size of the Matrix texture
+
+    private Shader BlurShader = LoadShader(null, "res/shaders/blur.fs");        // Blur shader
+    private Shader BloomShader = LoadShader(null, "res/shaders/bloom.fs");      // Bloom shader
 
 
     public Matrix(Engine engine) {
@@ -166,8 +168,12 @@ class Matrix {
         var P1 = Get(pos1);
         var P2 = Get(pos2);
 
-        if (P1.Weight > P2.Weight)
+        if (P1.Weight > P2.Weight) {
             return true;
+        } else if (P1 is Gas && P2 is not Solid) {
+            if (P1.Weight < P2.Weight || (P1.ColorFade > P2.ColorFade && RNG.CoinFlip()))
+                return true;
+        }
 
         return false;
     }
@@ -217,7 +223,7 @@ class Matrix {
                             P.Tick(this);
                             P.Ticked = true;
 
-                            if (P.Active)
+                            if (!P.Settled)
                                 P.ActOnNeighbors(this);
 
                             PixelsProcessed++;
@@ -230,11 +236,8 @@ class Matrix {
 
     // Actions performed before the start of the normal Update
     public void UpdateStart() {
-        ActivePixels = 0;
-
         // Reset Pixel Stepped and Ticked flags
         foreach (var P in Pixels) {
-            if (P.ID > -1 && P.Active) ActivePixels++;
             P.Stepped = false;
             P.Ticked = false;
             P.Acted = false;
@@ -245,54 +248,9 @@ class Matrix {
 
     // Actions performed at the end of the normal Update
     public void UpdateEnd() {
-        // Update Chunks
-        foreach (var C in Chunks) {
-            // Calculate dirty rects of awake chunks
-            // if (C.Awake) {
-            //     if (C.CheckAll) {
-            //         C.CheckAll = false;
-
-            //         var XStart = false;
-            //         var YStart = false;
-            //         C.X2 = 0;
-            //         C.Y2 = 0;
-
-            //         for (int y = ChunkSize.Y - 1; y >= 0; y--) {
-            //             for (int x = 0; x < ChunkSize.X; x++) {
-            //                 var P = Get(C.Position.X + x, C.Position.Y + y);
-            //                 if (P.ID > -1) {
-            //                     if (!XStart || x < C.X1) { C.X1 = x; XStart = true; }
-            //                     if (!YStart || y < C.Y1) { C.Y1 = y; YStart = true; }
-
-            //                     if (x > C.X2) C.X2 = x;
-            //                     if (y > C.Y2) C.Y2 = y;
-            //                 }
-            //             }
-            //         }
-            //     } else {
-            //         var XStart = false;
-            //         var YStart = false;
-            //         C.X2 = 0;
-            //         C.Y2 = 0;
-
-            //         for (int y = ChunkSize.Y - 1; y >= 0; y--) {
-            //             for (int x = 0; x < ChunkSize.X; x++) {
-            //                 var P = Get(C.Position.X + x, C.Position.Y + y);
-            //                 if (P.ID > -1) {// && (P.Active || P.Position != P.LastPosition)) {
-            //                     if (!XStart || x < C.X1) { C.X1 = x; XStart = true; }
-            //                     if (!YStart || y < C.Y1) { C.Y1 = y; YStart = true; }
-
-            //                     if (x > C.X2) C.X2 = x;
-            //                     if (y > C.Y2) C.Y2 = y;
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
-
-            // Step all chunks
+        // Step Chunks
+        foreach (var C in Chunks)
             C.Step();
-        }
     }
 
     // Return the chunk containing the given position (Vector2i pos)
@@ -323,6 +281,7 @@ class Matrix {
     // Draw each Pixel in the Matrix to the render texture
     public unsafe void Draw() {
         // Update and Draw Chunk Textures (Per Chunk Textures)
+
         foreach (var C in Chunks) {
             if (C.Awake || RedrawAllChunks) {
                 ImageClearBackground(ref C.Buffer, Color.BLACK);
@@ -340,11 +299,8 @@ class Matrix {
                         }
 
                         var Col = P.Color;
-                        if (Engine.Canvas.DrawActiveOverlay) {
-                            if (!P.Active) Col = Color.RED;
-                            else if (P.Settled) Col = Color.ORANGE;
-                            else Col = Color.BLUE;
-                        }
+                        if (Engine.Canvas.DrawSettledOverlay)
+                            Col = P.Settled ? Color.RED : Color.BLUE;
 
                         ImageDrawPixel(ref C.Buffer, P.Position.X - C.Position.X, P.Position.Y - C.Position.Y, Col);
                     }
@@ -353,32 +309,15 @@ class Matrix {
                 UpdateTexture(C.Texture, C.Buffer.data);
             }
 
+            // DrawTexturePro(C.Texture, C.SourceRec, C.DestRec, Vector2.Zero, 0, Color.WHITE);
+        }
+
+        foreach (var C in Chunks) {
             DrawTexturePro(C.Texture, C.SourceRec, C.DestRec, Vector2.Zero, 0, Color.WHITE);
         }
 
         if (RedrawAllChunks)
             RedrawAllChunks = false;
-
-        // Update  and Draw Texture (Entire Matrix)
-        // ImageClearBackground(ref Buffer, Color.BLACK);
-
-        // foreach (var P in Pixels) {
-        //     if (P.ID == -1) continue;
-
-        //     if (!P.ColorSet) {
-        //         int Offset = RNG.Range(-P.ColorOffset, P.ColorOffset);
-        //         P.Color = P.BaseColor;
-        //         P.ShiftColor(Offset);
-        //         P.ColorSet = true;
-        //     }
-
-        //     Color Col = P.Color;
-        //     if (Engine.Canvas.DrawActiveOverlay && !P.Active) Col = Color.RED;
-        //     ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, Col);
-        // }
-
-        // UpdateTexture(Texture, Buffer.data);
-        // DrawTexturePro(Texture, SourceRec, DestRec, Vector2.Zero, 0, Color.WHITE);
 
         // Chunk Borders
         if (Engine.Canvas.DrawChunks) {

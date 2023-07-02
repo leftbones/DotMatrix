@@ -129,6 +129,11 @@ class Engine {
     }
 
     public void Update() {
+        if (FullStop) {
+            Interface.Update();
+            return;
+        }
+
         if (!Active) {
             Canvas.Update();
             Interface.Update();
@@ -183,5 +188,9 @@ class Engine {
 
             DrawTextEx(Theme.Font, PauseText, CenterPos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.Foreground);
         }
+    }
+
+    public void Halt() {
+        FullStop = true;
     }
 }
