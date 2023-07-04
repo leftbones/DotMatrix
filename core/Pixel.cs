@@ -61,11 +61,12 @@ class Pixel {
     public void ActOnNeighbors(Matrix M) {
         if (!Acted) {
             foreach (var Dir in Direction.ShuffledCardinal) {
-                if (RNG.CoinFlip() && M.InBounds(Position + Dir)) {
+                if (M.InBounds(Position + Dir)) {
                     var P = M.Get(Position + Dir);
                     if (ActOnOther(M, P)) {
                         Acted = true;
-                        // return;
+                        M.WakeChunk(P.Position);
+                        return;
                     }
                 }
             }

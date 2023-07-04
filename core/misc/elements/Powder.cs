@@ -33,9 +33,6 @@ class Powder : Pixel {
             if (M.SwapIfValid(Position, Position + MoveDir)) return;
             else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
         }
-
-        if (RNG.Roll(Friction))
-            Settled = true;
     }
 
     public override bool ActOnOther(Matrix M, Pixel O) {

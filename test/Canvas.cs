@@ -42,7 +42,8 @@ class Canvas {
 
     // Debug
     public bool DrawChunks          = true;         // Draw lines on the border of each Chunk
-    public bool DrawDirtyRects      = false;        // Draw each Chunk's dirty rectangle
+    public bool DrawDirtyRects      = true;         // Draw each Chunk's dirty rectangle
+    public bool DrawMovementOverlay = false;         // Draw Pixels in purple when they have not moved since the last tick and yellow when they have
     public bool DrawSettledOverlay  = false;        // Draw Pixels in red when settled and blue when not settled
 
     public Canvas(Engine engine) {
@@ -148,6 +149,7 @@ class Canvas {
         CheatsMenu.AddWidget(new Label(CheatsMenu, "(dust)", new Vector2i(100, 20)));
 
         // Debug Menu
+        DebugMenu.AddWidget(new Button(DebugMenu, "Movement Overlay", () => { DrawMovementOverlay = !DrawMovementOverlay; ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
         DebugMenu.AddWidget(new Button(DebugMenu, "Settled Overlay", () => { DrawSettledOverlay = !DrawSettledOverlay; ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
         DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Borders", () => { DrawChunks = !DrawChunks; ChangeMenu(); }, new Vector2i(150, 20), background: false));
         DebugMenu.AddWidget(new Button(DebugMenu, "Dirty Rects", () => { DrawDirtyRects = !DrawDirtyRects; ChangeMenu(); }, new Vector2i(150, 20), background: false));
