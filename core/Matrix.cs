@@ -20,7 +20,7 @@ class Matrix {
     public int MaxChunksX { get; private set; }             // Number of Chunks in a row
     public int MaxChunksY { get; private set; }             // Number of Chunks in a column
 
-    public bool RedrawAllChunks { get; set; }               // Draw all Chunks on the next Draw call, including sleeping ones
+    public bool RedrawAllChunks { get; set; } = true;       // Draw all Chunks on the next Draw call, including sleeping ones
 
     private int ChunkWidth = 64;
     private int ChunkHeight = 64;
@@ -34,7 +34,7 @@ class Matrix {
     public int ActiveChunks = 0;
     public int ChunksProcessed = 0;
 
-    // Texture
+    // Textures + Shaders
     public Texture2D Texture { get; private set; }                              // Render texture that Pixels are drawn to
     private Image Buffer;                                                       // Buffer image used to create the render texture
 
@@ -285,7 +285,6 @@ class Matrix {
     // Draw each Pixel in the Matrix to the render texture
     public unsafe void Draw() {
         // Update and Draw Chunk Textures (Per Chunk Textures)
-
         foreach (var C in Chunks) {
             if (C.Awake || RedrawAllChunks) {
                 ImageClearBackground(ref C.Buffer, Color.BLACK);
@@ -293,7 +292,10 @@ class Matrix {
                 for (int y = ChunkSize.Y - 1; y >= 0; y--) {
                     for (int x = 0; x < ChunkSize.X; x++) {
                         var P = Get(C.Position.X + x, C.Position.Y + y);
-                        if (P.ID == -1) continue;
+                        if (P.ID == -1) {
+                            ImageDrawPixel(ref C.Buffer, P.Position.X - C.Position.X, P.Position.Y - C.Position.Y, Theme.Transparent);
+                            continue;
+                        }
 
                         if (!P.ColorSet) {
                             int Offset = RNG.Range(-P.ColorOffset, P.ColorOffset);
@@ -315,8 +317,6 @@ class Matrix {
 
                 UpdateTexture(C.Texture, C.Buffer.data);
             }
-
-            // DrawTexturePro(C.Texture, C.SourceRec, C.DestRec, Vector2.Zero, 0, Color.WHITE);
         }
 
         foreach (var C in Chunks) {

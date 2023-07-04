@@ -196,7 +196,7 @@ class Canvas {
     public unsafe void LoadScene(Vector2i? origin=null) {
         var Origin = origin ?? Vector2i.Zero;
 
-        var SceneImage = LoadImage("test/ocean_tower.png");
+        var SceneImage = LoadImage("res/scenes/ocean_tower.png");
         var SceneColors = LoadImageColors(SceneImage);
 
         for (int x = 0; x < SceneImage.width; x++) {
@@ -219,6 +219,8 @@ class Canvas {
                 Matrix.Set(Pos, Pixel);
             }
         }
+
+        Pepper.Log(LogType.MATRIX, LogLevel.MESSAGE, "Loaded scene");
     }
 
     public void Paint() {

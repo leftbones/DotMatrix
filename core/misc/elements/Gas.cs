@@ -7,7 +7,7 @@ class Gas : Pixel {
     public Gas(int id, Vector2i position) : base(id, position){
         Lifetime = RNG.Range(750, 1000);
 
-        Weight = -20;
+        Weight = -30;
         Diffusion = 25;
 
         BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));

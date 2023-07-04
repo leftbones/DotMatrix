@@ -174,6 +174,8 @@ class Engine {
     }
 
     public void Draw() {
+        Camera.Draw();
+
         BeginMode2D(Camera.Viewport);
         Matrix.Draw();
         EndMode2D();
@@ -190,6 +192,7 @@ class Engine {
         }
     }
 
+    // Completely stop all processing except for Interface (called only by Pepper.Throw)
     public void Halt() {
         FullStop = true;
     }

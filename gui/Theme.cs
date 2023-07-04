@@ -4,6 +4,8 @@ using static Raylib_cs.Raylib;
 namespace DotMatrix;
 
 class Theme {
+    public Color Transparent { get; set; }                      = new Color(0, 0, 0, 0);            // Transparency color
+
     public Color Foreground { get; set; }                       = new Color(255, 255, 255, 255);    // Window foreground color
     public Color Background { get; set; }                       = new Color(50, 55, 65, 255);       // Window background color
 

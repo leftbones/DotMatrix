@@ -99,7 +99,7 @@ class Pixel {
             Math.Clamp(Color.r + amount, 0, 255),
             Math.Clamp(Color.g + amount, 0, 255),
             Math.Clamp(Color.b + amount, 0, 255),
-            255
+            Color.a
         );
     }
 

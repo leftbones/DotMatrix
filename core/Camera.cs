@@ -1,3 +1,4 @@
+using System.Numerics;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 
@@ -12,6 +13,9 @@ class Camera {
     public Camera2D Viewport;
 
     public Chunk Chunk { get { return Matrix.GetChunk(Position); } }        // Chunk containing the Camera
+
+    public bool DrawSkybox { get; set; } = false;
+    private Texture2D Skybox = LoadTexture("res/backgrounds/background.png");
 
     public Camera(Engine engine) {
         Engine = engine;
@@ -31,5 +35,11 @@ class Camera {
 
     public void Update() {
         Viewport.target = Position.ToVector2();
+    }
+
+    public void Draw() {
+        // Skybox + Parallax
+        if (DrawSkybox)
+            DrawTexturePro(Skybox, new Rectangle(0, 0, Skybox.width, Skybox.height), new Rectangle(0, 0, Engine.WindowSize.X, Engine.WindowSize.Y), Vector2.Zero, 0.0f, Color.WHITE);
     }
 }

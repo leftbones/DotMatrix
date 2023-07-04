@@ -26,7 +26,7 @@ static class Atlas {
         string Hex = ColorToInt(color).ToString("X");
         if (Hex != "FF") {
             if (Hex.Length == 7) Hex = "0" + Hex;
-            return Colors.Where(P => P.Value == Hex).Select(P => P.Key).FirstOrDefault();
+            return Colors.Where(P => P.Value[0..^2] == Hex[0..^2]).Select(P => P.Key).FirstOrDefault();
         }
         return -1;
     }
