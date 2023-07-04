@@ -5,8 +5,9 @@ namespace DotMatrix;
 
 class Chunk {
     public Matrix Matrix { get; private set; }                                                                          // The parent Matrix this Chunk belongs to
-    public Vector2i Position { get; private set; }                                                                      // Position of a Chunk within the parent Matrix
-    public Vector2i Size { get; private set; }                                                                          // Size of a Chunk in Pixels
+    public Vector2i Position { get; private set; }                                                                      // The position of a Chunk within the parent MatrixA
+    public Vector2i Size { get; private set; }                                                                          // The size of a Chunk, in Pixels
+    public int ThreadOrder { get; private set; }                                                                        // The "substep" in which a Chunk is processed when multithreading is enabled (1-4)
 
     public Texture2D Texture { get; set; }                                                                              // Texture that Pixels are drawn to
     public Image Buffer;                                                                                                // Buffer image used to create the texture
@@ -24,7 +25,7 @@ class Chunk {
     private int X2w = 0;                                                                                                // Bottom right X coord for the working dirty rectangle
     private int Y2w = 0;                                                                                                // Bottom right Y coord for the working dirty rectangle
 
-    private int BD = 1;                                                                                                 // Buffer Distance - how far to extend the dirty rect past the actual active pixels (1 seems fine, 2 if there are floating pixels left behind)
+    private int BD = 1;                                                                                                 // "Buffer Distance", how far to extend the dirty rect past the actual active pixels (1 seems fine, 2 if there are floating pixels left behind)
 
     public int SleepTimer { get; private set; }                                                                         // Timer that counts down before a Chunk sleeps
     private int WaitTime = 30;                                                                                          // Number of ticks used for the SleepTimer
@@ -36,10 +37,11 @@ class Chunk {
 
     public bool CheckAll { get; set; } = false;                                                                         // All Pixels in the Chunk should be checked rather than just those within the DirtyRect
 
-    public Chunk(Matrix matrix, Vector2i position, Vector2i size) {
+    public Chunk(Matrix matrix, Vector2i position, Vector2i size, int thread_order) {
         Matrix = matrix;
         Position = position;
         Size = size;
+        ThreadOrder = thread_order;
 
         Buffer = GenImageColor(Size.X, Size.Y, Color.BLACK);
         Texture = LoadTextureFromImage(Buffer);

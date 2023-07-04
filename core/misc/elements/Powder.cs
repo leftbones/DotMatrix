@@ -34,7 +34,7 @@ class Powder : Pixel {
             else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
         }
 
-        if (RNG.Roll(Friction)) // && Position == LastPosition)
+        if (RNG.Roll(Friction))
             Settled = true;
     }
 
