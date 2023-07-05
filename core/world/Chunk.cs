@@ -35,7 +35,9 @@ class Chunk {
     public bool Awake { get; private set; } = false;                                                                    // Chunk contains active Pixels
     public bool WakeNextStep { get; private set; } = false;                                                             // Chunk will become Awake during the next Matrix update
 
-    public bool CheckAll { get; set; } = false;                                                                         // All Pixels in the Chunk should be checked rather than just those within the DirtyRect
+    public bool ForceRedraw { get; set; } = false;
+
+    private List<Vector2i> WakeActions = new List<Vector2i>();
 
     public Chunk(Matrix matrix, Vector2i position, Vector2i size, int thread_order) {
         Matrix = matrix;
@@ -54,8 +56,11 @@ class Chunk {
 
     // Set the Chunk to be Awake for the next Matrix update
     public void Wake(Vector2i pos) {
-        if (!Awake && !WakeNextStep)
-            Matrix.ActiveChunks++;
+        if (!Awake && !Matrix.Engine.Active)
+            ForceRedraw = true;
+
+        // if (!Awake && !WakeNextStep)
+        //     Matrix.ActiveChunks++;
 
         WakeNextStep = true;
         SleepTimer = WaitTime;
@@ -84,7 +89,7 @@ class Chunk {
         if (Awake && !WakeNextStep) {
             SleepTimer--;
             if (SleepTimer == 0) {
-                Matrix.ActiveChunks--;
+                // Matrix.ActiveChunks--;
                 Awake = false;
             }
         } else {

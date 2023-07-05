@@ -33,7 +33,6 @@ class Matrix {
     private List<Chunk> D;
 
     // Statistics
-    public int HighestPixels = 0;
     public int TotalPixels = 0;                                                 // Total number of Pixels in the Matrix
     public int PixelsProcessed = 0;                                             // Total number of Pixel operations done
     public int PixelsMoved = 0;                                                 // Total number of Pixels moved
@@ -50,6 +49,9 @@ class Matrix {
 
     private Shader BlurShader = LoadShader(null, "res/shaders/blur.fs");        // Blur shader
     private Shader BloomShader = LoadShader(null, "res/shaders/bloom.fs");      // Bloom shader
+
+    // Settings TODO: Move to dedicated Settings class
+    public bool MultithreadingEnabled { get; set; } = true;
 
 
     public Matrix(Engine engine) {
@@ -222,31 +224,49 @@ class Matrix {
     }
 
     // Update each awake Chunk in the Matrix
-    public void Update() {
-        // Threading
-        foreach (var Group in ThreadGroups) {
-            int Count = Group.Count();
-            using (var ResetEvent = new ManualResetEvent(false)) {
-                foreach (var Chunk in Group) {
-                    ThreadPool.QueueUserWorkItem(new WaitCallback(x => {
-                        UpdateChunk(Chunk);
-                        Chunk.Step();
-                        if (Interlocked.Decrement(ref Count) == 0)
-                            ResetEvent.Set();
-                    }), Chunk);
+    public async void Update() {
+        if (MultithreadingEnabled) {
+            await UpdateAsync();
+        } else {
+            for (int i = 1; i <= 4; i++) {
+                foreach (var C in Chunks) {
+                    if (C.ThreadOrder == i) {
+                        UpdateChunk(C);
+                        C.Step();
+                    }
                 }
+            }
+        }
+    }
 
-                ResetEvent.WaitOne();
+    public async Task<int> UpdateAsync() {
+        var UpdateA = new List<Task>();
+        var UpdateB = new List<Task>();
+        var UpdateC = new List<Task>();
+        var UpdateD = new List<Task>();
+
+        foreach (var Chunk in Chunks) {
+            switch (Chunk.ThreadOrder) {
+                case 1: UpdateA.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
+                case 2: UpdateB.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
+                case 3: UpdateC.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
+                case 4: UpdateD.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
             }
         }
 
-        // No Threading
-        // for (int i = 1; i <= 4; i++) {
-        //     foreach (var C in Chunks) {
-        //         if (C.ThreadOrder == i && C.Awake)
-        //             UpdateChunk(C);
-        //     }
-        // }
+        Parallel.ForEach(UpdateA, Task => Task.Start());
+        await Task.WhenAll(UpdateA);
+
+        Parallel.ForEach(UpdateB, Task => Task.Start());
+        await Task.WhenAll(UpdateB);
+
+        Parallel.ForEach(UpdateC, Task => Task.Start());
+        await Task.WhenAll(UpdateC);
+
+        Parallel.ForEach(UpdateD, Task => Task.Start());
+        await Task.WhenAll(UpdateD);
+
+        return 1;
     }
 
     // Update all of the Pixels within a Chunk's dirty rect
@@ -278,11 +298,6 @@ class Matrix {
                             P.Settled = true;
                     }
 
-                    if (TotalPixels > HighestPixels) HighestPixels = TotalPixels;
-                    if (TotalPixels > HighestPixels) {
-                        Console.WriteLine("this sucks");
-                    }
-
                     PixelsProcessed++;
                 }
             }
@@ -312,7 +327,6 @@ class Matrix {
 
     // Actions performed at the end of the normal Update
     public void UpdateEnd() {
-        // Step Chunks
         // foreach (var C in Chunks)
         //     C.Step();
     }
@@ -332,9 +346,6 @@ class Matrix {
         var Chunk = GetChunk(pos);
         Chunk.Wake(pos);
 
-        if (check_all)
-            Chunk.CheckAll = true;
-
         // Wake appropriate neighbor chunks if the position is on a border
         if (pos.X == Chunk.Position.X + Chunk.Size.X - 1 && InBounds(pos + Direction.Right)) GetChunk(pos + Direction.Right).Wake(pos + Direction.Right);
         if (pos.X == Chunk.Position.X && InBounds(pos + Direction.Left)) GetChunk(pos + Direction.Left).Wake(pos + Direction.Left);
@@ -346,7 +357,7 @@ class Matrix {
     public unsafe void Draw() {
         // Update and Draw Chunk Textures (Per Chunk Textures)
         foreach (var C in Chunks) {
-            if (C.Awake || RedrawAllChunks) {
+            if (C.Awake || C.ForceRedraw || RedrawAllChunks) {
                 ImageClearBackground(ref C.Buffer, Color.BLACK);
 
                 for (int y = ChunkSize.Y - 1; y >= 0; y--) {
@@ -376,6 +387,9 @@ class Matrix {
                 }
 
                 UpdateTexture(C.Texture, C.Buffer.data);
+
+                if (C.ForceRedraw)
+                    C.ForceRedraw = false;
             }
         }
 
