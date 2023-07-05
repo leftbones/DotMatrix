@@ -69,20 +69,12 @@ class Chunk {
             Y1w = Math.Clamp(Math.Min(Y - BD, Y1w), 0, Size.Y);
             X2w = Math.Clamp(Math.Max(X + BD, X2w), 0, Size.X - 1);
             Y2w = Math.Clamp(Math.Max(Y + BD, Y2w), 0, Size.Y - 1);
-
-            // if (X < X1w) X1w = X;
-            // if (Y < Y1w) Y1w = Y;
-            // if (X > X2w) X2w = X;
-            // if (Y > Y2w) Y2w = Y;
         } else {
             X1w = 0;
             Y1w = 0;
             X2w = Size.X - 1;
             Y2w = Size.Y - 1;
         }
-
-        // if (!Awake || (X2 == 0 && Y2 == 0))
-        //     CheckAll = true;
     }
 
     // Update the dirty rect then update the awake state or tick down the SleepTimer

@@ -6,33 +6,40 @@ using static Raylib_cs.Raylib;
 namespace DotMatrix;
 
 class Matrix {
-    public Engine Engine { get; private set; }              // Reference to the parent Engine instance
-    public Theme Theme { get { return Engine.Theme; } }     // Reference to the Theme class instance of the parent Engine
-    public Pepper Pepper { get { return Engine.Pepper; } }  // Reference to the Pepper class instanace of the parent Engine
-    public int Scale { get; private set; }                  // Scale of the Matrix texture (Matrix pixel to screen pixel)
+    public Engine Engine { get; private set; }                                  // Reference to the parent Engine instance
+    public Theme Theme { get { return Engine.Theme; } }                         // Reference to the Theme class instance of the parent Engine
+    public Pepper Pepper { get { return Engine.Pepper; } }                      // Reference to the Pepper class instanace of the parent Engine
+    public int Scale { get; private set; }                                      // Scale of the Matrix texture (Matrix pixel to screen pixel)
 
-    public Vector2i Size { get; private set; }              // Size of the Matrix (in Pixels)
-    public Pixel[,] Pixels { get; private set; }            // 2D array that stores the Pixels
+    public Vector2i Size { get; private set; }                                  // Size of the Matrix (in Pixels)
+    public Pixel[,] Pixels { get; private set; }                                // 2D array that stores the Pixels
 
     // Chunks
-    public Chunk[,] Chunks { get; private set; }            // 2D array that stores Chunks
-    public Vector2i ChunkSize { get; private set; }         // Size for each Chunk
-    public int MaxChunksX { get; private set; }             // Number of Chunks in a row
-    public int MaxChunksY { get; private set; }             // Number of Chunks in a column
+    public Chunk[,] Chunks { get; private set; }                                // 2D array that stores Chunks
+    public Vector2i ChunkSize { get; private set; }                             // Size for each Chunk
+    public int MaxChunksX { get; private set; }                                 // Number of Chunks in a row
+    public int MaxChunksY { get; private set; }                                 // Number of Chunks in a column
 
-    public bool RedrawAllChunks { get; set; } = true;       // Draw all Chunks on the next Draw call, including sleeping ones
+    public bool RedrawAllChunks { get; set; } = true;                           // Draw all Chunks on the next Draw call, including sleeping ones
 
-    private int ChunkWidth = 64;
-    private int ChunkHeight = 64;
+    private int ChunkWidth = 64;                                                // Width of each Chunk in Pixels
+    private int ChunkHeight = 64;                                               // Height of each Chunk in Pixels
+
+    // Threading
+    private List<List<Chunk>> ThreadGroups;
+    private List<Chunk> A;
+    private List<Chunk> B;
+    private List<Chunk> C;
+    private List<Chunk> D;
 
     // Statistics
-    public int TotalPixels = 0;
-    public int PixelsProcessed = 0;
-    public int PixelsMoved = 0;
+    public int HighestPixels = 0;
+    public int TotalPixels = 0;                                                 // Total number of Pixels in the Matrix
+    public int PixelsProcessed = 0;                                             // Total number of Pixel operations done
+    public int PixelsMoved = 0;                                                 // Total number of Pixels moved
 
-    public int TotalChunks = 0;
-    public int ActiveChunks = 0;
-    public int ChunksProcessed = 0;
+    public int TotalChunks = 0;                                                 // Total number of Chunks in the Matrix
+    public int ActiveChunks = 0;                                                // Total number of Chunks currently awake
 
     // Textures + Shaders
     public Texture2D Texture { get; private set; }                              // Render texture that Pixels are drawn to
@@ -85,6 +92,24 @@ class Matrix {
 
         TotalChunks = MaxChunksX * MaxChunksY;
 
+        // Setup Threads
+        A = new List<Chunk>();
+        B = new List<Chunk>();
+        C = new List<Chunk>();
+        D = new List<Chunk>();
+
+        foreach (var Chunk in Chunks) {
+            switch (Chunk.ThreadOrder) {
+                case 1: A.Add(Chunk); break;
+                case 2: B.Add(Chunk); break;
+                case 3: C.Add(Chunk); break;
+                case 4: D.Add(Chunk); break;
+            }
+        }
+
+        ThreadGroups = new List<List<Chunk>>() { A, B, C, D };
+
+        // Finish
         Pepper.Log(LogType.MATRIX, LogLevel.MESSAGE, "Matrix initialized.");
     }
 
@@ -198,16 +223,37 @@ class Matrix {
 
     // Update each awake Chunk in the Matrix
     public void Update() {
-        for (int i = 1; i <= 4; i++) {
-            foreach (var C in Chunks) {
-                if (C.ThreadOrder == i && C.Awake)
-                    UpdateChunk(C);
+        // Threading
+        foreach (var Group in ThreadGroups) {
+            int Count = Group.Count();
+            using (var ResetEvent = new ManualResetEvent(false)) {
+                foreach (var Chunk in Group) {
+                    ThreadPool.QueueUserWorkItem(new WaitCallback(x => {
+                        UpdateChunk(Chunk);
+                        Chunk.Step();
+                        if (Interlocked.Decrement(ref Count) == 0)
+                            ResetEvent.Set();
+                    }), Chunk);
+                }
+
+                ResetEvent.WaitOne();
             }
         }
+
+        // No Threading
+        // for (int i = 1; i <= 4; i++) {
+        //     foreach (var C in Chunks) {
+        //         if (C.ThreadOrder == i && C.Awake)
+        //             UpdateChunk(C);
+        //     }
+        // }
     }
 
     // Update all of the Pixels within a Chunk's dirty rect
     public void UpdateChunk(Chunk C) {
+        // Skip sleeping Chunks
+        if (!C.Awake) return;
+
         bool IsEvenTick = Engine.Tick % 2 == 0;
 
         // Process pixels within dirty rect
@@ -232,6 +278,11 @@ class Matrix {
                             P.Settled = true;
                     }
 
+                    if (TotalPixels > HighestPixels) HighestPixels = TotalPixels;
+                    if (TotalPixels > HighestPixels) {
+                        Console.WriteLine("this sucks");
+                    }
+
                     PixelsProcessed++;
                 }
             }
@@ -240,6 +291,15 @@ class Matrix {
 
     // Actions performed before the start of the normal Update
     public void UpdateStart() {
+        // Test Spout
+        // int Spout = 5;
+        // for (int i = 0; i < Spout; i++) {
+        //     if (RNG.CoinFlip()) {
+        //         var Pos = new Vector2i((Size.X / 2) - Spout + i, 0);
+        //         Set(Pos, new Powder(400, Pos));
+        //     }
+        // }
+
         // Reset Pixel Stepped and Ticked flags
         foreach (var P in Pixels) {
             P.Stepped = false;
@@ -253,8 +313,8 @@ class Matrix {
     // Actions performed at the end of the normal Update
     public void UpdateEnd() {
         // Step Chunks
-        foreach (var C in Chunks)
-            C.Step();
+        // foreach (var C in Chunks)
+        //     C.Step();
     }
 
     // Return the chunk containing the given position (Vector2i pos)

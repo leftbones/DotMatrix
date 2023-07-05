@@ -66,7 +66,7 @@ class Canvas {
             position: new Vector2i(10, Engine.WindowSize.Y - 10),
             draw_anchor: Anchor.Bottom,
             background: true,
-            activated: false
+            activated: true
         );
 
         StatsContent = new Multiline(StatsWindow, "", 300, update_action: UpdateStats);

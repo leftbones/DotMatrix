@@ -7,10 +7,10 @@ namespace DotMatrix;
 enum ElementType { Solid, Liquid, Gas, Powder };
 
 static class Atlas {
-    public static Dictionary<string, ElementData> Solid = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/misc/elements/json/Solid.json"))!;
-    public static Dictionary<string, ElementData> Liquid = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/misc/elements/json/Liquid.json"))!;
-    public static Dictionary<string, ElementData> Gas = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/misc/elements/json/Gas.json"))!;
-    public static Dictionary<string, ElementData> Powder = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/misc/elements/json/Powder.json"))!;
+    public static Dictionary<string, ElementData> Solid = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Solid.json"))!;
+    public static Dictionary<string, ElementData> Liquid = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Liquid.json"))!;
+    public static Dictionary<string, ElementData> Gas = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Gas.json"))!;
+    public static Dictionary<string, ElementData> Powder = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Powder.json"))!;
 
     public static Dictionary<int, string> Colors = new Dictionary<int, string>();
 
