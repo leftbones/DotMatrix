@@ -141,12 +141,6 @@ class Engine {
             return;
         }
 
-        // Start Update
-        Matrix.UpdateStart();
-
-        // Normal Update
-        Matrix.Update();
-
         // Timers
         for (int i = Timers.Count() - 1; i >= 0; i--) {
             var T = Timers[i];
@@ -155,6 +149,13 @@ class Engine {
             if (T.Done && !T.Repeat)
                 Timers.Remove(T);
         }
+
+        // Start Update
+        Matrix.UpdateStart();
+
+        // Normal Update
+        Matrix.Update();
+
 
         // End Update
         Matrix.UpdateEnd();

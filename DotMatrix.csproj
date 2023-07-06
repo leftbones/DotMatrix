@@ -13,4 +13,26 @@
     <PackageReference Include="Raylib-cs" Version="4.5.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="core\world\elements\json\*.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+
+    <EmbeddedResource Include="res\backgrounds\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+
+    <EmbeddedResource Include="res\fonts\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+
+    <EmbeddedResource Include="res\scenes\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+
+    <EmbeddedResource Include="res\shaders\*.fs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

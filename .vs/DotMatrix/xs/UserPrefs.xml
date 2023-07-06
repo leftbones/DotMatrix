@@ -1,29 +1,31 @@
 ﻿<Properties StartupConfiguration="{709879A5-4840-4EE7-ACE0-9A4435036B17}|Default">
-  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Program.cs">
+  <MonoDevelop.Ide.ItemProperties.DotMatrix PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="DotMatrix.csproj">
     <Files>
-      <File FileName="Program.cs" Line="7" Column="15" />
+      <File FileName="Program.cs" />
       <File FileName="core/Engine.cs" />
-      <File FileName="core/Matrix.cs" />
-      <File FileName="core/Pixel.cs" />
+      <File FileName="core/Atlas.cs" />
+      <File FileName="DotMatrix.csproj" Line="20" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="DotMatrix">
-            <Node name="DotMatrix">
-              <Node name="core" expanded="True" />
+            <Node name="DotMatrix" expanded="True">
               <Node name="Program.cs" selected="True" />
             </Node>
           </Node>
         </State>
       </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
+      </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MonoDevelop.Ide.ItemProperties.DotMatrix PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
 </Properties>
