@@ -7,7 +7,7 @@ namespace DotMatrix;
 
 // TODO: Implement Colorful.Console for nicer looking output (https://github.com/tomakita/Colorful.Console)
 
-enum LogType { ENGINE, MATRIX, INTERFACE, DEBUG, OTHER };
+enum LogType { SYSTEM, ENGINE, MATRIX, INTERFACE, DEBUG, OTHER };
 enum LogLevel { MESSAGE, WARNING, ERROR, EXCEPTION, DEBUG };
 
 class Pepper {
@@ -32,13 +32,13 @@ class Pepper {
         switch (type) {
             case 0: return DateTime.Now.ToString("[HH:mm:ss]");             // Log write format
             case 1: return DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss");    // File name format
-            default: Throw(LogType.OTHER, LogLevel.EXCEPTION, "Invalid Timestamp type given (requires 0-1)"); return null;
+            default: Throw("Invalid Timestamp type given (requires 0-1)", LogType.OTHER, LogLevel.EXCEPTION); return null;
         }
     }
 
     // Throw an exception and write the exception to the current log file
-    public void Throw(LogType type, LogLevel level, string message) {
-        Log(type, level, message);
+    public void Throw(string message, LogType type, LogLevel level) {
+        Log(message, type, level);
         Canvas.ExceptionWindow.AddWidget(new Multiline(Canvas.ExceptionWindow, $"{type} {level} %N %N {message}", 750, new Quad(0, 20, 10, 10)));
         Canvas.ExceptionWindow.AddWidget(new Button(Canvas.ExceptionWindow, "Exit", () => { Environment.Exit(0); }, new Vector2i(75, 20), anchor: Anchor.Right));
         Canvas.ExceptionWindow.Toggle();
@@ -46,7 +46,7 @@ class Pepper {
     }
 
     // Log a message to the console as well as the current log file
-    public void Log(LogType type, LogLevel level, string message) {
+    public void Log(string message, LogType type=LogType.DEBUG, LogLevel level=LogLevel.MESSAGE) {
         Console.WriteLine($"{Timestamp()} [{type}] {level}: {message}");
     }
 

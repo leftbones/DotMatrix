@@ -34,7 +34,7 @@ class Engine {
         MatrixScale = matrix_scale;
 
         Pepper = new Pepper(this);
-        Pepper.Log(LogType.ENGINE, LogLevel.MESSAGE, "Engine initialized.");
+        Pepper.Log("Engine initialized.", LogType.ENGINE);
 
         Matrix = new Matrix(this);
         Interface = new Interface(this);

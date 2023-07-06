@@ -62,7 +62,7 @@ class Program {
 
         ////
         // Exit
-        Engine.Pepper.Log(LogType.OTHER, LogLevel.MESSAGE, "Program exited successfully");
+        Engine.Pepper.Log("Program exited successfully", LogType.SYSTEM);
         CloseWindow();
     }
 }

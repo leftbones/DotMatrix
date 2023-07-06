@@ -87,7 +87,7 @@ class Matrix {
         TotalChunks = MaxChunksX * MaxChunksY;
 
         // Finish
-        Pepper.Log(LogType.MATRIX, LogLevel.MESSAGE, "Matrix initialized.");
+        Pepper.Log("Matrix initialized.", LogType.MATRIX);
     }
 
     // Get a Pixel from the Matrix (Vector2i pos)
