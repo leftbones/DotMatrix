@@ -61,7 +61,9 @@ class Matrix {
         Pixels = new Pixel[Size.X, Size.Y];
         for (int y = Size.Y - 1; y >= 0; y--) {
             for (int x = 0; x < Size.X; x++) {
-                Set(new Vector2i(x, y), new Pixel(), wake_chunk: false);
+                var P = new Pixel();
+                P.Position = new Vector2i(x, y);
+                Pixels[x, y] = P;
             }
         }
 

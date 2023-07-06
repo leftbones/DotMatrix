@@ -37,8 +37,6 @@ class Chunk {
 
     public bool ForceRedraw { get; set; } = false;
 
-    private List<Vector2i> WakeActions = new List<Vector2i>();
-
     public Chunk(Matrix matrix, Vector2i position, Vector2i size, int thread_order) {
         Matrix = matrix;
         Position = position;
@@ -101,8 +99,8 @@ class Chunk {
 
     // Update the current dirty rect, reset the working dirty rect
     public void UpdateRect() {
-        X1 = X1w; X1w = Size.X;
-        Y1 = Y1w; Y1w = Size.Y;
+        X1 = X1w; X1w = Size.X - 1;
+        Y1 = Y1w; Y1w = Size.Y - 1;
         X2 = X2w; X2w = 0;
         Y2 = Y2w; Y2w = 0;
     }
