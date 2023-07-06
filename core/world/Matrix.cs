@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Numerics;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
@@ -24,13 +23,6 @@ class Matrix {
 
     private int ChunkWidth = 64;                                                // Width of each Chunk in Pixels
     private int ChunkHeight = 64;                                               // Height of each Chunk in Pixels
-
-    // Threading
-    private List<List<Chunk>> ThreadGroups;
-    private List<Chunk> A;
-    private List<Chunk> B;
-    private List<Chunk> C;
-    private List<Chunk> D;
 
     // Statistics
     public int TotalPixels = 0;                                                 // Total number of Pixels in the Matrix
@@ -93,23 +85,6 @@ class Matrix {
         }
 
         TotalChunks = MaxChunksX * MaxChunksY;
-
-        // Setup Threads
-        A = new List<Chunk>();
-        B = new List<Chunk>();
-        C = new List<Chunk>();
-        D = new List<Chunk>();
-
-        foreach (var Chunk in Chunks) {
-            switch (Chunk.ThreadOrder) {
-                case 1: A.Add(Chunk); break;
-                case 2: B.Add(Chunk); break;
-                case 3: C.Add(Chunk); break;
-                case 4: D.Add(Chunk); break;
-            }
-        }
-
-        ThreadGroups = new List<List<Chunk>>() { A, B, C, D };
 
         // Finish
         Pepper.Log(LogType.MATRIX, LogLevel.MESSAGE, "Matrix initialized.");
@@ -327,8 +302,7 @@ class Matrix {
 
     // Actions performed at the end of the normal Update
     public void UpdateEnd() {
-        // foreach (var C in Chunks)
-        //     C.Step();
+
     }
 
     // Return the chunk containing the given position (Vector2i pos)
