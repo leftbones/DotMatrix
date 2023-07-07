@@ -8,6 +8,7 @@ namespace DotMatrix;
 class Canvas {
     public Engine Engine { get; private set; }
     public Matrix Matrix { get { return Engine.Matrix; } }
+    public Camera Camera { get { return Engine.Camera; } }
     public Pepper Pepper { get { return Engine.Pepper; } }
     public Theme Theme { get { return Engine.Theme; } }
 
@@ -30,7 +31,7 @@ class Canvas {
 
     public Container SceneMenu { get; private set; }
     public Container BrushMenu { get; private set; }
-    public Container WindowMenu { get; private set; }
+    public Container ViewMenu { get; private set; }
     public Container CheatsMenu { get; private set; }
     public Container DebugMenu { get; private set; }
 
@@ -42,7 +43,7 @@ class Canvas {
 
     // Debug
     public bool DrawChunks          = true;         // Draw lines on the border of each Chunk
-    public bool DrawDirtyRects      = true;         // Draw each Chunk's dirty rectangle
+    public bool DrawDirtyRects      = false;         // Draw each Chunk's dirty rectangle
     public bool DrawMovementOverlay = false;         // Draw Pixels in purple when they have not moved since the last tick and yellow when they have
     public bool DrawSettledOverlay  = false;        // Draw Pixels in red when settled and blue when not settled
 
@@ -100,7 +101,7 @@ class Canvas {
             activated: false
         );
 
-        WindowMenu = new Container(
+        ViewMenu = new Container(
             parent: Engine.Interface,
             position: new Vector2i(210, 25),
             activated: false
@@ -121,14 +122,14 @@ class Canvas {
         Menus = new List<Container>();
         Menus.Add(SceneMenu);
         Menus.Add(BrushMenu);
-        Menus.Add(WindowMenu);
+        Menus.Add(ViewMenu);
         Menus.Add(CheatsMenu);
         Menus.Add(DebugMenu);
 
         // Toolbar
         Toolbar.AddWidget(new Button(Toolbar, "Scene", () => { ChangeMenu(SceneMenu); }, new Vector2i(100, 20)));
         Toolbar.AddWidget(new Button(Toolbar, "Brush", () => { ChangeMenu(BrushMenu); }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "Window", () => { ChangeMenu(WindowMenu); }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "View", () => { ChangeMenu(ViewMenu); }, new Vector2i(100, 20)));
         Toolbar.AddWidget(new Button(Toolbar, "Cheats", () => { ChangeMenu(CheatsMenu); }, new Vector2i(100, 20)));
         Toolbar.AddWidget(new Button(Toolbar, "Debug", () => { ChangeMenu(DebugMenu); }, new Vector2i(100, 20)));
 
@@ -143,14 +144,15 @@ class Canvas {
         BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { ID = 400; ChangeMenu(); }, new Vector2i(100, 20), background: false));
 
         // Window Menu
-        WindowMenu.AddWidget(new Button(WindowMenu, "Statistics", () => { StatsWindow.Toggle(); ChangeMenu(); }, new Vector2i(150, 20), background: false));
+        ViewMenu.AddWidget(new Button(ViewMenu, "Statistics", () => { StatsWindow.Toggle(); ChangeMenu(); }, new Vector2i(150, 20), background: false));
+        ViewMenu.AddWidget(new Button(ViewMenu, "Skybox", () => { Camera.DrawSkybox = !Camera.DrawSkybox; }, new Vector2i(150, 20), background: false));
 
         // Cheats Menu
         CheatsMenu.AddWidget(new Label(CheatsMenu, "(dust)", new Vector2i(100, 20)));
 
         // Debug Menu
-        DebugMenu.AddWidget(new Button(DebugMenu, "Movement Overlay", () => { DrawMovementOverlay = !DrawMovementOverlay; ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
-        DebugMenu.AddWidget(new Button(DebugMenu, "Settled Overlay", () => { DrawSettledOverlay = !DrawSettledOverlay; ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Movement Overlay", () => { DrawMovementOverlay = !DrawMovementOverlay; if (DrawSettledOverlay) { DrawSettledOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Settled Overlay", () => { DrawSettledOverlay = !DrawSettledOverlay; if (DrawMovementOverlay) { DrawMovementOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
         DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Borders", () => { DrawChunks = !DrawChunks; ChangeMenu(); }, new Vector2i(150, 20), background: false));
         DebugMenu.AddWidget(new Button(DebugMenu, "Dirty Rects", () => { DrawDirtyRects = !DrawDirtyRects; ChangeMenu(); }, new Vector2i(150, 20), background: false));
 

@@ -14,8 +14,9 @@ class Camera {
 
     public Chunk Chunk { get { return Matrix.GetChunk(Position); } }        // Chunk containing the Camera
 
-    public bool DrawSkybox { get; set; } = false;
     private Texture2D Skybox = LoadTexture("res/backgrounds/background.png");
+
+    public bool DrawSkybox { get; set; } = false;
 
     public Camera(Engine engine) {
         Engine = engine;

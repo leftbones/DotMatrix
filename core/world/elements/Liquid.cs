@@ -28,10 +28,10 @@ class Liquid : Pixel {
         if (M.SwapIfValid(Position, Position + Direction.Down)) return;
 
 
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < 8; i++) {
             if (!M.SwapIfValid(Position, Position + LR)) {
                 if (RNG.Roll(Fluidity)) LR = Direction.MirrorHorizontal(LR);
-                else return;
+                else if (M.IsValid(Position, Position + Direction.Down)) return;
             }
 
             if (RNG.CoinFlip() && M.InBoundsAndEmpty(Position + Direction.Down)) return;

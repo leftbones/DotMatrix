@@ -217,17 +217,18 @@ class Matrix {
     }
 
     public async Task<int> UpdateAsync() {
-        var UpdateA = new List<Task>();
-        var UpdateB = new List<Task>();
-        var UpdateC = new List<Task>();
-        var UpdateD = new List<Task>();
+        bool IsEvenTick = Engine.Tick % 2 == 0;
 
-        foreach (var Chunk in Chunks) {
-            switch (Chunk.ThreadOrder) {
-                case 1: { UpdateChunk(Chunk); Chunk.Step(); break; }
-                case 2: { UpdateChunk(Chunk); Chunk.Step(); break; }
-                case 3: { UpdateChunk(Chunk); Chunk.Step(); break; }
-                case 4: { UpdateChunk(Chunk); Chunk.Step(); break; }
+        for (int y = MaxChunksY - 1; y >= 0; y--) {
+            for (int x = IsEvenTick ? 0 : MaxChunksX - 1; IsEvenTick ? x <= MaxChunksX - 1 : x >= 0; x += IsEvenTick ? 1 : -1) {
+                var Chunk = Chunks[x, y];
+
+                switch (Chunk.ThreadOrder) {
+                    case 1: { UpdateChunk(Chunk); Chunk.Step(); break; }
+                    case 2: { UpdateChunk(Chunk); Chunk.Step(); break; }
+                    case 3: { UpdateChunk(Chunk); Chunk.Step(); break; }
+                    case 4: { UpdateChunk(Chunk); Chunk.Step(); break; }
+                }
             }
         }
 

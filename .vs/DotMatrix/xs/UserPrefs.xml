@@ -1,24 +1,28 @@
 ﻿<Properties StartupConfiguration="{709879A5-4840-4EE7-ACE0-9A4435036B17}|Default">
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
+    <BreakpointStore>
+      <Breakpoint file="/Users/evan/Desktop/DotMatrix/core/world/Matrix.cs" relfile="core/world/Matrix.cs" line="235" column="9" />
+    </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MultiItemStartupConfigurations />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.ItemProperties.DotMatrix PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="DotMatrix.csproj">
+  <MonoDevelop.Ide.Workbench ActiveDocument="core/world/Matrix.cs">
     <Files>
-      <File FileName="Program.cs" />
+      <File FileName="Program.cs" Line="52" Column="1" />
       <File FileName="core/Engine.cs" />
       <File FileName="core/Atlas.cs" />
-      <File FileName="DotMatrix.csproj" Line="20" Column="1" />
+      <File FileName="DotMatrix.csproj" />
+      <File FileName="core/world/Matrix.cs" Line="235" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="DotMatrix">
-            <Node name="DotMatrix" expanded="True">
-              <Node name="Program.cs" selected="True" />
+            <Node name="DotMatrix">
+              <Node name="core" expanded="True">
+                <Node name="world" expanded="True">
+                  <Node name="Matrix.cs" selected="True" />
+                </Node>
+              </Node>
             </Node>
           </Node>
         </State>
@@ -28,4 +32,7 @@
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
 </Properties>
