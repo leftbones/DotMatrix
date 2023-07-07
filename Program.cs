@@ -12,7 +12,7 @@ class Program {
         var WindowTitle = "DotMatrix";
         var VersionString = "1.0.0-alpha";
         var WindowSize = new Vector2i(1280, 800);
-        int MatrixScale = 4;
+        int MatrixScale = 2;
 
         SetTraceLogLevel(LOG_WARNING | LOG_ERROR | LOG_FATAL);
         InitWindow(WindowSize.X, WindowSize.Y, $"{WindowTitle} {VersionString}");

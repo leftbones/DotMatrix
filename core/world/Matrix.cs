@@ -43,7 +43,7 @@ class Matrix {
     private Shader BloomShader = LoadShader(null, "res/shaders/bloom.fs");      // Bloom shader
 
     // Settings TODO: Move to dedicated Settings class
-    public bool MultithreadingEnabled { get; set; } = true;
+    public bool MultithreadingEnabled { get; set; } = false;
 
 
     public Matrix(Engine engine) {
@@ -224,24 +224,12 @@ class Matrix {
 
         foreach (var Chunk in Chunks) {
             switch (Chunk.ThreadOrder) {
-                case 1: UpdateA.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
-                case 2: UpdateB.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
-                case 3: UpdateC.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
-                case 4: UpdateD.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
+                case 1: { UpdateChunk(Chunk); Chunk.Step(); break; }
+                case 2: { UpdateChunk(Chunk); Chunk.Step(); break; }
+                case 3: { UpdateChunk(Chunk); Chunk.Step(); break; }
+                case 4: { UpdateChunk(Chunk); Chunk.Step(); break; }
             }
         }
-
-        Parallel.ForEach(UpdateA, Task => Task.Start());
-        await Task.WhenAll(UpdateA);
-
-        Parallel.ForEach(UpdateB, Task => Task.Start());
-        await Task.WhenAll(UpdateB);
-
-        Parallel.ForEach(UpdateC, Task => Task.Start());
-        await Task.WhenAll(UpdateC);
-
-        Parallel.ForEach(UpdateD, Task => Task.Start());
-        await Task.WhenAll(UpdateD);
 
         return 1;
     }
