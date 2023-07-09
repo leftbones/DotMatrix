@@ -183,7 +183,6 @@ class Canvas {
                             $"Mouse Pos (Matrix): {((Engine.Camera.Position - (Engine.WindowSize / 2)) / Engine.MatrixScale) + (MousePos / Engine.MatrixScale)} %N " + 
                             $"Camera Pos: {Engine.Camera.Position} %N %N " + 
                             $"Chunks: {Matrix.TotalChunks:n0} ({Matrix.ActiveChunks:n0} awake) %N %N " +
-                            $"Pixels: {Matrix.TotalPixels:n0} %N " +
                             $"Pixel Ops (Total): {Matrix.PixelsProcessed:n0} %N " + 
                             $"Pixels Moved: {Matrix.PixelsMoved:n0} %N %N " +
                             $"Tick: {Engine.Tick:n0} %N " +

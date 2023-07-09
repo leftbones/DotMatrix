@@ -28,7 +28,6 @@ class Matrix {
     private int ChunkHeight = 64;                                               // Height of each Chunk in Pixels
 
     // Statistics
-    public int TotalPixels = 0;                                                 // Total number of Pixels in the Matrix
     public int PixelsProcessed = 0;                                             // Total number of Pixel operations done
     public int PixelsMoved = 0;                                                 // Total number of Pixels moved
 
@@ -52,6 +51,10 @@ class Matrix {
 
     // Settings TODO: Move to dedicated Settings class
     public bool MultithreadingEnabled { get; set; } = true;
+
+	private bool SpoutTestEnabled = false;										// Create Pixels in the center of the top of the Matrix
+	private bool RainTestEnabled = true;										// Create Pixels across the top of the Matrix
+	private int TestLength = 1000;												// Length of the tests (in ticks)
 
 
     public Matrix(Engine engine, int? seed=null) {
@@ -77,8 +80,6 @@ class Matrix {
                 Pixels[x, y] = P;
             }
         }
-
-        TotalPixels = 0;
 
         // Generate the Buffer and Texture
         Buffer = GenImageColor(Size.X, Size.Y, Color.BLACK);
@@ -119,9 +120,6 @@ class Matrix {
         Pixels[pos.X, pos.Y] = pixel;
         pixel.Position = pos;
 
-        if (pixel.ID > -1) TotalPixels++;
-        else TotalPixels--;
-
         if (wake_chunk)
             WakeChunk(pos);
     }
@@ -130,9 +128,6 @@ class Matrix {
     public void Set(int x, int y, Pixel pixel, bool wake_chunk=true) {
         Pixels[x, y] = pixel;
         pixel.Position = new Vector2i(x, y);
-
-        if (pixel.ID > -1) TotalPixels++;
-        else TotalPixels--;
 
         if (wake_chunk)
             WakeChunk(pixel.Position);
@@ -236,9 +231,10 @@ class Matrix {
 
         bool IsEvenTick = Engine.Tick % 2 == 0;
 
-        for (int y = MaxChunksY - 1; y >= 0; y--) {
-            for (int x = IsEvenTick ? 0 : MaxChunksX - 1; IsEvenTick ? x <= MaxChunksX - 1 : x >= 0; x += IsEvenTick ? 1 : -1) {
-                var Chunk = Chunks[x, y];
+        //for (int y = MaxChunksY - 1; y >= 0; y--) {
+        //    for (int x = IsEvenTick ? 0 : MaxChunksX - 1; IsEvenTick ? x <= MaxChunksX - 1 : x >= 0; x += IsEvenTick ? 1 : -1) {
+        //        var Chunk = Chunks[x, y];
+			foreach (var Chunk in Chunks) { 
                 switch (Chunk.ThreadOrder) {
                     case 1: UpdateA.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
                     case 2: UpdateB.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
@@ -246,7 +242,7 @@ class Matrix {
                     case 4: UpdateD.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
                 }
             }
-        }
+        //}
 
         Parallel.ForEach(UpdateA, Task => Task.Start());
         while (!Task.WhenAll(UpdateA).IsCompletedSuccessfully) { }
@@ -298,33 +294,37 @@ class Matrix {
 
     // Actions performed before the start of the normal Update
     public void UpdateStart() {
-        // Spout Test
-        // int Width = 5;
-        // for (int i = 0; i < Width; i++) {
-        //     if (RNG.CoinFlip()) {
-        //         var Pos = new Vector2i((Size.X / 2) - Width + i, 0);
-        //         if (IsEmpty(Pos))
-        //             Set(Pos, new Powder(400, Pos));
-        //     }
-        // }
+		// Spout Test
+		if (SpoutTestEnabled && Engine.Tick < TestLength) {
+			int Width = 5;
+			for (int i = 0; i < Width; i++) {
+				if (RNG.CoinFlip()) {
+					var Pos = new Vector2i((Size.X / 2) - Width + i, 0);
+					if (IsEmpty(Pos))
+						Set(Pos, new Powder(400, Pos));
+				}
+			}
+		}
 
-        // Rain Test
-        for (int i = 0; i < Size.X; i++) {
-            if (RNG.Roll(25)) {
-                var Pos = new Vector2i(i, 0);
-                if (IsEmpty(Pos))
-                    Set(Pos, new Liquid(200, Pos));
-            }
-        }
+		// Rain Test
+		if (RainTestEnabled && Engine.Tick < TestLength) {
+			for (int i = 0; i < Size.X; i++) {
+				if (RNG.Roll(25)) {
+					var Pos = new Vector2i(i, 0);
+					if (IsEmpty(Pos))
+						Set(Pos, new Liquid(200, Pos));
+				}
+			}
+		}
 
-        // FPS Statistics
-        if (Engine.Tick > 50) {
-            var FPS = GetFPS();
-            if (FPS > FPSUpper) FPSUpper = FPS;
-            if (FPS < FPSLower) FPSLower = FPS;
-            FPSList.Add(FPS);
-            FPSAverage = FPSList.Sum() / FPSList.Count;
-        }
+		// FPS Statistics
+		if (Engine.Tick > 150) {
+			var FPS = GetFPS();
+			if (FPS > FPSUpper) FPSUpper = FPS;
+			if (FPS < FPSLower) FPSLower = FPS;
+			FPSList.Add(FPS);
+			FPSAverage = FPSList.Sum() / FPSList.Count;
+		}
 
         // Reset Pixel Stepped and Ticked flags
         foreach (var P in Pixels) {
