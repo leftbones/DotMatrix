@@ -11,7 +11,7 @@ class Solid : Pixel {
         ColorOffset = 15;
     }
 
-    public override void Step(Matrix M) {
+    public override void Step(Matrix M, RNG RNG) {
         Settled = true;
     }
 }

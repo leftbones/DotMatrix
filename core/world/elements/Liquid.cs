@@ -11,9 +11,9 @@ class Liquid : Pixel {
         BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
     }
 
-    public override void Step(Matrix M) {
+    public override void Step(Matrix M, RNG RNG) {
         if (Settled) {
-            var HorizDir = Direction.RandomHorizontal;
+            var HorizDir = Direction.Random(RNG, Direction.Horizontal);
             if (M.IsValid(Position, Position + Direction.Down) ||
                 M.IsValid(Position, Position + HorizDir) ||
                 M.IsValid(Position, Position + Direction.MirrorHorizontal(HorizDir))) Settled = false;
@@ -38,7 +38,7 @@ class Liquid : Pixel {
         }
     }
 
-    public override bool ActOnOther(Matrix M, Pixel O) {
+    public override bool ActOnOther(Matrix M, RNG RNG, Pixel O) {
         if (!Settled && O is Powder && !RNG.Roll(O.Friction)) {
             O.Settled = false;
             return true;

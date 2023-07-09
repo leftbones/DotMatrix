@@ -12,6 +12,8 @@ class Canvas {
     public Pepper Pepper { get { return Engine.Pepper; } }
     public Theme Theme { get { return Engine.Theme; } }
 
+    public RNG RNG { get { return Matrix.RNG; } }
+
     public Vector2i WindowSize { get { return Engine.WindowSize; } }
     public Vector2i MatrixSize { get { return Engine.Matrix.Size; } }
 
@@ -67,7 +69,7 @@ class Canvas {
             position: new Vector2i(10, Engine.WindowSize.Y - 10),
             draw_anchor: Anchor.Bottom,
             background: true,
-            activated: false
+            activated: true
         );
 
         StatsContent = new Multiline(StatsWindow, "", 300, update_action: UpdateStats);
@@ -184,7 +186,8 @@ class Canvas {
                             $"Pixels: {Matrix.TotalPixels:n0} %N " +
                             $"Pixel Ops (Total): {Matrix.PixelsProcessed:n0} %N " + 
                             $"Pixels Moved: {Matrix.PixelsMoved:n0} %N %N " +
-                            $"Tick: {Engine.Tick:n0}";
+                            $"Tick: {Engine.Tick:n0} %N " +
+                            $"Avg. FPS: {Matrix.FPSAverage} (H: {Matrix.FPSUpper}, L: {Matrix.FPSLower})";
     }
 
     // Save a Pixel Scene to a PNG image of a specified size from the origin position given
@@ -225,6 +228,7 @@ class Canvas {
         Pepper.Log("Loaded scene", LogType.MATRIX);
     }
 
+    // Paint Pixels to the Matrix using a brush
     public void Paint() {
         if (Menus.Any(M => M.Active)) ChangeMenu();
 

@@ -58,12 +58,12 @@ class Pixel {
     }
 
     // Act on neighboring Pixels
-    public void ActOnNeighbors(Matrix M) {
+    public void ActOnNeighbors(Matrix M, RNG RNG) {
         if (!Acted) {
-            foreach (var Dir in Direction.ShuffledCardinal) {
+            foreach (var Dir in Direction.Shuffled(RNG, Direction.Cardinal)) {
                 if (M.InBounds(Position + Dir)) {
                     var P = M.Get(Position + Dir);
-                    if (ActOnOther(M, P)) {
+                    if (ActOnOther(M, RNG, P)) {
                         Acted = true;
                         M.WakeChunk(P.Position);
                         return;
@@ -74,12 +74,12 @@ class Pixel {
     }
 
     // Act on another Pixel, return true on success
-    public virtual bool ActOnOther(Matrix M, Pixel O) {
+    public virtual bool ActOnOther(Matrix M, RNG RNG, Pixel O) {
         return false;
     }
 
     // Performed once each time the Engine updates, as long as Active is set to true
-    public virtual void Step(Matrix M) {
+    public virtual void Step(Matrix M, RNG RNG) {
 
     }
 

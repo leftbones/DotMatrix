@@ -5,6 +5,7 @@ namespace DotMatrix;
 
 class Chunk {
     public Matrix Matrix { get; private set; }                                                                          // The parent Matrix this Chunk belongs to
+    public RNG RNG { get; private set; }                                                                                // Thread safe RNG instance local to this Chunk
     public Vector2i Position { get; private set; }                                                                      // The position of a Chunk within the parent MatrixA
     public Vector2i Size { get; private set; }                                                                          // The size of a Chunk, in Pixels
     public int ThreadOrder { get; private set; }                                                                        // The "substep" in which a Chunk is processed when multithreading is enabled (1-4)
@@ -37,8 +38,9 @@ class Chunk {
 
     public bool ForceRedraw { get; set; } = false;
 
-    public Chunk(Matrix matrix, Vector2i position, Vector2i size, int thread_order) {
+    public Chunk(Matrix matrix, RNG rng, Vector2i position, Vector2i size, int thread_order) {
         Matrix = matrix;
+        RNG = rng;
         Position = position;
         Size = size;
         ThreadOrder = thread_order;
@@ -57,8 +59,8 @@ class Chunk {
         if (!Awake && !Matrix.Engine.Active)
             ForceRedraw = true;
 
-        // if (!Awake && !WakeNextStep)
-        //     Matrix.ActiveChunks++;
+        if (!Awake && !WakeNextStep)
+            Matrix.ActiveChunks++;
 
         WakeNextStep = true;
         SleepTimer = WaitTime;
@@ -87,7 +89,7 @@ class Chunk {
         if (Awake && !WakeNextStep) {
             SleepTimer--;
             if (SleepTimer == 0) {
-                // Matrix.ActiveChunks--;
+                Matrix.ActiveChunks--;
                 Awake = false;
             }
         } else {

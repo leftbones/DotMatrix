@@ -10,7 +10,8 @@ class Matrix {
     public Pepper Pepper { get { return Engine.Pepper; } }                      // Reference to the Pepper class instanace of the parent Engine
     public int Scale { get; private set; }                                      // Scale of the Matrix texture (Matrix pixel to screen pixel)
 
-    public int Seed { get; private set; }
+    public int Seed { get; private set; }                                       // Seed used for all RNG instances
+    public RNG RNG { get; private set; }                                        // RNG instance used for non-Chunk operations
 
     public Vector2i Size { get; private set; }                                  // Size of the Matrix (in Pixels)
     public Pixel[,] Pixels { get; private set; }                                // 2D array that stores the Pixels
@@ -34,6 +35,11 @@ class Matrix {
     public int TotalChunks = 0;                                                 // Total number of Chunks in the Matrix
     public int ActiveChunks = 0;                                                // Total number of Chunks currently awake
 
+    public List<int> FPSList = new List<int>();
+    public int FPSUpper = 0;
+    public int FPSLower = 9999;
+    public int FPSAverage = 0;
+
     // Textures + Shaders
     public Texture2D Texture { get; private set; }                              // Render texture that Pixels are drawn to
     private Image Buffer;                                                       // Buffer image used to create the render texture
@@ -53,6 +59,7 @@ class Matrix {
         Scale = Engine.MatrixScale;
 
         Seed = seed ?? Environment.TickCount;
+        RNG = new RNG(Seed);
 
         // Set the Matrix size, scaled
         Size = new Vector2i(1024 / Scale, 768 / Scale);
@@ -86,7 +93,8 @@ class Matrix {
             for (int y = 0; y < MaxChunksY; y++) {
                 var TO = y % 2 == 0 ? x % 2 == 0 ? 1 : 2 : x % 2 == 0 ? 3 : 4;
                 var Pos = new Vector2i(x * ChunkSize.X, y * ChunkSize.Y);
-                Chunks[x, y] = new Chunk(this, Pos, ChunkSize, TO);
+                Chunks[x, y] = new Chunk(this, new RNG(Environment.TickCount), Pos, ChunkSize, TO);
+                Thread.Sleep(100);
             }
         }
 
@@ -270,14 +278,14 @@ class Matrix {
                     if (P.Stepped)
                         continue;
 
-                    P.Step(this);
+                    P.Step(this, C.RNG);
                     P.Stepped = true;
 
                     P.Tick(this);
                     P.Ticked = true;
 
                     if (!P.Settled) {
-                        P.ActOnNeighbors(this);
+                        P.ActOnNeighbors(this, C.RNG);
                         if (P.Position == P.LastPosition)
                             P.Settled = true;
                     }
@@ -290,14 +298,33 @@ class Matrix {
 
     // Actions performed before the start of the normal Update
     public void UpdateStart() {
-        // Test Spout
-        // int Spout = 5;
-        // for (int i = 0; i < Spout; i++) {
+        // Spout Test
+        // int Width = 5;
+        // for (int i = 0; i < Width; i++) {
         //     if (RNG.CoinFlip()) {
-        //         var Pos = new Vector2i((Size.X / 2) - Spout + i, 0);
-        //         Set(Pos, new Powder(400, Pos));
+        //         var Pos = new Vector2i((Size.X / 2) - Width + i, 0);
+        //         if (IsEmpty(Pos))
+        //             Set(Pos, new Powder(400, Pos));
         //     }
         // }
+
+        // Rain Test
+        for (int i = 0; i < Size.X; i++) {
+            if (RNG.Roll(25)) {
+                var Pos = new Vector2i(i, 0);
+                if (IsEmpty(Pos))
+                    Set(Pos, new Liquid(200, Pos));
+            }
+        }
+
+        // FPS Statistics
+        if (Engine.Tick > 50) {
+            var FPS = GetFPS();
+            if (FPS > FPSUpper) FPSUpper = FPS;
+            if (FPS < FPSLower) FPSLower = FPS;
+            FPSList.Add(FPS);
+            FPSAverage = FPSList.Sum() / FPSList.Count;
+        }
 
         // Reset Pixel Stepped and Ticked flags
         foreach (var P in Pixels) {

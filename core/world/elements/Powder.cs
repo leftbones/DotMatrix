@@ -12,7 +12,7 @@ class Powder : Pixel {
         ColorOffset = 15;
     }
 
-    public override void Step(Matrix M) {
+    public override void Step(Matrix M, RNG RNG) {
         if (Settled) {
             if (!M.IsValid(Position, Position + Direction.Down)) return;
             else Settled = false;
@@ -22,20 +22,20 @@ class Powder : Pixel {
 
         if (RNG.Roll(50)) {
             var MoveDir = Direction.GetMovementDirection(Position, LastPosition);
-            if (!Direction.Horizontal.Contains(MoveDir)) MoveDir = Direction.RandomHorizontal;
+            if (!Direction.Horizontal.Contains(MoveDir)) MoveDir = Direction.Random(RNG, Direction.Horizontal);
 
             if (M.SwapIfValid(Position, Position + MoveDir)) return;
             else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
         } else {
             var MoveDir = Direction.GetMovementDirection(Position, LastPosition);
-            if (!Direction.DiagonalDown.Contains(MoveDir)) MoveDir = Direction.RandomDiagonalDown;
+            if (!Direction.DiagonalDown.Contains(MoveDir)) MoveDir = Direction.Random(RNG, Direction.DiagonalDown);
 
             if (M.SwapIfValid(Position, Position + MoveDir)) return;
             else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(MoveDir))) return;
         }
     }
 
-    public override bool ActOnOther(Matrix M, Pixel O) {
+    public override bool ActOnOther(Matrix M, RNG RNG, Pixel O) {
         if (!Settled && !RNG.Roll(O.Friction)) {
             O.Settled = false;
             return true;

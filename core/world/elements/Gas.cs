@@ -5,7 +5,7 @@ namespace DotMatrix;
 
 class Gas : Pixel {
     public Gas(int id, Vector2i position) : base(id, position){
-        Lifetime = RNG.Range(600, 800);
+        Lifetime = 750;
 
         Weight = -30;
         Diffusion = 25;
@@ -14,7 +14,7 @@ class Gas : Pixel {
         ColorOffset = 10;
     }
 
-    public override void Step(Matrix M) {
+    public override void Step(Matrix M, RNG RNG) {
         // Color Shift (even when not Active)
         FadeOpacity();
 
@@ -38,7 +38,7 @@ class Gas : Pixel {
 
         var MoveDir = new Vector2i(
             RNG.Roll(Diffusion) ? RNG.CoinFlip() ? -1 : 1 : 0,
-            Weight != 0.0f ? RNG.Roll(Math.Abs(Weight)) ? WeightDir.Y : 0 : RNG.CoinFlip() ? Direction.RandomVertical.Y : 0
+            Weight != 0.0f ? RNG.Roll(Math.Abs(Weight)) ? WeightDir.Y : 0 : RNG.CoinFlip() ? Direction.Random(RNG, Direction.Vertical).Y : 0
         );
 
         if (MoveDir == Direction.None) {
@@ -49,7 +49,7 @@ class Gas : Pixel {
         if (M.SwapIfValid(Position, Position + MoveDir)) {
             return;
         } else if (MoveDir == Direction.Up || MoveDir == Direction.Down) {
-            var HorizDir = Direction.RandomHorizontal;
+            var HorizDir = Direction.Random(RNG, Direction.Horizontal);
             if (M.SwapIfValid(Position, Position + HorizDir)) return;
             else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(HorizDir))) return;
             else if (RNG.Roll(Diffusion)) Settled = true;
