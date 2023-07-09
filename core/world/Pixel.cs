@@ -8,7 +8,7 @@ enum PixelType { Element, Particle };
 class Pixel {
     // Attributes
     public int ID { get; set; }                     = -1;                           // Unique identifier for comparison with other Pixels
-    public Body? Body { get; set; }                 = null;                         // Physics body this Pixel belongs to (null when not part of a Body)
+    public Entity? Entity { get; set; }             = null;                         // Physics entity this Pixel belongs to (null when not part of an Entity)
 
     // Movement
     public Vector2i Position { get; set; }          = Vector2i.Zero;                // Current position within the Matrix

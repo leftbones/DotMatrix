@@ -1,7 +1,17 @@
 namespace DotMatrix;
 
 public static class RNG {
-    public static Random Random = new Random(Guid.NewGuid().GetHashCode());
+    // public static Random Random = new Random(Guid.NewGuid().GetHashCode());
+
+    private static int Seed = Environment.TickCount;
+    private static readonly ThreadLocal<Random> _Random = new ThreadLocal<Random>(() => new Random(Interlocked.Increment(ref Seed)));
+
+    public static Random Random { get { return _Random.Value!; } }
+
+    // Return a thread safe instance of Random
+    public static Random NewRandom() {
+        return new Random(Seed);
+    }
 
     // Return true or false based on a roll using a float
     public static bool Roll(float n) {

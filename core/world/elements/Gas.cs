@@ -5,7 +5,7 @@ namespace DotMatrix;
 
 class Gas : Pixel {
     public Gas(int id, Vector2i position) : base(id, position){
-        Lifetime = RNG.Range(750, 1000);
+        Lifetime = RNG.Range(600, 800);
 
         Weight = -30;
         Diffusion = 25;

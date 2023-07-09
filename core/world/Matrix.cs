@@ -10,6 +10,8 @@ class Matrix {
     public Pepper Pepper { get { return Engine.Pepper; } }                      // Reference to the Pepper class instanace of the parent Engine
     public int Scale { get; private set; }                                      // Scale of the Matrix texture (Matrix pixel to screen pixel)
 
+    public int Seed { get; private set; }
+
     public Vector2i Size { get; private set; }                                  // Size of the Matrix (in Pixels)
     public Pixel[,] Pixels { get; private set; }                                // 2D array that stores the Pixels
 
@@ -43,12 +45,14 @@ class Matrix {
     private Shader BloomShader = LoadShader(null, "res/shaders/bloom.fs");      // Bloom shader
 
     // Settings TODO: Move to dedicated Settings class
-    public bool MultithreadingEnabled { get; set; } = false;
+    public bool MultithreadingEnabled { get; set; } = true;
 
 
-    public Matrix(Engine engine) {
+    public Matrix(Engine engine, int? seed=null) {
         Engine = engine;
         Scale = Engine.MatrixScale;
+
+        Seed = seed ?? Environment.TickCount;
 
         // Set the Matrix size, scaled
         Size = new Vector2i(1024 / Scale, 768 / Scale);
@@ -89,7 +93,7 @@ class Matrix {
         TotalChunks = MaxChunksX * MaxChunksY;
 
         // Finish
-        Pepper.Log("Matrix initialized.", LogType.MATRIX);
+        Pepper.Log("Matrix initialized", LogType.MATRIX);
     }
 
     // Get a Pixel from the Matrix (Vector2i pos)
@@ -201,38 +205,52 @@ class Matrix {
     }
 
     // Update each awake Chunk in the Matrix
-    public async void Update() {
+    public void Update() {
         if (MultithreadingEnabled) {
-            await UpdateAsync();
+            UpdateParallel();
         } else {
-            for (int i = 1; i <= 4; i++) {
-                foreach (var C in Chunks) {
-                    if (C.ThreadOrder == i) {
-                        UpdateChunk(C);
-                        C.Step();
-                    }
+            bool IsEvenTick = Engine.Tick % 2 == 0;
+            for (int y = MaxChunksY - 1; y >= 0; y--) {
+                for (int x = IsEvenTick ? 0 : MaxChunksX - 1; IsEvenTick ? x <= MaxChunksX - 1 : x >= 0; x += IsEvenTick ? 1 : -1) {
+                    var C = Chunks[x, y];
+                    UpdateChunk(C);
+                    C.Step();
                 }
             }
         }
     }
 
-    public async Task<int> UpdateAsync() {
+    public void UpdateParallel() {
+        var UpdateA = new List<Task>();
+        var UpdateB = new List<Task>();
+        var UpdateC = new List<Task>();
+        var UpdateD = new List<Task>();
+
         bool IsEvenTick = Engine.Tick % 2 == 0;
 
         for (int y = MaxChunksY - 1; y >= 0; y--) {
             for (int x = IsEvenTick ? 0 : MaxChunksX - 1; IsEvenTick ? x <= MaxChunksX - 1 : x >= 0; x += IsEvenTick ? 1 : -1) {
                 var Chunk = Chunks[x, y];
-
                 switch (Chunk.ThreadOrder) {
-                    case 1: { UpdateChunk(Chunk); Chunk.Step(); break; }
-                    case 2: { UpdateChunk(Chunk); Chunk.Step(); break; }
-                    case 3: { UpdateChunk(Chunk); Chunk.Step(); break; }
-                    case 4: { UpdateChunk(Chunk); Chunk.Step(); break; }
+                    case 1: UpdateA.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
+                    case 2: UpdateB.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
+                    case 3: UpdateC.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
+                    case 4: UpdateD.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
                 }
             }
         }
 
-        return 1;
+        Parallel.ForEach(UpdateA, Task => Task.Start());
+        while (!Task.WhenAll(UpdateA).IsCompletedSuccessfully) { }
+
+        Parallel.ForEach(UpdateB, Task => Task.Start());
+        while (!Task.WhenAll(UpdateB).IsCompletedSuccessfully) { }
+
+        Parallel.ForEach(UpdateC, Task => Task.Start());
+        while (!Task.WhenAll(UpdateC).IsCompletedSuccessfully) { }
+
+        Parallel.ForEach(UpdateD, Task => Task.Start());
+        while (!Task.WhenAll(UpdateD).IsCompletedSuccessfully) { }
     }
 
     // Update all of the Pixels within a Chunk's dirty rect

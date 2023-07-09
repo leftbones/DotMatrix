@@ -164,7 +164,7 @@ class Canvas {
         foreach (var W in Windows) Engine.Interface.AddContainer(W);
         foreach (var M in Menus) Engine.Interface.AddContainer(M);
 
-        Pepper.Log("Canvas initialized.");
+        Pepper.Log("Canvas initialized");
     }
 
     // Close all active menus, if `menu` is given and not active, open that menu

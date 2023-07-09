@@ -7,7 +7,7 @@ namespace DotMatrix;
 
 // TODO: Implement Colorful.Console for nicer looking output (https://github.com/tomakita/Colorful.Console)
 
-enum LogType { SYSTEM, ENGINE, MATRIX, INTERFACE, DEBUG, OTHER };
+enum LogType { SYSTEM, ENGINE, MATRIX, SIMULATION, INTERFACE, DEBUG, OTHER };
 enum LogLevel { MESSAGE, WARNING, ERROR, EXCEPTION, DEBUG };
 
 class Pepper {

@@ -9,13 +9,15 @@ class Engine {
 
     public int Tick { get; private set; }
 
+    public int Seed { get; private set; }
+
     // Core
     public Matrix Matrix { get; private set; }
+    public Simulation Simulation { get; private set; }
     public Interface Interface { get; private set; }
     public Canvas Canvas { get; private set; }
     public Camera Camera { get; private set; }
     public Pepper Pepper { get; private set; }
-
     public Theme Theme { get { return Interface.Theme; } }
 
     // State
@@ -34,9 +36,10 @@ class Engine {
         MatrixScale = matrix_scale;
 
         Pepper = new Pepper(this);
-        Pepper.Log("Engine initialized.", LogType.ENGINE);
+        Pepper.Log("Engine initialized", LogType.ENGINE);
 
         Matrix = new Matrix(this);
+        Simulation = new Simulation(this);
         Interface = new Interface(this);
         Canvas = new Canvas(this);
         Camera = new Camera(this);
@@ -156,11 +159,11 @@ class Engine {
         // Normal Update
         Matrix.Update();
 
-
         // End Update
         Matrix.UpdateEnd();
 
         // Other Updates
+        Simulation.Update();
         Canvas.Update();
         Interface.Update();
         Camera.Update();
@@ -179,6 +182,7 @@ class Engine {
 
         BeginMode2D(Camera.Viewport);
         Matrix.Draw();
+        Simulation.Draw();
         EndMode2D();
 
         Canvas.Draw();

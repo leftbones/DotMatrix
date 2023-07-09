@@ -1,6 +1,8 @@
 namespace DotMatrix;
 
 public static class Direction {
+    public static int Seed = Environment.TickCount;
+
     public static readonly Vector2i None = new Vector2i(0, 0);
 
     // Directionections
