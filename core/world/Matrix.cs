@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Reflection.Metadata.Ecma335;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 
@@ -46,15 +47,18 @@ class Matrix {
     private Rectangle SourceRec;                                                // Actual size of the Matrix texture
     private Rectangle DestRec;                                                  // Scaled size of the Matrix texture
 
-    private Shader BlurShader = LoadShader(null, "res/shaders/blur.fs");        // Blur shader
-    private Shader BloomShader = LoadShader(null, "res/shaders/bloom.fs");      // Bloom shader
+    private Shader BlurShader = LoadShader(null, "res/shaders/blur.fs");        // Blur shader (experimental)
+    private Shader BloomShader = LoadShader(null, "res/shaders/bloom.fs");      // Bloom shader (experimental)
+
+	// Tests
+	private bool SpoutTestEnabled = false;										// Create Pixels in the center of the top of the Matrix
+	private bool RainTestEnabled = false;										// Create Pixels across the top of the Matrix
+
+	private bool PauseAfterTest = false;										// Pause the simulation when the test finishes
+	private int TestLength = 1000;                                              // Length of the tests (in ticks)
 
     // Settings TODO: Move to dedicated Settings class
     public bool MultithreadingEnabled { get; set; } = true;
-
-	private bool SpoutTestEnabled = false;										// Create Pixels in the center of the top of the Matrix
-	private bool RainTestEnabled = true;										// Create Pixels across the top of the Matrix
-	private int TestLength = 1000;												// Length of the tests (in ticks)
 
 
     public Matrix(Engine engine, int? seed=null) {
@@ -64,8 +68,8 @@ class Matrix {
         Seed = seed ?? Environment.TickCount;
         RNG = new RNG(Seed);
 
-        // Set the Matrix size, scaled
-        Size = new Vector2i(1024 / Scale, 768 / Scale);
+		// Set the Matrix size, scaled
+		Size = new Vector2i(2000 / Scale, 1000 / Scale);
 
         // Size the source and destination rectangles
         SourceRec = new Rectangle(0, 0, Size.X, Size.Y);
@@ -90,12 +94,15 @@ class Matrix {
         MaxChunksX = Size.X / ChunkSize.X;
         MaxChunksY = Size.Y / ChunkSize.Y;
         Chunks = new Chunk[MaxChunksX, MaxChunksY];
+		var ChunkSeed = RNG.Random.Next(int.MinValue, int.MaxValue);
+
         for (int x = 0; x < MaxChunksX; x++) {
             for (int y = 0; y < MaxChunksY; y++) {
                 var TO = y % 2 == 0 ? x % 2 == 0 ? 1 : 2 : x % 2 == 0 ? 3 : 4;
                 var Pos = new Vector2i(x * ChunkSize.X, y * ChunkSize.Y);
-                Chunks[x, y] = new Chunk(this, new RNG(Environment.TickCount), Pos, ChunkSize, TO);
-                Thread.Sleep(100);
+				var ChunkRNG = new RNG(ChunkSeed);
+				ChunkSeed = ChunkRNG.Range(int.MinValue, int.MaxValue);
+                Chunks[x, y] = new Chunk(this, ChunkRNG, Pos, ChunkSize, TO);
             }
         }
 
@@ -295,24 +302,36 @@ class Matrix {
     // Actions performed before the start of the normal Update
     public void UpdateStart() {
 		// Spout Test
-		if (SpoutTestEnabled && Engine.Tick < TestLength) {
-			int Width = 5;
-			for (int i = 0; i < Width; i++) {
-				if (RNG.CoinFlip()) {
-					var Pos = new Vector2i((Size.X / 2) - Width + i, 0);
-					if (IsEmpty(Pos))
-						Set(Pos, new Powder(400, Pos));
+		if (SpoutTestEnabled) {
+			if (Engine.Tick == TestLength) {
+				if (PauseAfterTest)
+					Engine.ToggleActive();
+				SpoutTestEnabled = false;
+			} else {
+				int Width = 5;
+				for (int i = 0; i < Width; i++) {
+					if (RNG.CoinFlip()) {
+						var Pos = new Vector2i((Size.X / 2) - Width + i, 0);
+						if (IsEmpty(Pos))
+							Set(Pos, new Powder(400, Pos));
+					}
 				}
 			}
 		}
 
 		// Rain Test
-		if (RainTestEnabled && Engine.Tick < TestLength) {
-			for (int i = 0; i < Size.X; i++) {
-				if (RNG.Roll(25)) {
-					var Pos = new Vector2i(i, 0);
-					if (IsEmpty(Pos))
-						Set(Pos, new Liquid(200, Pos));
+		if (RainTestEnabled) {
+			if (Engine.Tick == TestLength) {
+				if (PauseAfterTest)
+					Engine.ToggleActive();
+				RainTestEnabled = false;
+			} else {
+				for (int i = 0; i < Size.X; i++) {
+					if (RNG.Roll(25)) {
+						var Pos = new Vector2i(i, 0);
+						if (IsEmpty(Pos))
+							Set(Pos, new Liquid(200, Pos));
+					}
 				}
 			}
 		}

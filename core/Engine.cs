@@ -197,6 +197,13 @@ class Engine {
         }
     }
 
+	// Toggle the Active state
+	public void ToggleActive() {
+		Active = !Active;
+		var ActiveStr = Active ? "active" : "inactive";
+		Pepper.Log($"Simulation is now {ActiveStr}", LogType.ENGINE);
+	}
+
     // Completely stop all processing except for Interface (called only by Pepper.Throw)
     public void Halt() {
         FullStop = true;
