@@ -69,7 +69,8 @@ class Matrix {
         RNG = new RNG(Seed);
 
 		// Set the Matrix size, scaled
-		Size = new Vector2i(2000 / Scale, 1000 / Scale);
+		Size = new Vector2i(2048 / Scale, 1280 / Scale);
+        // Size = new Vector2i(1024 / Scale, 768 / Scale);
 
         // Size the source and destination rectangles
         SourceRec = new Rectangle(0, 0, Size.X, Size.Y);
@@ -238,18 +239,14 @@ class Matrix {
 
         bool IsEvenTick = Engine.Tick % 2 == 0;
 
-        //for (int y = MaxChunksY - 1; y >= 0; y--) {
-        //    for (int x = IsEvenTick ? 0 : MaxChunksX - 1; IsEvenTick ? x <= MaxChunksX - 1 : x >= 0; x += IsEvenTick ? 1 : -1) {
-        //        var Chunk = Chunks[x, y];
-			foreach (var Chunk in Chunks) { 
-                switch (Chunk.ThreadOrder) {
-                    case 1: UpdateA.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
-                    case 2: UpdateB.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
-                    case 3: UpdateC.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
-                    case 4: UpdateD.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
-                }
+        foreach (var Chunk in Chunks) { 
+            switch (Chunk.ThreadOrder) {
+                case 1: UpdateA.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
+                case 2: UpdateB.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
+                case 3: UpdateC.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
+                case 4: UpdateD.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
             }
-        //}
+        }
 
         Parallel.ForEach(UpdateA, Task => Task.Start());
         while (!Task.WhenAll(UpdateA).IsCompletedSuccessfully) { }
@@ -422,6 +419,8 @@ class Matrix {
             }
         }
 
+        int OX = 0;
+        int OY = 0;
         foreach (var C in Chunks) {
             DrawTexturePro(C.Texture, C.SourceRec, C.DestRec, Vector2.Zero, 0, Color.WHITE);
         }

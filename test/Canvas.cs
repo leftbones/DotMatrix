@@ -69,7 +69,7 @@ class Canvas {
             position: new Vector2i(10, Engine.WindowSize.Y - 10),
             draw_anchor: Anchor.Bottom,
             background: true,
-            activated: true
+            activated: false
         );
 
         StatsContent = new Multiline(StatsWindow, "", 300, update_action: UpdateStats);
@@ -200,12 +200,19 @@ class Canvas {
     public unsafe void LoadScene(Vector2i? origin=null) {
         var Origin = origin ?? Vector2i.Zero;
 
+        // Load the scene image and get the colors
         var SceneImage = LoadImage("res/scenes/ocean_tower.png");
         var SceneColors = LoadImageColors(SceneImage);
 
+        // Scan through the colors and place pixels that match
         for (int x = 0; x < SceneImage.width; x++) {
             for (int y = 0; y < SceneImage.height; y++) {
                 var Pos = new Vector2i(Origin.X + x, Origin.Y + y);
+
+                // Position is out of bounds
+                if (!Matrix.InBounds(Pos))
+                    continue;
+
                 int Index = (y * SceneImage.width) + x;
                 int ID = Atlas.GetIDFromColor(SceneColors[Index]);
                 var Pixel = new Pixel();

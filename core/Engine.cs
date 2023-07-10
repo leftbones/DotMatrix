@@ -178,8 +178,6 @@ class Engine {
     }
 
     public void Draw() {
-        Camera.Draw();
-
         BeginMode2D(Camera.Viewport);
         Matrix.Draw();
         Simulation.Draw();
@@ -187,6 +185,8 @@ class Engine {
 
         Canvas.Draw();
         Interface.Draw();
+
+        Camera.Draw();
 
         // Misc. HUD/Overlays
         if (!Active) {
