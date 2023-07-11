@@ -60,7 +60,7 @@ class Chunk {
             ForceRedraw = true;
 
         if (!Awake && !WakeNextStep)
-            Matrix.ActiveChunks++;
+            Matrix.AwakeChunks++;
 
         WakeNextStep = true;
         SleepTimer = WaitTime;
@@ -89,7 +89,7 @@ class Chunk {
         if (Awake && !WakeNextStep) {
             SleepTimer--;
             if (SleepTimer == 0) {
-                Matrix.ActiveChunks--;
+                Matrix.AwakeChunks--;
                 Awake = false;
             }
         } else {

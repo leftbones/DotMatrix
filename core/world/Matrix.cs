@@ -22,18 +22,21 @@ class Matrix {
     public Vector2i ChunkSize { get; private set; }                             // Size for each Chunk
     public int MaxChunksX { get; private set; }                                 // Number of Chunks in a row
     public int MaxChunksY { get; private set; }                                 // Number of Chunks in a column
+    public List<Chunk> ActiveChunks { get; private set; }                       // List of Chunks near the Camera
+    public Vector2i ActiveArea { get; private set; }                            // Number of Chunks around the Camera in each direction to keep Active
 
     public bool RedrawAllChunks { get; set; } = true;                           // Draw all Chunks on the next Draw call, including sleeping ones
 
     private int ChunkWidth = 64;                                                // Width of each Chunk in Pixels
     private int ChunkHeight = 64;                                               // Height of each Chunk in Pixels
 
+
     // Statistics
     public int PixelsProcessed = 0;                                             // Total number of Pixel operations done
     public int PixelsMoved = 0;                                                 // Total number of Pixels moved
 
     public int TotalChunks = 0;                                                 // Total number of Chunks in the Matrix
-    public int ActiveChunks = 0;                                                // Total number of Chunks currently awake
+    public int AwakeChunks = 0;                                                 // Total number of Chunks currently awake
 
     public List<int> FPSList = new List<int>();
     public int FPSUpper = 0;
@@ -70,7 +73,6 @@ class Matrix {
 
 		// Set the Matrix size, scaled
 		Size = new Vector2i(2048 / Scale, 1280 / Scale);
-        // Size = new Vector2i(1024 / Scale, 768 / Scale);
 
         // Size the source and destination rectangles
         SourceRec = new Rectangle(0, 0, Size.X, Size.Y);
@@ -95,6 +97,8 @@ class Matrix {
         MaxChunksX = Size.X / ChunkSize.X;
         MaxChunksY = Size.Y / ChunkSize.Y;
         Chunks = new Chunk[MaxChunksX, MaxChunksY];
+        ActiveChunks = new List<Chunk>();
+        ActiveArea = new Vector2i(3, 3);
 		var ChunkSeed = RNG.Random.Next(int.MinValue, int.MaxValue);
 
         for (int x = 0; x < MaxChunksX; x++) {
@@ -220,13 +224,9 @@ class Matrix {
         if (MultithreadingEnabled) {
             UpdateParallel();
         } else {
-            bool IsEvenTick = Engine.Tick % 2 == 0;
-            for (int y = MaxChunksY - 1; y >= 0; y--) {
-                for (int x = IsEvenTick ? 0 : MaxChunksX - 1; IsEvenTick ? x <= MaxChunksX - 1 : x >= 0; x += IsEvenTick ? 1 : -1) {
-                    var C = Chunks[x, y];
-                    UpdateChunk(C);
-                    C.Step();
-                }
+            foreach (var Chunk in ActiveChunks) {
+                UpdateChunk(Chunk);
+                Chunk.Step();
             }
         }
     }
@@ -239,7 +239,7 @@ class Matrix {
 
         bool IsEvenTick = Engine.Tick % 2 == 0;
 
-        foreach (var Chunk in Chunks) { 
+        foreach (var Chunk in ActiveChunks) { 
             switch (Chunk.ThreadOrder) {
                 case 1: UpdateA.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
                 case 2: UpdateB.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
@@ -298,6 +298,30 @@ class Matrix {
 
     // Actions performed before the start of the normal Update
     public void UpdateStart() {
+        // Get Active Chunks
+        ActiveChunks.Clear();
+        var CenterPos = (Engine.Camera.Position / Scale) / ChunkSize;
+        Console.WriteLine(CenterPos);
+        for (int x = CenterPos.X - ActiveArea.X; x < CenterPos.X + ActiveArea.X + 1; x++) {
+            for (int y = CenterPos.Y - ActiveArea.Y; y < CenterPos.Y + ActiveArea.Y + 1; y++) {
+                if (x >= 0 && x < MaxChunksX && y >= 0 && y < MaxChunksY) {
+                    ActiveChunks.Add(Chunks[x, y]);
+                    Console.WriteLine($"{x}, {y}");
+                }
+            }
+        }
+
+        Console.WriteLine(ActiveChunks.Count);
+
+        // Reset Pixel Stepped and Ticked flags
+        foreach (var P in Pixels) {
+            P.Stepped = false;
+            P.Ticked = false;
+            P.Acted = false;
+
+            P.LastPosition = P.Position;
+        }
+
 		// Spout Test
 		if (SpoutTestEnabled) {
 			if (Engine.Tick == TestLength) {
@@ -341,15 +365,6 @@ class Matrix {
 			FPSList.Add(FPS);
 			FPSAverage = FPSList.Sum() / FPSList.Count;
 		}
-
-        // Reset Pixel Stepped and Ticked flags
-        foreach (var P in Pixels) {
-            P.Stepped = false;
-            P.Ticked = false;
-            P.Acted = false;
-
-            P.LastPosition = P.Position;
-        }
     }
 
     // Actions performed at the end of the normal Update
@@ -382,7 +397,7 @@ class Matrix {
     // Draw each Pixel in the Matrix to the render texture
     public unsafe void Draw() {
         // Update and Draw Chunk Textures (Per Chunk Textures)
-        foreach (var C in Chunks) {
+        foreach (var C in ActiveChunks) {
             if (C.Awake || C.ForceRedraw || RedrawAllChunks) {
                 ImageClearBackground(ref C.Buffer, Color.BLACK);
 
@@ -419,8 +434,6 @@ class Matrix {
             }
         }
 
-        int OX = 0;
-        int OY = 0;
         foreach (var C in Chunks) {
             DrawTexturePro(C.Texture, C.SourceRec, C.DestRec, Vector2.Zero, 0, Color.WHITE);
         }
@@ -430,7 +443,7 @@ class Matrix {
 
         // Chunk Borders + Info
         if (Engine.Canvas.DrawChunks) {
-            foreach (var C in Chunks) {
+            foreach (var C in ActiveChunks) {
                 var Col = C.Awake ? new Color(255, 255, 255, 150) : new Color(255, 255, 255, 50);
                 var Str = $"{C.ThreadOrder} - {C.Position.X / ChunkSize.X}, {C.Position.Y / ChunkSize.Y} : {C.SleepTimer}";
                 DrawRectangleLines(C.Position.X * Scale, C.Position.Y * Scale, C.Size.X * Scale, C.Size.Y * Scale, Col);
@@ -440,7 +453,7 @@ class Matrix {
 
         // Chunk DirtyRect
         if (Engine.Canvas.DrawDirtyRects) {
-            foreach (var C in Chunks) {
+            foreach (var C in ActiveChunks) {
                 if (C.Awake) {
                     // Skip clean chunks
                     if (C.X2 == 0 && C.Y2 == 0) continue;
