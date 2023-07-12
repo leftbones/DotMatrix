@@ -13,7 +13,7 @@ class Engine {
 
     // Core
     public Matrix Matrix { get; private set; }
-    public Simulation Simulation { get; private set; }
+    public Physics Physics { get; private set; }
     public Interface Interface { get; private set; }
     public Canvas Canvas { get; private set; }
     public Camera Camera { get; private set; }
@@ -39,7 +39,7 @@ class Engine {
         Pepper.Log("Engine initialized", LogType.ENGINE);
 
         Matrix = new Matrix(this);
-        Simulation = new Simulation(this);
+        Physics = new Physics(this);
         Interface = new Interface(this);
         Canvas = new Canvas(this);
         Camera = new Camera(this);
@@ -163,7 +163,7 @@ class Engine {
         Matrix.UpdateEnd();
 
         // Other Updates
-        Simulation.Update();
+        Physics.Update();
         Canvas.Update();
         Interface.Update();
         Camera.Update();
@@ -180,7 +180,7 @@ class Engine {
     public void Draw() {
         BeginMode2D(Camera.Viewport);
         Matrix.Draw();
-        Simulation.Draw();
+        Physics.Draw();
         EndMode2D();
 
         Canvas.Draw();
