@@ -13,14 +13,14 @@ class Engine {
 
     // Core
     public Matrix Matrix { get; private set; }
-    public Simulation Simulation { get; private set; }
+    public Physics Physics { get; private set; }
     public Interface Interface { get; private set; }
     public Canvas Canvas { get; private set; }
     public Camera Camera { get; private set; }
     public Pepper Pepper { get; private set; }
     public Theme Theme { get { return Interface.Theme; } }
 
-    public Entity Player { get; private set; }
+    public Entity? Player { get; private set; }
 
     // State
     public bool Active { get; private set; }        = true;     // Simulation (Matrix) pause state
@@ -41,13 +41,13 @@ class Engine {
         Pepper.Log("Engine initialized", LogType.ENGINE);
 
         Matrix = new Matrix(this);
-        Simulation = new Simulation(this);
+        Physics = new Physics(this);
         Interface = new Interface(this);
         Canvas = new Canvas(this);
         Camera = new Camera(this);
 
-        Player = new Entity();
-        Camera.Target = Player;
+        // Player = new Entity();
+        // Camera.Target = Player;
     }
 
     public void HandleInput() {
@@ -129,10 +129,14 @@ class Engine {
             else if (E.Name.Contains("MouseWheel")) { Canvas.BrushSize = Math.Clamp(Canvas.BrushSize - ((MouseWheelEvent)E).Amount, 1, 100); }
 
             // Player Controls
-            else if (E.Name == "KeyDown:KEY_W") Player.Jump();
-            else if (E.Name == "KeyDown:KEY_A") Player.Move(Direction.Left);
-            else if (E.Name == "KeyDown:KEY_D") Player.Move(Direction.Right);
-            else if (E.Name == "KeyDown:KEY_S") Player.Respawn();
+            else if (Player is null && E.Name == "KeyDown:KEY_W") Camera.Pan(Direction.Up);
+            else if (Player is null && E.Name == "KeyDown:KEY_S") Camera.Pan(Direction.Down);
+            else if (Player is null && E.Name == "KeyDown:KEY_A") Camera.Pan(Direction.Left);
+            else if (Player is null && E.Name == "KeyDown:KEY_D") Camera.Pan(Direction.Right);
+            else if (Player is not null && E.Name == "KeyDown:KEY_W") Player.Jump();
+            else if (Player is not null && E.Name == "KeyDown:KEY_S") Player.Respawn();
+            else if (Player is not null && E.Name == "KeyDown:KEY_A") Player.Move(Direction.Left);
+            else if (Player is not null && E.Name == "KeyDown:KEY_D") Player.Move(Direction.Right);
         }
     }
 
@@ -168,8 +172,8 @@ class Engine {
         Matrix.UpdateEnd();
 
         // Other Updates
-        Player.Update();
-        Simulation.Update();
+        Player?.Update();
+        Physics.Update();
         Canvas.Update();
         Interface.Update();
         Camera.Update();
@@ -188,8 +192,8 @@ class Engine {
 
         BeginMode2D(Camera.Viewport);
         Matrix.Draw();
-        Player.Draw();
-        Simulation.Draw();
+        Player?.Draw();
+        Physics.Draw();
         EndMode2D();
 
         Canvas.Draw();

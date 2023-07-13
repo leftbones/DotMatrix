@@ -33,7 +33,7 @@ class Camera {
     }
 
     public void Pan(Vector2i dir) {
-        Position = new Vector2i(Position.X + (dir.X * PanSpeed), Position.Y + (dir.Y * PanSpeed));
+        Position = new Vector2i(Position.X + (dir.X * 4), Position.Y + (dir.Y * 4));
     }
 
     public void Update() {

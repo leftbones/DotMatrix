@@ -17,7 +17,7 @@ class Program {
         SetTraceLogLevel(LOG_WARNING | LOG_ERROR | LOG_FATAL);
         InitWindow(WindowSize.X, WindowSize.Y, $"{WindowTitle} {VersionString}");
         SetExitKey(KeyboardKey.KEY_NULL);
-        SetTargetFPS(240);
+        SetTargetFPS(144);
 
         ////
         // Setup
