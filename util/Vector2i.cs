@@ -63,6 +63,14 @@ public struct Vector2i : IEquatable<Vector2i> {
 	public static readonly Vector2i Zero = new Vector2i(0, 0);
 	public static readonly Vector2i One = new Vector2i(1, 1);
 
+	// Lerp
+	public static Vector2i Lerp(Vector2i a, Vector2i b, double t) {
+		return new Vector2i(
+			a.X + (b.X - a.X) * t,
+			a.Y + (b.Y - a.Y) * t
+		);
+	}
+
 
 	////
 	//Basic Math

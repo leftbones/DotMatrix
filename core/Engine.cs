@@ -20,6 +20,8 @@ class Engine {
     public Pepper Pepper { get; private set; }
     public Theme Theme { get { return Interface.Theme; } }
 
+    public Entity Player { get; private set; }
+
     // State
     public bool Active { get; private set; }        = true;     // Simulation (Matrix) pause state
     public bool StepOnce { get; private set; }      = false;    // (When paused) Reactivate Matrix, perform one step, pause again
@@ -43,6 +45,9 @@ class Engine {
         Interface = new Interface(this);
         Canvas = new Canvas(this);
         Camera = new Camera(this);
+
+        Player = new Entity();
+        Camera.Target = Player;
     }
 
     public void HandleInput() {
@@ -123,11 +128,11 @@ class Engine {
             // Brush Size
             else if (E.Name.Contains("MouseWheel")) { Canvas.BrushSize = Math.Clamp(Canvas.BrushSize - ((MouseWheelEvent)E).Amount, 1, 100); }
 
-            // Camera Movement
-            else if (E.Name == "KeyDown:KEY_W") Camera.Pan(Direction.Up);
-            else if (E.Name == "KeyDown:KEY_S") Camera.Pan(Direction.Down);
-            else if (E.Name == "KeyDown:KEY_A") Camera.Pan(Direction.Left);
-            else if (E.Name == "KeyDown:KEY_D") Camera.Pan(Direction.Right);
+            // Player Controls
+            else if (E.Name == "KeyDown:KEY_W") Player.Jump();
+            else if (E.Name == "KeyDown:KEY_A") Player.Move(Direction.Left);
+            else if (E.Name == "KeyDown:KEY_D") Player.Move(Direction.Right);
+            else if (E.Name == "KeyDown:KEY_S") Player.Respawn();
         }
     }
 
@@ -163,6 +168,7 @@ class Engine {
         Matrix.UpdateEnd();
 
         // Other Updates
+        Player.Update();
         Simulation.Update();
         Canvas.Update();
         Interface.Update();
@@ -178,15 +184,17 @@ class Engine {
     }
 
     public void Draw() {
+        Camera.Draw();
+
         BeginMode2D(Camera.Viewport);
         Matrix.Draw();
+        Player.Draw();
         Simulation.Draw();
         EndMode2D();
 
         Canvas.Draw();
         Interface.Draw();
 
-        Camera.Draw();
 
         // Misc. HUD/Overlays
         if (!Active) {

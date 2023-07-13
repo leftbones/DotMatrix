@@ -299,19 +299,25 @@ class Matrix {
     // Actions performed before the start of the normal Update
     public void UpdateStart() {
         // Get Active Chunks
+        var PrevActive = new List<Chunk>();
+        foreach (var Chunk in ActiveChunks)
+            PrevActive.Add(Chunk);
+
         ActiveChunks.Clear();
         var CenterPos = (Engine.Camera.Position / Scale) / ChunkSize;
-        Console.WriteLine(CenterPos);
-        for (int x = CenterPos.X - ActiveArea.X; x < CenterPos.X + ActiveArea.X + 1; x++) {
-            for (int y = CenterPos.Y - ActiveArea.Y; y < CenterPos.Y + ActiveArea.Y + 1; y++) {
-                if (x >= 0 && x < MaxChunksX && y >= 0 && y < MaxChunksY) {
-                    ActiveChunks.Add(Chunks[x, y]);
-                    Console.WriteLine($"{x}, {y}");
-                }
+        var SX = Math.Max(0, CenterPos.X - ActiveArea.X);
+        var SY = Math.Max(0, CenterPos.Y - ActiveArea.Y);
+        var EX = Math.Min(CenterPos.X + ActiveArea.X + 1, MaxChunksX);
+        var EY = Math.Min(CenterPos.Y + ActiveArea.Y + 1, MaxChunksY);
+        for (int x = SX; x < EX; x++) {
+            for (int y = SY; y < EY; y++) {
+                var Chunk = Chunks[x, y];
+                ActiveChunks.Add(Chunk);
+
+                if (!PrevActive.Contains(Chunk))
+                    Chunk.ForceRedraw = true;
             }
         }
-
-        Console.WriteLine(ActiveChunks.Count);
 
         // Reset Pixel Stepped and Ticked flags
         foreach (var P in Pixels) {

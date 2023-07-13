@@ -10,6 +10,8 @@ class Chunk {
     public Vector2i Size { get; private set; }                                                                          // The size of a Chunk, in Pixels
     public int ThreadOrder { get; private set; }                                                                        // The "substep" in which a Chunk is processed when multithreading is enabled (1-4)
 
+    public bool Active = false;                                                                                         // If a Chunk is part of the ActiveChunks list of the Matrix
+
     public Texture2D Texture { get; set; }                                                                              // Texture that Pixels are drawn to
     public Image Buffer;                                                                                                // Buffer image used to create the texture
 
@@ -36,7 +38,7 @@ class Chunk {
     public bool Awake { get; private set; } = false;                                                                    // Chunk contains active Pixels
     public bool WakeNextStep { get; private set; } = false;                                                             // Chunk will become Awake during the next Matrix update
 
-    public bool ForceRedraw { get; set; } = false;
+    public bool ForceRedraw { get; set; } = false;                                                                      // Force this Chunk to be redrawn during the next Matrix draw
 
     public Chunk(Matrix matrix, RNG rng, Vector2i position, Vector2i size, int thread_order) {
         Matrix = matrix;
