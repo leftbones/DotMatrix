@@ -84,6 +84,7 @@ class Matrix {
             for (int x = 0; x < Size.X; x++) {
                 var P = new Pixel();
                 P.Position = new Vector2i(x, y);
+                // var P = new Solid(100, new Vector2i(x, y));
                 Pixels[x, y] = P;
             }
         }
@@ -236,8 +237,6 @@ class Matrix {
         var UpdateB = new List<Task>();
         var UpdateC = new List<Task>();
         var UpdateD = new List<Task>();
-
-        bool IsEvenTick = Engine.Tick % 2 == 0;
 
         foreach (var Chunk in ActiveChunks) { 
             switch (Chunk.ThreadOrder) {

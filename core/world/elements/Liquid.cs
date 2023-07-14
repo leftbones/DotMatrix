@@ -27,7 +27,6 @@ class Liquid : Pixel {
         if (RNG.Roll(5) && M.SwapIfValid(Position, Position + LR)) return;
         if (M.SwapIfValid(Position, Position + Direction.Down)) return;
 
-
         for (int i = 0; i < 8; i++) {
             if (!M.SwapIfValid(Position, Position + LR)) {
                 if (RNG.Roll(Fluidity)) LR = Direction.MirrorHorizontal(LR);

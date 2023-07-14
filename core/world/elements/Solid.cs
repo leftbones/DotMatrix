@@ -7,8 +7,8 @@ class Solid : Pixel {
     public Solid(int id, Vector2i position) : base(id, position){
         Weight = 9999;
 
-        BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
-        ColorOffset = 15;
+        BaseColor = Atlas.MaterialMaps[ID].GetColor(position);
+        ColorOffset = 0;
     }
 
     public override void Step(Matrix M, RNG RNG) {

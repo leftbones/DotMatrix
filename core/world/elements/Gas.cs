@@ -16,7 +16,8 @@ class Gas : Pixel {
 
     public override void Step(Matrix M, RNG RNG) {
         // Color Shift (even when not Active)
-        FadeOpacity();
+        if (Lifetime > -1)
+            FadeOpacity();
 
         if (Settled) {
             foreach (var Dir in Direction.Cardinal) {
@@ -36,10 +37,21 @@ class Gas : Pixel {
         if (Weight != 0)
 	        WeightDir = Weight > 0.0f ? Direction.Down : Direction.Up;
 
-        var MoveDir = new Vector2i(
-            RNG.Roll(Diffusion) ? RNG.CoinFlip() ? -1 : 1 : 0,
-            Weight != 0.0f ? RNG.Roll(Math.Abs(Weight)) ? WeightDir.Y : 0 : RNG.CoinFlip() ? Direction.Random(RNG, Direction.Vertical).Y : 0
-        );
+        // var MoveDir = new Vector2i(
+        //     RNG.Roll(Diffusion) ? RNG.CoinFlip() ? -1 : 1 : 0,
+        //     Weight != 0.0f ? RNG.Roll(Math.Abs(Weight)) ? WeightDir.Y : 0 : RNG.CoinFlip() ? Direction.Random(RNG, Direction.Vertical).Y : 0
+        // );
+
+        var DX = 0;
+        var DY = 0;
+
+        if (RNG.Roll(Diffusion))
+            DX = RNG.CoinFlip() ? -1 : 1;
+
+        if (DX == 0 && Weight != 0.0f && RNG.Roll(Math.Abs(Weight)))
+            DY = Math.Sign(Weight);
+
+        var MoveDir = new Vector2i(DX, DY);
 
         if (MoveDir == Direction.None) {
             Settled = true;
@@ -52,7 +64,7 @@ class Gas : Pixel {
             var HorizDir = Direction.Random(RNG, Direction.Horizontal);
             if (M.SwapIfValid(Position, Position + HorizDir)) return;
             else if (M.SwapIfValid(Position, Position + Direction.MirrorHorizontal(HorizDir))) return;
-            else if (RNG.Roll(Diffusion)) Settled = true;
+            else Settled = true;
         } else if (RNG.Roll(Diffusion)) {
             Settled = true;
         }

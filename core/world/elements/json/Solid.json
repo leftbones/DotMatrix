@@ -3,6 +3,7 @@
         "ID" : 100,
         "Name" : "Stone",
         "Color" : "7F8076FF",
+        "Texture" : "res/textures/stone.png",
         "Type" : "Solid"
     },
 
