@@ -4,7 +4,7 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
-class Entity {
+class TestPlayer {
     public int ID { get; private set; }
     public Vector2i Position { get; private set; }
     public Vector2i Velocity { get; private set; }
@@ -20,7 +20,7 @@ class Entity {
 
     private Vector2i SpawnPosition;
 
-    public Entity() {
+    public TestPlayer() {
         ID = 0;
         Position = new Vector2i(1000, 500);
         Velocity = Vector2i.Zero;

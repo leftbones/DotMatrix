@@ -180,7 +180,7 @@ class Canvas {
     // Update the Statistics menu Multiline widget
     public void UpdateStats() {
         StatsContent.Text = $"Mouse Pos (Screen): {MousePos / Engine.MatrixScale} %N " +
-                            $"Mouse Pos (Matrix): {((Engine.Camera.Position - (Engine.WindowSize / 2)) / Engine.MatrixScale) + (MousePos / Engine.MatrixScale)} %N " + 
+                            $"Mouse Pos (Matrix): {((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Engine.MatrixScale) + (MousePos / Engine.MatrixScale)} %N " + 
                             $"Camera Pos: {Engine.Camera.Position} %N %N " + 
                             $"Chunks: {Matrix.TotalChunks:n0} ({Matrix.AwakeChunks:n0} awake) %N %N " +
                             $"Pixel Ops (Total): {Matrix.PixelsProcessed:n0} %N " + 
@@ -244,7 +244,7 @@ class Canvas {
         foreach (var Point in LinePoints) {
             if (!Erasing && ID >= 200 && RNG.Roll(0.95)) continue;
 
-            var P = ((Engine.Camera.Position - (Engine.WindowSize / 2)) / Engine.MatrixScale) + Point;
+            var P = ((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Engine.MatrixScale) + Point;
 
             if (PointCache.Contains(P)) continue;
             PointCache.Add(P);

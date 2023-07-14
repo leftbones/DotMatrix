@@ -8,7 +8,7 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
-class Physics {
+class PhysicsOld {
     // Core
     public Engine Engine { get; private set; }
     public Matrix Matrix { get { return Engine.Matrix; } }
@@ -17,7 +17,7 @@ class Physics {
     public Pepper Pepper { get { return Engine.Pepper; } }
 
     // Settings
-    private bool Active = false;
+    private bool Active = true;
     // private bool DebugDraw = false;
 
     // Testing
@@ -33,7 +33,7 @@ class Physics {
 
     private float PTM = 16;
 
-    public Physics(Engine engine) {
+    public PhysicsOld(Engine engine) {
         Engine = engine;
 
         // Testing
@@ -50,13 +50,13 @@ class Physics {
     public void SetActive(bool flag) {
         Active = flag;
         var FlagStr = Active ? "active" : "inactive";
-        Pepper.Log($"Physics simulation is now {FlagStr}", LogType.SIMULATION);
+        Pepper.Log($"PhysicsOld simulation is now {FlagStr}", LogType.SIMULATION);
     }
 
     public void Update() {
         if (!Active) return;
 
-        var MousePosAdj = ((Engine.Camera.Position - (Engine.WindowSize / 2)) + Engine.Canvas.MousePos).ToVector2() / PTM;
+        var MousePosAdj = ((Engine.Camera.Position - (Engine.WindowSize.ToVector2() / 2)) + Engine.Canvas.MousePos.ToVector2()) / PTM;
 
         if (IsKeyDown(KeyboardKey.KEY_ONE)) {
             var Box = new Box(World, PTM, MousePosAdj, 1.0f, 1.0f);

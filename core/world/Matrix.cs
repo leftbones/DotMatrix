@@ -238,7 +238,7 @@ class Matrix {
         var UpdateC = new List<Task>();
         var UpdateD = new List<Task>();
 
-        foreach (var Chunk in ActiveChunks) { 
+        foreach (var Chunk in ActiveChunks.OrderBy(C => RNG.Random.Next()).ToList()) { 
             switch (Chunk.ThreadOrder) {
                 case 1: UpdateA.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
                 case 2: UpdateB.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
@@ -303,7 +303,7 @@ class Matrix {
             PrevActive.Add(Chunk);
 
         ActiveChunks.Clear();
-        var CenterPos = (Engine.Camera.Position / Scale) / ChunkSize;
+        var CenterPos = (new Vector2i(Engine.Camera.Position) / Scale) / ChunkSize;
         var SX = Math.Max(0, CenterPos.X - ActiveArea.X);
         var SY = Math.Max(0, CenterPos.Y - ActiveArea.Y);
         var EX = Math.Min(CenterPos.X + ActiveArea.X + 1, MaxChunksX);
