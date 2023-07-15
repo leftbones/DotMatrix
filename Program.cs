@@ -14,6 +14,8 @@ class Program {
         var WindowSize = new Vector2i(1280, 800);
         int MatrixScale = 4;
 
+        var DefaultColor = new Color(34, 35, 35, 255);
+
         SetTraceLogLevel(LOG_WARNING | LOG_ERROR | LOG_FATAL);
         InitWindow(WindowSize.X, WindowSize.Y, $"{WindowTitle} {VersionString}");
         SetExitKey(KeyboardKey.KEY_NULL);
@@ -45,7 +47,7 @@ class Program {
             ////
             // Draw
             BeginDrawing();
-            ClearBackground(Color.BLACK);
+            ClearBackground(DefaultColor);
 
             Engine.Draw();
 

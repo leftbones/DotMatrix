@@ -12,12 +12,13 @@ class Engine {
     public float Delta { get { return GetFrameTime(); } }
 
     // Core
+    public Pepper Pepper { get; private set; }
+    public Config Config { get; private set; }
     public Matrix Matrix { get; private set; }
-    // public PhysicsOld PhysicsOld { get; private set; }
+    public Physics Physics { get; private set; }
     public Interface Interface { get; private set; }
     public Canvas Canvas { get; private set; }
     public Camera Camera { get; private set; }
-    public Pepper Pepper { get; private set; }
 
     public Theme Theme { get { return Interface.Theme; } }
 
@@ -43,10 +44,12 @@ class Engine {
 
         // Core
         Pepper = new Pepper(this);
+        Config = new Config(this);
+
         Pepper.Log("Engine initialized", LogType.ENGINE);
 
         Matrix = new Matrix(this);
-        // PhysicsOld = new PhysicsOld(this);
+        Physics = new Physics(this);
         Interface = new Interface(this);
         Canvas = new Canvas(this);
         Camera = new Camera(this);
@@ -171,7 +174,7 @@ class Engine {
         }
 
         // ECS Updates
-        PhysicsSystem.Update(Delta);
+        // SomeSystem.Update(Delta);
 
         // Matrix Updates
         Matrix.UpdateStart();
@@ -180,7 +183,7 @@ class Engine {
 
         // Other Updates
         TestPlayer?.Update();
-        // PhysicsOld.Update();
+        Physics.Update();
         Canvas.Update();
         Interface.Update();
         Camera.Update();
@@ -200,7 +203,6 @@ class Engine {
         BeginMode2D(Camera.Viewport);
         Matrix.Draw();
         // TestPlayer?.Draw();
-        // PhysicsOld.Draw();
         RenderSystem.Update(Delta);
         EndMode2D();
 

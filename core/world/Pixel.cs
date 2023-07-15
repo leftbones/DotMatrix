@@ -23,7 +23,6 @@ class Pixel {
     public bool Stepped { get; set; }               = false;                        // If a Pixel has already had it's Step method called in the current tick
     public bool Ticked { get; set; }                = false;                        // If a Pixel has already had it's Tick method called in the current tick
     public bool Acted { get; set; }                 = false;                        // If a Pixel has already had it's ActOnOther method called (successfully) in the current tick
-    // public bool Active { get; set; }                = true;                         // If true, call Step once each time Engine is updated
     public bool Settled { get; set; }               = false;
 
     // Properties
@@ -44,7 +43,7 @@ class Pixel {
 
     // Rendering
     public Color Color { get; set; }                = new Color(0, 0, 0, 0);        // RGBA color used to render a Pixel
-    public Color? BaseColor { get; set; }            = new Color(0, 0, 0, 0);        // Default color of a Pixel
+    public Color BaseColor { get; set; }            = new Color(0, 0, 0, 0);        // Default color of a Pixel
     public bool ColorSet { get; set; }              = false;                        // If a Pixel's color has already been set
     public int ColorOffset { get; set; }            = 0;                            // Maximum offset that can be applied to a Pixel's color (in both directions)
     public double ColorFade { get; set; }           = 150.0;                        // Used for fading opacity for Pixels with a limited Lifetime

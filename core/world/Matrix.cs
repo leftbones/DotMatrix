@@ -7,6 +7,7 @@ namespace DotMatrix;
 
 class Matrix {
     public Engine Engine { get; private set; }                                  // Reference to the parent Engine instance
+    public Config Config { get { return Engine.Config; } }                      // Reference to the Config class instance of the parent Engine
     public Theme Theme { get { return Engine.Theme; } }                         // Reference to the Theme class instance of the parent Engine
     public Pepper Pepper { get { return Engine.Pepper; } }                      // Reference to the Pepper class instanace of the parent Engine
     public int Scale { get; private set; }                                      // Scale of the Matrix texture (Matrix pixel to screen pixel)
@@ -60,9 +61,8 @@ class Matrix {
 	private bool PauseAfterTest = false;										// Pause the simulation when the test finishes
 	private int TestLength = 1000;                                              // Length of the tests (in ticks)
 
-    // Settings TODO: Move to dedicated Settings class
-    public bool MultithreadingEnabled { get; set; } = true;
-
+    // Settings
+    private bool UseMultithreading = true;
 
     public Matrix(Engine engine, int? seed=null) {
         Engine = engine;
@@ -116,6 +116,11 @@ class Matrix {
 
         // Finish
         Pepper.Log("Matrix initialized", LogType.MATRIX);
+    }
+
+    // Apply changes to the Config
+    public void ApplyConfig() {
+        UseMultithreading = Config.Items["UseMultithreading"];
     }
 
     // Get a Pixel from the Matrix (Vector2i pos)
@@ -222,7 +227,7 @@ class Matrix {
 
     // Update each awake Chunk in the Matrix
     public void Update() {
-        if (MultithreadingEnabled) {
+        if (UseMultithreading) {
             UpdateParallel();
         } else {
             foreach (var Chunk in ActiveChunks) {

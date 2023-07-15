@@ -29,4 +29,3 @@ class System<T> where T : Token {
 }
 
 class RenderSystem : System<Render> { }
-class PhysicsSystem : System<Physics> { }

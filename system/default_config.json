@@ -1,0 +1,8 @@
+{
+    // Matrix
+    "UseMultithreading" : true,
+    "UseFancyGraphics" : true,
+
+    // Debug
+    "DebugModeEnabled" : true
+}

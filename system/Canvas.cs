@@ -7,6 +7,7 @@ namespace DotMatrix;
 
 class Canvas {
     public Engine Engine { get; private set; }
+    public Config Config { get { return Engine.Config; } }
     public Matrix Matrix { get { return Engine.Matrix; } }
     public Camera Camera { get { return Engine.Camera; } }
     public Pepper Pepper { get { return Engine.Pepper; } }
@@ -44,7 +45,7 @@ class Canvas {
     public Multiline StatsContent { get; private set; }
 
     // Debug
-    public bool DrawChunks          = true;         // Draw lines on the border of each Chunk
+    public bool DrawChunks          = false;         // Draw lines on the border of each Chunk
     public bool DrawDirtyRects      = false;         // Draw each Chunk's dirty rectangle
     public bool DrawMovementOverlay = false;         // Draw Pixels in purple when they have not moved since the last tick and yellow when they have
     public bool DrawSettledOverlay  = false;        // Draw Pixels in red when settled and blue when not settled
@@ -167,6 +168,11 @@ class Canvas {
         foreach (var M in Menus) Engine.Interface.AddContainer(M);
 
         Pepper.Log("Canvas initialized");
+    }
+
+    // Apply changes to the Config
+    public void ApplyConfig() {
+
     }
 
     // Close all active menus, if `menu` is given and not active, open that menu

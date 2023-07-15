@@ -8,7 +8,7 @@ class Powder : Pixel {
         Weight = 90;
         Friction = 25;
 
-        BaseColor = BaseColor ?? GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
+        BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
         ColorOffset = 15;
     }
 
