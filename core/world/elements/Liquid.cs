@@ -8,7 +8,7 @@ class Liquid : Pixel {
         Weight = 30;
         Fluidity = 75;
 
-        BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
+        BaseColor = BaseColor ?? GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
     }
 
     public override void Step(Matrix M, RNG RNG) {

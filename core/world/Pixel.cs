@@ -44,7 +44,7 @@ class Pixel {
 
     // Rendering
     public Color Color { get; set; }                = new Color(0, 0, 0, 0);        // RGBA color used to render a Pixel
-    public Color BaseColor { get; set; }            = new Color(0, 0, 0, 0);        // Default color of a Pixel
+    public Color? BaseColor { get; set; }            = new Color(0, 0, 0, 0);        // Default color of a Pixel
     public bool ColorSet { get; set; }              = false;                        // If a Pixel's color has already been set
     public int ColorOffset { get; set; }            = 0;                            // Maximum offset that can be applied to a Pixel's color (in both directions)
     public double ColorFade { get; set; }           = 150.0;                        // Used for fading opacity for Pixels with a limited Lifetime

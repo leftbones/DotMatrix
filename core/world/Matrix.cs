@@ -416,7 +416,7 @@ class Matrix {
 
                         if (!P.ColorSet) {
                             int Offset = RNG.Range(-P.ColorOffset, P.ColorOffset);
-                            P.Color = P.BaseColor;
+                            P.Color = (Color)P.BaseColor!;
                             P.ShiftColor(Offset);
                             P.ColorSet = true;
                         }

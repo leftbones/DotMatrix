@@ -10,7 +10,7 @@ class Gas : Pixel {
         Weight = -30;
         Diffusion = 25;
 
-        BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
+        BaseColor = BaseColor ?? GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
         ColorOffset = 10;
     }
 

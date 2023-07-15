@@ -23,6 +23,9 @@ class Engine {
 
     public TestPlayer? TestPlayer { get; private set; }
 
+    // ECS
+    public List<Entity> Entities { get; private set; }
+
     // State
     public bool Active { get; private set; }        = true;     // Simulation (Matrix) pause state
     public bool StepOnce { get; private set; }      = false;    // (When paused) Reactivate Matrix, perform one step, pause again
@@ -38,6 +41,7 @@ class Engine {
         WindowSize = window_size;
         MatrixScale = matrix_scale;
 
+        // Core
         Pepper = new Pepper(this);
         Pepper.Log("Engine initialized", LogType.ENGINE);
 
@@ -49,6 +53,9 @@ class Engine {
 
         // TestPlayer = new Entity();
         // Camera.Target = TestPlayer;
+
+        // ECS
+        Entities = new List<Entity>();
     }
 
     public void HandleInput() {
@@ -163,13 +170,12 @@ class Engine {
                 Timers.Remove(T);
         }
 
-        // Start Update
+        // ECS Updates
+        PhysicsSystem.Update(Delta);
+
+        // Matrix Updates
         Matrix.UpdateStart();
-
-        // Normal Update
         Matrix.Update();
-
-        // End Update
         Matrix.UpdateEnd();
 
         // Other Updates
@@ -195,6 +201,7 @@ class Engine {
         Matrix.Draw();
         // TestPlayer?.Draw();
         // PhysicsOld.Draw();
+        RenderSystem.Update(Delta);
         EndMode2D();
 
         Canvas.Draw();
