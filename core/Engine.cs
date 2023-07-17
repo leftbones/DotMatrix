@@ -59,6 +59,14 @@ class Engine {
 
         // ECS
         Entities = new List<Entity>();
+
+        // Testing
+        var Barrel = new Entity();
+        Barrel.AddToken(new Render());
+        Barrel.AddToken(new PixelMap("res/objects/barrel_mm.png", "res/objects/barrel_pm.png"));
+        Barrel.AddToken(new Transform(new Vector2i(100, 100)));
+
+        Entities.Add(Barrel);
     }
 
     public void HandleInput() {
@@ -174,7 +182,7 @@ class Engine {
         }
 
         // ECS Updates
-        // SomeSystem.Update(Delta);
+        PixelMapSystem.Update(Delta);
 
         // Matrix Updates
         Matrix.UpdateStart();
@@ -182,7 +190,6 @@ class Engine {
         Matrix.UpdateEnd();
 
         // Other Updates
-        TestPlayer?.Update();
         Physics.Update();
         Canvas.Update();
         Interface.Update();
@@ -200,12 +207,15 @@ class Engine {
     public void Draw() {
         Camera.Draw();
 
+        // Viewport
         BeginMode2D(Camera.Viewport);
         Matrix.Draw();
-        // TestPlayer?.Draw();
+
         RenderSystem.Update(Delta);
+
         EndMode2D();
 
+        // Canvas + Interface
         Canvas.Draw();
         Interface.Draw();
 

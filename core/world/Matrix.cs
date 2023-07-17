@@ -308,7 +308,7 @@ class Matrix {
             PrevActive.Add(Chunk);
 
         ActiveChunks.Clear();
-        var CenterPos = (new Vector2i(Engine.Camera.Position) / Scale) / ChunkSize;
+        var CenterPos = (Engine.Camera.Position / Scale) / ChunkSize;
         var SX = Math.Max(0, CenterPos.X - ActiveArea.X);
         var SY = Math.Max(0, CenterPos.Y - ActiveArea.Y);
         var EX = Math.Min(CenterPos.X + ActiveArea.X + 1, MaxChunksX);
@@ -409,19 +409,16 @@ class Matrix {
         // Update and Draw Chunk Textures (Per Chunk Textures)
         foreach (var C in ActiveChunks) {
             if (C.Awake || C.ForceRedraw || RedrawAllChunks) {
-                ImageClearBackground(ref C.Buffer, Color.BLACK);
+                ImageClearBackground(ref C.Buffer, Theme.Transparent);
 
                 for (int y = ChunkSize.Y - 1; y >= 0; y--) {
                     for (int x = 0; x < ChunkSize.X; x++) {
                         var P = Get(C.Position.X + x, C.Position.Y + y);
-                        if (P.ID == -1) {
-                            ImageDrawPixel(ref C.Buffer, P.Position.X - C.Position.X, P.Position.Y - C.Position.Y, Theme.Transparent);
-                            continue;
-                        }
+                        if (P.ID == -1) continue;
 
                         if (!P.ColorSet) {
                             int Offset = RNG.Range(-P.ColorOffset, P.ColorOffset);
-                            P.Color = (Color)P.BaseColor!;
+                            P.Color = P.BaseColor;
                             P.ShiftColor(Offset);
                             P.ColorSet = true;
                         }

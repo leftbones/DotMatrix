@@ -27,10 +27,12 @@ static class Atlas {
     }
 
     public static int GetIDFromColor(Color color) {
-        string Hex = ColorToInt(color).ToString("X");
-        if (Hex != "FF") {
-            if (Hex.Length == 7) Hex = "0" + Hex;
-            return Colors.Where(P => P.Value[0..^2] == Hex[0..^2]).Select(P => P.Key).FirstOrDefault();
+        if (color.a > 0) {
+            string Hex = ColorToInt(color).ToString("X");
+            if (Hex != "FF") {
+                if (Hex.Length == 7) Hex = "0" + Hex;
+                return Colors.Where(P => P.Value[0..^2] == Hex[0..^2]).Select(P => P.Key).FirstOrDefault();
+            }
         }
         return -1;
     }

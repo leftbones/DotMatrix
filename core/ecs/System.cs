@@ -18,7 +18,7 @@ class System<T> where T : Token {
         for (int i = Tokens.Count - 1; i >= 0; i--) {
             var T = Tokens[i];
 
-            if (T.Entity!.Disabled) {
+            if (T.Entity is not null && T.Entity.Disabled) {
                 Deregister(T);
                 continue;
             }
@@ -29,3 +29,4 @@ class System<T> where T : Token {
 }
 
 class RenderSystem : System<Render> { }
+class PixelMapSystem : System<PixelMap> { }

@@ -13,8 +13,10 @@ class PixelMap : Token {
     public int Width { get; private set; }
     public int Height { get; private set; }
 
+    public Texture2D Texture { get; private set; }
     private Image Buffer;
-    public Texture2D Texture;
+
+    private Color Transparent = new Color(0, 0, 0, 0);
 
     public unsafe PixelMap(string material_map, string pixel_map) {
         var MaterialImage = LoadImage(material_map);
@@ -46,9 +48,31 @@ class PixelMap : Token {
                     }
 
                     Pixel.BaseColor = Color;
+                    Pixel.Color = Color;
+                    Pixel.ColorSet = true;
                     Pixels[x, y] = Pixel;
                 }
             }
         }
+
+        Buffer = GenImageColor(Width * 4, Height * 4, Transparent);
+        Texture = LoadTextureFromImage(Buffer);
+
+        PixelMapSystem.Register(this);
+    }
+
+    public override unsafe void Update(float delta) {
+        ImageClearBackground(ref Buffer, Transparent);
+
+        for (int x = 0; x < Width; x++) {
+            for (int y = 0; y < Height; y++) {
+                var P = Pixels[x, y];
+                if (P is null || P.ID == -1) continue;
+
+                ImageDrawPixel(ref Buffer, P.Position.X, P.Position.Y, P.Color);
+            }
+        }
+
+        UpdateTexture(Texture, Buffer.data);
     }
 }

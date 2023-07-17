@@ -11,18 +11,27 @@
         "ID" : 101,
         "Name" : "Iron",
         "Color" : "A19D94FF",
+        "Texture" : "res/textures/iron.png",
+        "Type" : "Solid"
+    },
+
+    "Wood" : {
+        "ID" : 102,
+        "Name" : "Wood",
+        "Color" : "474727FF",
+        "Texture" : "res/textures/wood.png",
         "Type" : "Solid"
     },
 
     "Ice" : {
-        "ID" : 102,
+        "ID" : 103,
         "Name" : "Ice",
         "Color" : "A5F2F3FF",
         "Type" : "Solid"
     },
 
     "PackedSnow" : {
-        "ID" : 103,
+        "ID" : 104,
         "Name" : "Packed Snow",
         "Color" : "FFFAFAFF",
         "Type" : "Solid"

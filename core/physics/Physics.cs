@@ -53,7 +53,7 @@ class Physics {
     public void Update() {
         if (!Active) return;
 
-        var MousePosAdj = ((Engine.Camera.Position - (Engine.WindowSize.ToVector2() / 2)) + Engine.Canvas.MousePos.ToVector2()) / PTM;
+        // var MousePosAdj = ((Engine.Camera.Position - (Engine.WindowSize.ToVector2() / 2)) + Engine.Canvas.MousePos.ToVector2()) / PTM;
 
         World.Step(TimeStep, VelocityIterations, PositionIterations);
     }
