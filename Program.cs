@@ -9,23 +9,18 @@ class Program {
         ////
         // Init
 
-        var WindowTitle = "DotMatrix";
-        var VersionString = "1.0.0-alpha";
-        var WindowSize = new Vector2i(1280, 800);
-        int MatrixScale = 4;
-
-        var DefaultColor = new Color(34, 35, 35, 255);
-
         SetTraceLogLevel(LOG_WARNING | LOG_ERROR | LOG_FATAL);
-        InitWindow(WindowSize.X, WindowSize.Y, $"{WindowTitle} {VersionString}");
+        InitWindow(Global.WindowSize.X, Global.WindowSize.Y, $"{Global.WindowTitle} {Global.VersionString}");
         SetExitKey(KeyboardKey.KEY_NULL);
         SetTargetFPS(144);
+
+        var DefaultColor = new Color(34, 35, 35, 255);
 
         ////
         // Setup
 
         Atlas.Initialize();
-        var Engine = new Engine(WindowSize, MatrixScale);
+        var Engine = new Engine(Global.WindowSize, Global.MatrixScale);
 
 
         ////

@@ -7,6 +7,8 @@ namespace DotMatrix;
 enum ElementType { Solid, Liquid, Gas, Powder };
 
 static class Atlas {
+    public static Dictionary<int, ElementData> Elements = new Dictionary<int, ElementData>();
+
     public static Dictionary<string, ElementData> Solid = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Solid.json"))!;
     public static Dictionary<string, ElementData> Liquid = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Liquid.json"))!;
     public static Dictionary<string, ElementData> Gas = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Gas.json"))!;
@@ -16,6 +18,12 @@ static class Atlas {
     public static Dictionary<int, MaterialMap> MaterialMaps = new Dictionary<int, MaterialMap>();
 
     public static void Initialize() {
+        // Elements
+        foreach (var Data in Solid) Elements[Data.Value.ID] = Data.Value;
+        foreach (var Data in Liquid) Elements[Data.Value.ID] = Data.Value;
+        foreach (var Data in Gas) Elements[Data.Value.ID] = Data.Value;
+        foreach (var Data in Powder) Elements[Data.Value.ID] = Data.Value;
+
         // Colors
         foreach (var Data in Solid) Colors[Data.Value.ID] = Data.Value.Color;
         foreach (var Data in Liquid) Colors[Data.Value.ID] = Data.Value.Color;
@@ -23,7 +31,10 @@ static class Atlas {
         foreach (var Data in Powder) Colors[Data.Value.ID] = Data.Value.Color;
 
         // Textures
-        foreach (var Data in Solid) MaterialMaps[Data.Value.ID] = new MaterialMap(LoadImage(Data.Value.Texture));
+        foreach (var Data in Solid) {
+            if (Data.Value.Texture != "")
+            MaterialMaps[Data.Value.ID] = new MaterialMap(LoadImage(Data.Value.Texture));
+        }
     }
 
     public static int GetIDFromColor(Color color) {
@@ -31,6 +42,7 @@ static class Atlas {
             string Hex = ColorToInt(color).ToString("X");
             if (Hex != "FF") {
                 if (Hex.Length == 7) Hex = "0" + Hex;
+                // if (Hex == "FF00FFFF") return -1;
                 return Colors.Where(P => P.Value[0..^2] == Hex[0..^2]).Select(P => P.Key).FirstOrDefault();
             }
         }

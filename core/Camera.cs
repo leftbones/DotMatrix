@@ -14,7 +14,9 @@ class Camera {
     public Vector2i TargetPos { get; set; }
 
     public Camera2D Viewport;                                                                           // Raylib Camera2D instance
-    public Chunk Chunk { get { return Matrix.GetChunk(Position / Matrix.Scale); } }       // Matrix Chunk containing the Camera
+    public Chunk Chunk { get { return Matrix.GetChunk(Position / Matrix.Scale); } }                     // Matrix Chunk containing the Camera
+
+    public Vector2i StartPos { get; private set; }
 
     // Skybox (Experimental)
     public bool DrawSkybox { get; set; } = false;                                                       // Render the skybox in the background
@@ -26,6 +28,8 @@ class Camera {
         TargetPos = Position;
         PanSpeed = 0.033f;
 
+        StartPos = Position;
+
         // Viewport
         Viewport = new Camera2D();
         Viewport.target = Position.ToVector2();
@@ -36,6 +40,10 @@ class Camera {
 
     public void Pan(Vector2i dir) {
         TargetPos = new Vector2i(TargetPos.X + (dir.X * 4), TargetPos.Y + (dir.Y * 4));
+    }
+
+    public void Reset() {
+        TargetPos = StartPos;
     }
 
     public void Update() {

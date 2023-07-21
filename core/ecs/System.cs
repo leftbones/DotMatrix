@@ -1,7 +1,8 @@
 namespace DotMatrix;
 
 class System<T> where T : Token {
-    protected static List<T> Tokens = new List<T>();
+    // protected static List<T> Tokens = new List<T>();
+    public static List<T> Tokens = new List<T>();
 
     // Add a Token to the System's Token registry
     public static void Register(T token) {
@@ -30,3 +31,4 @@ class System<T> where T : Token {
 
 class RenderSystem : System<Render> { }
 class PixelMapSystem : System<PixelMap> { }
+class Box2DSystem : System<Box2D> { }

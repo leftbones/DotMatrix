@@ -18,10 +18,10 @@ class Config {
 
         // Load user_config.json or fall back to default_config.json
         try {
-            Items = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText("system/user_config.json"))!;
+            Items = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText("sys/user_config.json"))!;
             Pepper.Log("User config loaded", LogType.SYSTEM);
         } catch {
-            Items = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText("system/default_config.json"))!;
+            Items = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText("sys/default_config.json"))!;
             Pepper.Log("Default config loaded", LogType.SYSTEM);
         }
     }

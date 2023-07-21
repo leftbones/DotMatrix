@@ -22,7 +22,7 @@ class Engine {
 
     public Theme Theme { get { return Interface.Theme; } }
 
-    public TestPlayer? TestPlayer { get; private set; }
+    public TestPlayer? Player { get; private set; }
 
     // ECS
     public List<Entity> Entities { get; private set; }
@@ -42,6 +42,9 @@ class Engine {
         WindowSize = window_size;
         MatrixScale = matrix_scale;
 
+        // ECS
+        Entities = new List<Entity>();
+
         // Core
         Pepper = new Pepper(this);
         Config = new Config(this);
@@ -54,19 +57,8 @@ class Engine {
         Canvas = new Canvas(this);
         Camera = new Camera(this);
 
-        // TestPlayer = new Entity();
-        // Camera.Target = TestPlayer;
-
-        // ECS
-        Entities = new List<Entity>();
-
-        // Testing
-        var Barrel = new Entity();
-        Barrel.AddToken(new Render());
-        Barrel.AddToken(new PixelMap("res/objects/barrel_mm.png", "res/objects/barrel_pm.png"));
-        Barrel.AddToken(new Transform(new Vector2i(100, 100)));
-
-        Entities.Add(Barrel);
+        // Player = new Entity();
+        // Camera.Target = Player;
     }
 
     public void HandleInput() {
@@ -76,7 +68,9 @@ class Engine {
         var K = GetKeyPressed();
         while (K != 0) {
             var Key = (KeyboardKey)K;
-            Events.Add(new KeyPressEvent(Key));
+            var E = new KeyPressEvent(Key);
+            Events.Add(E);
+            // Pepper.Log($"{E.Name}");
 
             if (!HeldKeys.Contains(Key))
                 HeldKeys.Add(Key);
@@ -88,7 +82,9 @@ class Engine {
         for (int i = HeldKeys.Count() - 1; i >= 0; i--) {
             var Key = HeldKeys[i];
             if (!IsKeyDown(Key)) {
-                Events.Add(new KeyReleaseEvent(Key));
+                var E = new KeyReleaseEvent(Key);
+                Events.Add(E);
+                // Pepper.Log($"{E.Name}");
                 HeldKeys.Remove(Key);
             }
         }
@@ -113,7 +109,8 @@ class Engine {
 
         // Handle Held Keys (Temporary)
         foreach (var Key in HeldKeys) {
-            Events.Add(new KeyDownEvent(Key));
+            var E = new KeyDownEvent(Key);
+            Events.Add(E);
         }
 
         // Handle Events (Temporary)
@@ -137,25 +134,28 @@ class Engine {
             }
 
             // Paint
-            else if (E.Name == "MousePress:MOUSE_BUTTON_LEFT") Canvas.Painting = true;
+            else if (!IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) && E.Name == "MousePress:MOUSE_BUTTON_LEFT") Canvas.Painting = true;
             else if (E.Name == "MouseRelease:MOUSE_BUTTON_LEFT") Canvas.Painting = false;
 
             // Erase
-            else if (E.Name == "MousePress:MOUSE_BUTTON_RIGHT") { Canvas.Painting = true; Canvas.Erasing = true; }
+            else if (!IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) && E.Name == "MousePress:MOUSE_BUTTON_RIGHT") { Canvas.Painting = true; Canvas.Erasing = true; }
             else if (E.Name == "MouseRelease:MOUSE_BUTTON_RIGHT") { Canvas.Painting = false; Canvas.Erasing = false; }
 
             // Brush Size
             else if (E.Name.Contains("MouseWheel")) { Canvas.BrushSize = Math.Clamp(Canvas.BrushSize - ((MouseWheelEvent)E).Amount, 1, 100); }
 
-            // TestPlayer Controls
-            else if (TestPlayer is null && E.Name == "KeyDown:KEY_W") Camera.Pan(Direction.Up);
-            else if (TestPlayer is null && E.Name == "KeyDown:KEY_S") Camera.Pan(Direction.Down);
-            else if (TestPlayer is null && E.Name == "KeyDown:KEY_A") Camera.Pan(Direction.Left);
-            else if (TestPlayer is null && E.Name == "KeyDown:KEY_D") Camera.Pan(Direction.Right);
-            else if (TestPlayer is not null && E.Name == "KeyDown:KEY_W") TestPlayer.Jump();
-            else if (TestPlayer is not null && E.Name == "KeyDown:KEY_S") TestPlayer.Respawn();
-            else if (TestPlayer is not null && E.Name == "KeyDown:KEY_A") TestPlayer.Move(Direction.Left);
-            else if (TestPlayer is not null && E.Name == "KeyDown:KEY_D") TestPlayer.Move(Direction.Right);
+            // Player Controls
+            else if (Player is null && E.Name == "KeyDown:KEY_W") Camera.Pan(Direction.Up);
+            else if (Player is null && E.Name == "KeyDown:KEY_S") Camera.Pan(Direction.Down);
+            else if (Player is null && E.Name == "KeyDown:KEY_A") Camera.Pan(Direction.Left);
+            else if (Player is null && E.Name == "KeyDown:KEY_D") Camera.Pan(Direction.Right);
+            else if (Player is not null && E.Name == "KeyDown:KEY_W") Player.Jump();
+            // else if (Player is not null && E.Name == "KeyDown:KEY_S") Player.Crouch();
+            else if (Player is not null && E.Name == "KeyDown:KEY_A") Player.Move(Direction.Left);
+            else if (Player is not null && E.Name == "KeyDown:KEY_D") Player.Move(Direction.Right);
+
+            else if (Player is null && E.Name == "KeyPress:KEY_MENU") Camera.Reset();
+            else if (Player is not null && E.Name == "KeyPress:KEY_MENU") Player.Respawn();
         }
     }
 
@@ -183,15 +183,16 @@ class Engine {
 
         // ECS Updates
         PixelMapSystem.Update(Delta);
+        Box2DSystem.Update(Delta);
 
-        // Matrix Updates
+        // Matrix + Canvas Updates
         Matrix.UpdateStart();
         Matrix.Update();
+        Canvas.Update();
         Matrix.UpdateEnd();
 
         // Other Updates
         Physics.Update();
-        Canvas.Update();
         Interface.Update();
         Camera.Update();
 
@@ -211,6 +212,7 @@ class Engine {
         BeginMode2D(Camera.Viewport);
         Matrix.Draw();
 
+        Physics.Draw();
         RenderSystem.Update(Delta);
 
         EndMode2D();

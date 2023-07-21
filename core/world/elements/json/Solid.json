@@ -23,17 +23,27 @@
         "Type" : "Solid"
     },
 
-    "Ice" : {
+    "Meat" : {
         "ID" : 103,
+        "Name" : "Meat",
+        "Color" : "FF0000FF",
+        "Texture" : "",
+        "Type" : "Solid"
+    },
+
+    "Ice" : {
+        "ID" : 104,
         "Name" : "Ice",
         "Color" : "A5F2F3FF",
+        "Texture" : "",
         "Type" : "Solid"
     },
 
     "PackedSnow" : {
-        "ID" : 104,
+        "ID" : 105,
         "Name" : "Packed Snow",
         "Color" : "FFFAFAFF",
+        "Texture" : "",
         "Type" : "Solid"
     }
 }

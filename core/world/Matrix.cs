@@ -31,6 +31,9 @@ class Matrix {
     private int ChunkWidth = 64;                                                // Width of each Chunk in Pixels
     private int ChunkHeight = 64;                                               // Height of each Chunk in Pixels
 
+    // ECS
+    public List<Entity> PixelMapEntities { get; private set; }                  // List of all PixelMap Tokens added to the Matrix during UpdateStart
+
 
     // Statistics
     public int PixelsProcessed = 0;                                             // Total number of Pixel operations done
@@ -84,7 +87,6 @@ class Matrix {
             for (int x = 0; x < Size.X; x++) {
                 var P = new Pixel();
                 P.Position = new Vector2i(x, y);
-                // var P = new Solid(100, new Vector2i(x, y));
                 Pixels[x, y] = P;
             }
         }
@@ -113,6 +115,9 @@ class Matrix {
         }
 
         TotalChunks = MaxChunksX * MaxChunksY;
+
+        // ECS
+        PixelMapEntities = new List<Entity>();
 
         // Finish
         Pepper.Log("Matrix initialized", LogType.MATRIX);
@@ -243,7 +248,10 @@ class Matrix {
         var UpdateC = new List<Task>();
         var UpdateD = new List<Task>();
 
-        foreach (var Chunk in ActiveChunks.OrderBy(C => RNG.Random.Next()).ToList()) { 
+        // foreach (var Chunk in ActiveChunks.OrderBy(C => RNG.Random.Next()).ToList()) { 
+        // foreach (var Chunk in ActiveChunks) {
+        for (int i = ActiveChunks.Count - 1; i >= 0; i--) {
+            var Chunk = ActiveChunks[i];
             switch (Chunk.ThreadOrder) {
                 case 1: UpdateA.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
                 case 2: UpdateB.Add(new Task(() => { UpdateChunk(Chunk); Chunk.Step(); })); break;
@@ -273,6 +281,7 @@ class Matrix {
         bool IsEvenTick = Engine.Tick % 2 == 0;
 
         // Process pixels within dirty rect
+        // for (int y = C.Y1; y < C.Y2; y++) {
         for (int y = C.Y2; y >= C.Y1; y--) {
             for (int x = IsEvenTick ? C.X1 : C.X2; IsEvenTick ? x <= C.X2 : x >= C.X1; x += IsEvenTick ? 1 : -1) {
                 var P = Get(C.Position.X + x, C.Position.Y + y);
@@ -283,10 +292,12 @@ class Matrix {
                         continue;
 
                     P.Step(this, C.RNG);
-                    P.Stepped = true;
-
                     P.Tick(this);
-                    P.Ticked = true;
+
+                    if (C.InBounds(P.Position)) {
+                        P.Stepped = true;
+                        P.Ticked = true;
+                    }
 
                     if (!P.Settled) {
                         P.ActOnNeighbors(this, C.RNG);
@@ -320,6 +331,25 @@ class Matrix {
 
                 if (!PrevActive.Contains(Chunk))
                     Chunk.ForceRedraw = true;
+            }
+        }
+
+        // Add PixelMap entities into Matrix
+        PixelMapEntities.Clear();
+        foreach (var T in PixelMapSystem.Tokens) {
+            var E = T.Entity!;
+            var EntityPos = E.GetToken<Transform>()!.Position - T.Origin;
+            PixelMapEntities.Add(E);
+
+            for (int x = 0; x < T.Width; x++) {
+                for (int y = 0; y < T.Height; y++) {
+                    var Pixel = T.Pixels[x, y];
+                    if (Pixel is not null) {
+                        var AdjPos = (EntityPos + new Vector2i(x, y));
+                        if (InBoundsAndEmpty(AdjPos))
+                            Set(AdjPos, Pixel, wake_chunk: true);
+                    }
+                }
             }
         }
 
@@ -379,7 +409,25 @@ class Matrix {
 
     // Actions performed at the end of the normal Update
     public void UpdateEnd() {
+        // Remove PixelMap entities from Matrix
+        foreach (var E in PixelMapEntities) {
+            var T = E.GetToken<PixelMap>()!;
+            var EntityPos = E.GetToken<Transform>()!.Position - T.Origin;
 
+            for (int x = 0; x < T.Width; x++) {
+                for (int y = 0; y < T.Height; y++) {
+                    var PixelPos = EntityPos + new Vector2i(x, y);
+                    if (InBounds(PixelPos)) {
+                        var MPixel = Get(PixelPos);
+                        var TPixel = T.Pixels[x, y];
+                        if (TPixel is not null) {
+                            T.Pixels[x, y] = MPixel;
+                            Set(PixelPos, new Pixel(-1, PixelPos), wake_chunk: true);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Return the chunk containing the given position (Vector2i pos)
@@ -414,7 +462,7 @@ class Matrix {
                 for (int y = ChunkSize.Y - 1; y >= 0; y--) {
                     for (int x = 0; x < ChunkSize.X; x++) {
                         var P = Get(C.Position.X + x, C.Position.Y + y);
-                        if (P.ID == -1) continue;
+                        if (P.ID == -1 && !P.ColorSet) continue;
 
                         if (!P.ColorSet) {
                             int Offset = RNG.Range(-P.ColorOffset, P.ColorOffset);
@@ -441,7 +489,7 @@ class Matrix {
             }
         }
 
-        foreach (var C in Chunks) {
+        foreach (var C in ActiveChunks) {
             DrawTexturePro(C.Texture, C.SourceRec, C.DestRec, Vector2.Zero, 0, Color.WHITE);
         }
 
@@ -451,8 +499,8 @@ class Matrix {
         // Chunk Borders + Info
         if (Engine.Canvas.DrawChunks) {
             foreach (var C in ActiveChunks) {
-                var Col = C.Awake ? new Color(255, 255, 255, 150) : new Color(255, 255, 255, 50);
-                var Str = $"{C.ThreadOrder} - {C.Position.X / ChunkSize.X}, {C.Position.Y / ChunkSize.Y} : {C.SleepTimer}";
+                var Col = C.Awake ? new Color(255, 255, 255, 150) : new Color(255, 255, 255, 25);
+                var Str = $"{C.Position.X / ChunkSize.X}, {C.Position.Y / ChunkSize.Y} ({C.Position.X}, {C.Position.Y})";
                 DrawRectangleLines(C.Position.X * Scale, C.Position.Y * Scale, C.Size.X * Scale, C.Size.Y * Scale, Col);
                 DrawTextEx(Engine.Theme.Font, Str, new Vector2i((C.Position.X * Scale) + 5, (C.Position.Y * Scale) + 5).ToVector2(), Engine.Theme.FontSize, Engine.Theme.FontSpacing, Col);
             }
