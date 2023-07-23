@@ -21,6 +21,10 @@ class Interface {
         Pepper.Log("Interface initialized", LogType.INTERFACE);
     }
 
+    public void ApplyConfig(Config C) {
+        Pepper.Log("Interface config applied", LogType.SYSTEM);
+    }
+
     public void AddContainer(Container C) {
         if (Containers.Contains(C)) return;
         Containers.Add(C);

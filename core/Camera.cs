@@ -6,6 +6,7 @@ namespace DotMatrix;
 
 class Camera {
     public Engine Engine { get; private set; }
+    public Pepper Pepper { get { return Engine.Pepper; } }
     public Matrix Matrix { get { return Engine.Matrix; } }
     public Vector2 Position { get; private set; }
     public float PanSpeed { get; private set; }
@@ -37,6 +38,10 @@ class Camera {
         Viewport.offset = new Vector2i(Engine.WindowSize.X / 2, Engine.WindowSize.Y / 2).ToVector2();
         Viewport.rotation = 0.0f;
         Viewport.zoom = 1.0f;
+    }
+
+    public void ApplyConfig(Config C) {
+        Pepper.Log("Camera config applied", LogType.SYSTEM);
     }
 
     public void Pan(Vector2i dir) {

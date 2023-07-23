@@ -59,6 +59,13 @@ class Engine {
 
         // Player = new Entity();
         // Camera.Target = Player;
+
+        // Apply Config
+        Matrix.ApplyConfig(Config);
+        Physics.ApplyConfig(Config);
+        Interface.ApplyConfig(Config);
+        Canvas.ApplyConfig(Config);
+        Camera.ApplyConfig(Config);
     }
 
     public void HandleInput() {

@@ -7,7 +7,6 @@ namespace DotMatrix;
 
 class Matrix {
     public Engine Engine { get; private set; }                                  // Reference to the parent Engine instance
-    public Config Config { get { return Engine.Config; } }                      // Reference to the Config class instance of the parent Engine
     public Theme Theme { get { return Engine.Theme; } }                         // Reference to the Theme class instance of the parent Engine
     public Pepper Pepper { get { return Engine.Pepper; } }                      // Reference to the Pepper class instanace of the parent Engine
     public int Scale { get; private set; }                                      // Scale of the Matrix texture (Matrix pixel to screen pixel)
@@ -124,8 +123,9 @@ class Matrix {
     }
 
     // Apply changes to the Config
-    public void ApplyConfig() {
-        UseMultithreading = Config.Items["UseMultithreading"];
+    public void ApplyConfig(Config C) {
+        UseMultithreading = C.Items["UseMultithreading"];
+        Pepper.Log("Matrix config applied", LogType.SYSTEM);
     }
 
     // Get a Pixel from the Matrix (Vector2i pos)

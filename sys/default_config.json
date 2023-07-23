@@ -4,5 +4,9 @@
     "UseFancyGraphics" : true,
 
     // Debug
-    "DebugModeEnabled" : true
+    "DebugModeEnabled" : true,
+
+    "DrawBox2DSimulation" : false,
+    "DrawPhysicsHitboxes" : false,
+    "DrawPixelMapBoxes" : false
 }

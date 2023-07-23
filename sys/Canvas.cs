@@ -171,8 +171,8 @@ class Canvas {
     }
 
     // Apply changes to the Config
-    public void ApplyConfig() {
-
+    public void ApplyConfig(Config C) {
+        Pepper.Log("Canvas config applied", LogType.SYSTEM);
     }
 
     // Close all active menus, if `menu` is given and not active, open that menu

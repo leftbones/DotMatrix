@@ -28,7 +28,7 @@ class Box2D : Token {
 
     public Vector2i MatrixPosition { get { return new Vector2i(Position.X * Global.MatrixScale, Position.Y * Global.MatrixScale); } }
 
-    public Vector2 ScaledSize { get { return Size * Global.PTM; } }
+    public Vector2 ScaledSize { get { return Size * Global.PTM * Global.MatrixScale; } }
     public Rectangle ScaledRect { get { return new Rectangle(Position.X * Global.PTM, Position.Y * Global.PTM, ScaledSize.X, ScaledSize.Y); } }
     public Vector2 ScaledOrigin { get { return Origin * Global.PTM; } }
 
@@ -83,7 +83,10 @@ class Box2D : Token {
 
     public override void Update(float delta) {
         var Transform = Entity?.GetToken<Transform>();
-        Transform!.Position = MatrixPosition;
-        Transform!.RenderPosition = new Vector2i(Position.X, Position.X);
+
+        Transform!.Position = new Vector2i(
+            Math.Ceiling(Position.X * Global.MatrixScale),
+            Math.Ceiling(Position.Y * Global.MatrixScale)
+        );
     }
 }

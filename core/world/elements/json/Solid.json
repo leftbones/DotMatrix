@@ -45,5 +45,13 @@
         "Color" : "FFFAFAFF",
         "Texture" : "",
         "Type" : "Solid"
+    },
+
+    "Gold" : {
+        "ID" : 106,
+        "Name" : "Gold",
+        "Color" : "D4AF37FF",
+        "Texture" : "res/textures/gold.png",
+        "Type" : "Solid"
     }
 }

@@ -20,7 +20,7 @@ class PixelMap : Token {
 
     public Vector2i Origin { get { return new Vector2i(Width / 2, Height / 2); } }
 
-    public Texture2D Texture { get; private set; }
+    private Texture2D Texture;
     private Image Buffer;
 
     private Color Transparent = new Color(0, 0, 0, 0);
@@ -47,6 +47,7 @@ class PixelMap : Token {
         Buffer = GenImageColor(Width * 4, Height * 4, Transparent);
         Texture = LoadTextureFromImage(Buffer);
 
+        // Finish
         PixelMapSystem.Register(this);
     }
 
@@ -103,6 +104,7 @@ class PixelMap : Token {
         Buffer = GenImageColor(Width * 4, Height * 4, Transparent);
         Texture = LoadTextureFromImage(Buffer);
 
+        // Finish
         PixelMapSystem.Register(this);
     }
 
@@ -119,5 +121,6 @@ class PixelMap : Token {
         }
 
         UpdateTexture(Texture, Buffer.data);
+        Entity!.GetToken<Render>()!.Texture = Texture;
     }
 }

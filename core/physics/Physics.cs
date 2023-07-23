@@ -26,9 +26,13 @@ class Physics {
     private int VelocityIterations = 6;
     private int PositionIterations = 2;
 
-    // Settings
     private bool Active = true;
-    private bool DebugDraw = true;
+
+    // Settings
+    private bool DebugDraw = false;
+    private bool DrawBox2DSimulation = false;
+    private bool DrawPhysicsHitboxes = false;
+    private bool DrawPixelMapBoxes = false;
 
     private Raylib_cs.Color DebugColor = new Raylib_cs.Color(255, 255, 0, 255);
 
@@ -48,7 +52,7 @@ class Physics {
         // var PlatformPos = new Vector2i(Matrix.Size.X / 2, Matrix.Size.Y - 100);
         var PlatformPos = new Vector2i(150, 150);
         Platform.AddToken(new Render());
-        Platform.AddToken(new PixelMap(101, 200, 20));
+        Platform.AddToken(new PixelMap(106, 200, 20));
         Platform.AddToken(new Transform(PlatformPos));
         Platform.AddToken(new Box2D(World, PlatformPos, BodyType.Static, false, HitboxShape.Box, 25f, 2.5f));
 
@@ -60,6 +64,17 @@ class Physics {
         Active = flag;
         var FlagStr = Active ? "active" : "inactive";
         Pepper.Log($"Physics simulation is now {FlagStr}", LogType.PHYSICS);
+    }
+
+    public void ApplyConfig(Config C) {
+        DrawBox2DSimulation = C.Items["DrawBox2DSimulation"];
+        DrawPhysicsHitboxes = C.Items["DrawPhysicsHitboxes"];
+        DrawPixelMapBoxes = C.Items["DrawPixelMapBoxes"];
+
+        if (DrawBox2DSimulation || DrawPhysicsHitboxes || DrawPixelMapBoxes) DebugDraw = true;
+        else DebugDraw = false;
+
+        Pepper.Log("Physics config applied", LogType.SYSTEM);
     }
 
     public void Update() {
@@ -89,17 +104,34 @@ class Physics {
             var Box2D = Entity.GetToken<Box2D>();
 
             if (Box2D!.HitboxShape == HitboxShape.Box) {
-                DrawRectanglePro(Box2D!.Rect, Box2D!.Origin, (Box2D!.Body.GetAngle() * RAD2DEG), DebugColor);
+                // Draw Unscaled Box2D Simulation
+                if (DrawBox2DSimulation)
+                    DrawRectanglePro(Box2D!.Rect, Box2D!.Origin, (Box2D!.Body.GetAngle() * RAD2DEG), DebugColor);
 
-                var Shape = Box2D!.Fixture.Shape as PolygonShape;
-                var Vertices = Shape!.GetVertices();
-                List<Vector2> AdjVerts = new List<Vector2>();
+                // Draw Hitbox Debug Outline
+                if (DrawPhysicsHitboxes) {
+                    var Shape = Box2D!.Fixture.Shape as PolygonShape;
+                    var Vertices = Shape!.GetVertices();
+                    List<Vector2> AdjVerts = new List<Vector2>();
 
-                for (int i = 0; i < Vertices.Count(); i++) AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[i]) * Global.PTM);
-                AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[0]) * Global.PTM);
+                    for (int i = 0; i < Vertices.Count(); i++) AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[i]) * Global.PTM);
+                    AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[0]) * Global.PTM);
 
-                for (int i = 1; i < AdjVerts.Count(); i++) DrawLineEx(AdjVerts[i], AdjVerts[i - 1], 1.0f, DebugColor);
-                DrawLineEx(AdjVerts[AdjVerts.Count() / 2], AdjVerts[AdjVerts.Count() - 1], 1.0f, DebugColor);
+                    for (int i = 1; i < AdjVerts.Count(); i++) DrawLineEx(AdjVerts[i], AdjVerts[i - 1], 1.0f, DebugColor);
+                    DrawLineEx(AdjVerts[AdjVerts.Count() / 2], AdjVerts[AdjVerts.Count() - 1], 1.0f, DebugColor);
+                }
+
+                // Draw PixelMap Position in Matrix
+                if (DrawPixelMapBoxes) {
+                    var EntityPos = Entity!.GetToken<Transform>()!.Position - Entity!.GetToken<PixelMap>()!.Origin;
+                    DrawRectangle(
+                        EntityPos.X * Global.MatrixScale,
+                        EntityPos.Y * Global.MatrixScale,
+                        (int)Box2D!.ScaledSize.X / Global.MatrixScale,
+                        (int)Box2D!.ScaledSize.Y / Global.MatrixScale,
+                        new Raylib_cs.Color(255, 0, 0, 150)
+                    );
+                }
             } else {
                 // DrawPolyLines((Box2D!.Position * Global.PTM), 16, (float)(Box2D!.Radius! * Global.PTM), (-Box2D!.Body.GetAngle() * RAD2DEG) + 45, DebugColor);
             }
