@@ -319,7 +319,7 @@ class Matrix {
             PrevActive.Add(Chunk);
 
         ActiveChunks.Clear();
-        var CenterPos = (Engine.Camera.Position / Scale) / ChunkSize;
+        var CenterPos = (new Vector2i(Engine.Camera.Position) / Scale) / ChunkSize;
         var SX = Math.Max(0, CenterPos.X - ActiveArea.X);
         var SY = Math.Max(0, CenterPos.Y - ActiveArea.Y);
         var EX = Math.Min(CenterPos.X + ActiveArea.X + 1, MaxChunksX);
@@ -421,7 +421,7 @@ class Matrix {
                         var MPixel = Get(PixelPos);
                         var TPixel = T.Pixels[x, y];
                         if (TPixel is not null) {
-                            T.Pixels[x, y] = MPixel;
+                            // T.Pixels[x, y] = MPixel;
                             Set(PixelPos, new Pixel(-1, PixelPos), wake_chunk: true);
                         }
                     }

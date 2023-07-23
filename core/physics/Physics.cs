@@ -30,12 +30,12 @@ class Physics {
     private bool Active = true;
     private bool DebugDraw = true;
 
-    private Raylib_cs.Color DebugColor = new Raylib_cs.Color(0, 255, 255, 50);
+    private Raylib_cs.Color DebugColor = new Raylib_cs.Color(255, 255, 0, 255);
 
     public Physics(Engine engine) {
         Engine = engine;
 
-        Gravity = new Vector2(0.0f, 10.0f);
+        Gravity = new Vector2(0.0f, 20.0f);
         World = new World(Gravity);
 
         Bodies = new List<Entity>();
@@ -45,11 +45,12 @@ class Physics {
 
         // TESTING
         var Platform = new Entity();
-        var PlatformPos = new Vector2i(Matrix.Size.X / 2, Matrix.Size.Y - 100);
-        // Platform.AddToken(new Render());
-        // Platform.AddToken(new PixelMap(101, 200, 20));
+        // var PlatformPos = new Vector2i(Matrix.Size.X / 2, Matrix.Size.Y - 100);
+        var PlatformPos = new Vector2i(150, 150);
+        Platform.AddToken(new Render());
+        Platform.AddToken(new PixelMap(101, 200, 20));
         Platform.AddToken(new Transform(PlatformPos));
-        Platform.AddToken(new Box2D(World, PlatformPos, BodyType.Static, false, HitboxShape.Box, 20, 2));
+        Platform.AddToken(new Box2D(World, PlatformPos, BodyType.Static, false, HitboxShape.Box, 25f, 2.5f));
 
         Engine.Entities.Add(Platform);
         Bodies.Add(Platform);
@@ -66,16 +67,16 @@ class Physics {
 
         // TESTING
         if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) && IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT)) {
-            var MousePosAdj = (((Engine.Camera.Position - (Engine.WindowSize / 2)) / Matrix.Scale) + (Engine.Canvas.MousePos / Matrix.Scale));
+            var MousePosAdj = (((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Matrix.Scale) + (Engine.Canvas.MousePos / Matrix.Scale));
 
-            var Barrel = new Entity();
-            Barrel.AddToken(new Render());
-            Barrel.AddToken(new PixelMap("res/objects/barrel_pm.png", "res/objects/barrel_mm.png"));
-            Barrel.AddToken(new Transform(MousePosAdj));
-            Barrel.AddToken(new Box2D(World, MousePosAdj, BodyType.Dynamic, false, HitboxShape.Box));
+            var Block = new Entity();
+            Block.AddToken(new Render());
+            Block.AddToken(new PixelMap(100, 16, 16));
+            Block.AddToken(new Transform(MousePosAdj));
+            Block.AddToken(new Box2D(World, MousePosAdj, BodyType.Dynamic, false, HitboxShape.Box, 2.0f, 2.0f));
 
-            Engine.Entities.Add(Barrel);
-            Bodies.Add(Barrel);
+            Engine.Entities.Add(Block);
+            Bodies.Add(Block);
         }
 
         World.Step(TimeStep, VelocityIterations, PositionIterations);
@@ -89,6 +90,16 @@ class Physics {
 
             if (Box2D!.HitboxShape == HitboxShape.Box) {
                 DrawRectanglePro(Box2D!.Rect, Box2D!.Origin, (Box2D!.Body.GetAngle() * RAD2DEG), DebugColor);
+
+                var Shape = Box2D!.Fixture.Shape as PolygonShape;
+                var Vertices = Shape!.GetVertices();
+                List<Vector2> AdjVerts = new List<Vector2>();
+
+                for (int i = 0; i < Vertices.Count(); i++) AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[i]) * Global.PTM);
+                AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[0]) * Global.PTM);
+
+                for (int i = 1; i < AdjVerts.Count(); i++) DrawLineEx(AdjVerts[i], AdjVerts[i - 1], 1.0f, DebugColor);
+                DrawLineEx(AdjVerts[AdjVerts.Count() / 2], AdjVerts[AdjVerts.Count() - 1], 1.0f, DebugColor);
             } else {
                 // DrawPolyLines((Box2D!.Position * Global.PTM), 16, (float)(Box2D!.Radius! * Global.PTM), (-Box2D!.Body.GetAngle() * RAD2DEG) + 45, DebugColor);
             }

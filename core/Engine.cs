@@ -212,8 +212,8 @@ class Engine {
         BeginMode2D(Camera.Viewport);
         Matrix.Draw();
 
-        Physics.Draw();
         RenderSystem.Update(Delta);
+        Physics.Draw();
 
         EndMode2D();
 
