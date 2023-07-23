@@ -21,7 +21,7 @@ class Render : Token {
         
         var Rect = new Rectangle(0, 0, PixelMap!.Width, PixelMap!.Height);
         // var Dest = new Rectangle(Transform!.Position.X * Global.MatrixScale, Transform!.Position.Y * Global.MatrixScale, PixelMap!.Width * Global.MatrixScale, PixelMap!.Height * Global.MatrixScale);
-        var Dest = new Rectangle(Transform!.RenderPosition.X, Transform!.RenderPosition.Y, PixelMap!.Width * Global.MatrixScale, PixelMap!.Height * Global.MatrixScale);
-        DrawTexturePro(PixelMap!.Texture, Rect, Dest, Origin.ToVector2(), Rotation, Color.WHITE);
+        var Dest = Box2D!.ScaledRect;
+        DrawTexturePro(PixelMap!.Texture, Rect, Dest, Box2D!.ScaledOrigin, Rotation, Color.WHITE);
     }
 }

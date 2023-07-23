@@ -84,6 +84,6 @@ class Box2D : Token {
     public override void Update(float delta) {
         var Transform = Entity?.GetToken<Transform>();
         Transform!.Position = MatrixPosition;
-        Transform!.RenderPosition = new Vector2i(Position.X * Global.PTM, Position.X * Global.PTM);
+        Transform!.RenderPosition = new Vector2i(Position.X, Position.X);
     }
 }
