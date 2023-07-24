@@ -30,10 +30,6 @@ class Render : Token {
         var PixelMap = Entity!.GetToken<PixelMap>();
         var Box2D = Entity!.GetToken<Box2D>();
 
-        float Rotation;
-        if (Box2D is null) Rotation = 0.0f;
-        else Rotation = Box2D!.Body.GetAngle() * RAD2DEG;
-
         Rectangle DestRect;
         if (Box2D is null) DestRect = new Rectangle(Transform!.Position.X, Transform!.Position.Y, Width * Global.MatrixScale, Height * Global.MatrixScale);
         else DestRect = Box2D!.ScaledRect;
@@ -42,6 +38,8 @@ class Render : Token {
         if (Box2D is null) Orig = Origin;
         else Orig = Box2D!.ScaledOrigin;
 
-        DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, Color.WHITE);
+        float Rotation = Transform!.Rotation;
+
+        // DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, Color.WHITE);
     }
 }

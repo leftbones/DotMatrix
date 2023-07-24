@@ -8,5 +8,5 @@
 
     "DrawBox2DSimulation" : false,
     "DrawPhysicsHitboxes" : true,
-    "DrawPixelMapBoxes" : true
+    "DrawPixelMapBoxes" : false
 }

@@ -55,13 +55,13 @@ public struct Vector2i : IEquatable<Vector2i> {
 		}
 	}
 
-	// Distance
-	public int ManhattanDistance => Math.Abs(X) + Math.Abs(Y);
-	public int EuclideanDistance => (int)Math.Sqrt((X * X) + (Y * Y));
-
 	// Zero / One
 	public static readonly Vector2i Zero = new Vector2i(0, 0);
 	public static readonly Vector2i One = new Vector2i(1, 1);
+
+	// Distance
+	public int ManhattanDistance => Math.Abs(X) + Math.Abs(Y);
+	public int EuclideanDistance => (int)Math.Sqrt((X * X) + (Y * Y));
 
 	// Lerp
 	public static Vector2i Lerp(Vector2i a, Vector2i b, double t) {
@@ -70,7 +70,6 @@ public struct Vector2i : IEquatable<Vector2i> {
 			a.Y + (b.Y - a.Y) * t
 		);
 	}
-
 
 	////
 	//Basic Math

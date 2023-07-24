@@ -34,7 +34,7 @@ class Physics {
     private bool DrawPhysicsHitboxes = false;
     private bool DrawPixelMapBoxes = false;
 
-    private Raylib_cs.Color DebugColor = new Raylib_cs.Color(255, 255, 0, 255);
+    private Raylib_cs.Color DebugColor = new Raylib_cs.Color(255, 255, 0, 150);
 
     public Physics(Engine engine) {
         Engine = engine;
@@ -49,10 +49,9 @@ class Physics {
 
         // TESTING
         var Platform = new Entity();
-        // var PlatformPos = new Vector2i(Matrix.Size.X / 2, Matrix.Size.Y - 100);
         var PlatformPos = new Vector2i(150, 150);
         Platform.AddToken(new Render());
-        Platform.AddToken(new PixelMap(106, 200, 20));
+        Platform.AddToken(new PixelMap(new Vector2i(100, 200), 100, 200, 20));
         Platform.AddToken(new Transform(PlatformPos));
         Platform.AddToken(new Box2D(World, PlatformPos, BodyType.Static, false, HitboxShape.Box, 25f, 2.5f));
 
@@ -81,10 +80,8 @@ class Physics {
         var Render = E.GetToken<Render>()!;
         var PixelMap = E.GetToken<PixelMap>()!;
 
-        var W = PixelMap is null ? Render.Width : PixelMap.Width / Global.PTM;
-        var H = PixelMap is null ? Render.Height : PixelMap.Height / Global.PTM;
-
-        Console.WriteLine($"{W}, {H}");
+        float W = (PixelMap is null ? Render.Width : PixelMap.Width / (float)Global.PTM) * 2;
+        float H = (PixelMap is null ? Render.Height : PixelMap.Height / (float)Global.PTM) * 2;
         return new Box2D(World, pos, body_type, fixed_rotation, hitbox_shape, W, H);
 
         // TODO Implement HitboxShape.Ball
@@ -99,9 +96,8 @@ class Physics {
 
             var Block = new Entity();
             Block.AddToken(new Render());
-            Block.AddToken(new PixelMap("res/objects/barrel_pm.png", "res/objects/barrel_mm.png"));
+            Block.AddToken(new PixelMap(MousePosAdj, "res/objects/barrel_pm.png", "res/objects/barrel_mm.png"));
             Block.AddToken(new Transform(MousePosAdj));
-            // Block.AddToken(new Box2D(World, MousePosAdj, BodyType.Dynamic, false, HitboxShape.Box, 2.12f, 2.62f));
 
             Block.AddToken(CreateBody(Block, MousePosAdj, BodyType.Dynamic, false, HitboxShape.Box));
 

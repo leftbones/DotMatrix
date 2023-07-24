@@ -11,6 +11,7 @@ namespace DotMatrix;
 // If no material_map path is passed in, it is assumed to be 103 ("Meat"), as in a creature of some kind
 
 class PixelMap : Token {
+    public Vector2i Position { get; private set; }
     public int? MaterialID { get; private set; } = null;
 
     public int Width { get; private set; }
@@ -26,7 +27,8 @@ class PixelMap : Token {
     private Color Transparent = new Color(0, 0, 0, 0);
 
     // Constructor for material id and size
-    public unsafe PixelMap(int material_id, int width, int height) {
+    public unsafe PixelMap(Vector2i position, int material_id, int width, int height) {
+        Position = position;
         MaterialID = material_id;
         Width = width;
         Height = height;
@@ -35,7 +37,7 @@ class PixelMap : Token {
 
         for (int x = 0; x < Width; x++) {
             for (int y = 0; y < Height; y++) {
-                var Pos = new Vector2i(x, y);
+                var Pos = Position + new Vector2i(x, y);
                 var Pixel = new Solid((int)MaterialID, Pos);
                 Pixel.BaseColor = Atlas.MaterialMaps[(int)MaterialID].GetColor(Pos);
                 Pixel.Color = Pixel.BaseColor;
@@ -51,8 +53,10 @@ class PixelMap : Token {
         PixelMapSystem.Register(this);
     }
 
-    // Constructor for pixel map and optional material map (defaults to 103/"Meat" if not specified)
-    public unsafe PixelMap(string pixel_map, string? material_map=null) {
+    // Constructor for pixel map and optional material map, material id defaults to 103 ("Meat") if not specified
+    public unsafe PixelMap(Vector2i position, string pixel_map, string? material_map=null) {
+        Position = position;
+
         var PixelImage = LoadImage(pixel_map);
         var PixelColors = LoadImageColors(PixelImage);
 
@@ -71,7 +75,7 @@ class PixelMap : Token {
                     var Color = PixelColors[Index];
                     int ID = Atlas.GetIDFromColor(MaterialColors[Index]);
 
-                    var Pos = new Vector2i(x, y);
+                    var Pos = Position + new Vector2i(x, y);
                     var Pixel = new Pixel();
                     if (ID > -1) {
                         var STRID = ID.ToString();
@@ -92,7 +96,7 @@ class PixelMap : Token {
         } else {
             for (int x = 0; x < Width; x++) {
                 for (int y = 0; y < Height; y++) {
-                    var Pos = new Vector2i(x, y);
+                    var Pos = Position + new Vector2i(x, y);
                     var Color = GetColor(Convert.ToUInt32(Atlas.Colors[103], 16));
                     var Pixel = new Solid(103, Pos);
                     Pixel.BaseColor = Color;
@@ -109,6 +113,11 @@ class PixelMap : Token {
     }
 
     public override unsafe void Update(float delta) {
+        // Update Position
+        var Transform = Entity!.GetToken<Transform>()!;
+        Position = Transform.Position;
+
+        // Update Texture
         ImageClearBackground(ref Buffer, Transparent);
 
         for (int x = 0; x < Width; x++) {

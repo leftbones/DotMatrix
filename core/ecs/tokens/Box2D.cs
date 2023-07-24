@@ -88,5 +88,7 @@ class Box2D : Token {
             Math.Ceiling(Position.X * Global.MatrixScale),
             Math.Ceiling(Position.Y * Global.MatrixScale)
         );
+
+        Transform!.Rotation = Body.GetAngle() * RAD2DEG;
     }
 }

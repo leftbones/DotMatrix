@@ -338,7 +338,8 @@ class Matrix {
         PixelMapEntities.Clear();
         foreach (var T in PixelMapSystem.Tokens) {
             var E = T.Entity!;
-            var EntityPos = E.GetToken<Transform>()!.Position - T.Origin;
+            var Transform = E.GetToken<Transform>()!;
+            var EntityPos = Transform.Position - T.Origin;
             PixelMapEntities.Add(E);
 
             for (int x = 0; x < T.Width; x++) {
