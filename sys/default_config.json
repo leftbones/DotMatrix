@@ -7,6 +7,6 @@
     "DebugModeEnabled" : true,
 
     "DrawBox2DSimulation" : false,
-    "DrawPhysicsHitboxes" : false,
-    "DrawPixelMapBoxes" : false
+    "DrawPhysicsHitboxes" : true,
+    "DrawPixelMapBoxes" : true
 }
