@@ -40,7 +40,13 @@ class Render : Token {
 
         float Rotation = Transform!.Rotation;
 
-        // DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, Color.WHITE);
-        DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, new Color(255, 255, 255, 100));
+        DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, Color.WHITE);
+
+        // foreach (var Pixel in PixelMap!.Pixels) {
+        //     if (Pixel is null) continue;
+
+        //     var MPos = Vector2i.Rotate(Pixel.Position, PixelMap!.Position, Transform!.Rotation * DEG2RAD);
+        //     DrawCircleV(MPos.ToVector2() * Global.MatrixScale, 1.0f, Color.WHITE);
+        // }
     }
 }

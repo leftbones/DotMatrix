@@ -337,6 +337,7 @@ class Matrix {
         // Add PixelMap Pixels into the Matrix
         ActivePixelMaps.Clear();
         foreach (var PixelMap in PixelMapSystem.Tokens) {
+            var Transform = PixelMap.Entity!.GetToken<Transform>()!;
             ActivePixelMaps.Add(PixelMap);
 
             var Start = PixelMap.Position - PixelMap.Origin;
@@ -344,7 +345,8 @@ class Matrix {
 
             for (int x = Start.X; x < End.X; x++) {
                 for (int y = Start.Y; y < End.Y; y++) {
-                    var MPos = new Vector2i(x, y);
+                    var MPos = Vector2i.Rotate(new Vector2i(x, y), PixelMap.Position, Transform.Rotation * DEG2RAD);
+
                     if (!InBounds(MPos)) continue;
 
                     var MPixel = Get(MPos);
@@ -419,12 +421,14 @@ class Matrix {
     public void UpdateEnd() {
         // Remove PixelMap Pixels from the Matrix
         foreach (var PixelMap in ActivePixelMaps) {
+            var Transform = PixelMap.Entity!.GetToken<Transform>()!;
             var Start = PixelMap.Position - PixelMap.Origin;
             var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
 
             for (int x = Start.X; x < End.X; x++) {
                 for (int y = Start.Y; y < End.Y; y++) {
-                    var MPos = new Vector2i(x, y);
+                    var MPos = Vector2i.Rotate(new Vector2i(x, y), PixelMap.Position, Transform.Rotation * DEG2RAD);
+
                     if (!InBounds(MPos)) continue;
 
                     var MPixel = Get(MPos);

@@ -82,7 +82,7 @@ public struct Vector2i : IEquatable<Vector2i> {
 		var RX = TX * C - TY * S;
 		var RY = TX * S + TY * C;
 
-		return new Vector2i(RX + o.X, RY + o.Y);
+		return new Vector2i(Math.Round(RX + o.X), Math.Round(RY + o.Y));
 	}
 
 	////
