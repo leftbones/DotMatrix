@@ -71,6 +71,20 @@ public struct Vector2i : IEquatable<Vector2i> {
 		);
 	}
 
+	// Rotate
+	public static Vector2i Rotate(Vector2i v, Vector2i o, float a) {
+		var S = (float)Math.Sin(a);
+		var C = (float)Math.Cos(a);
+
+		var TX = v.X - o.X;
+		var TY = v.Y - o.Y;
+
+		var RX = TX * C - TY * S;
+		var RY = TX * S + TY * C;
+
+		return new Vector2i(RX + o.X, RY + o.Y);
+	}
+
 	////
 	//Basic Math
 

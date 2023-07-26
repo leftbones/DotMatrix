@@ -37,7 +37,7 @@ class PixelMap : Token {
 
         for (int x = 0; x < Width; x++) {
             for (int y = 0; y < Height; y++) {
-                var Pos = Position + new Vector2i(x, y);
+                var Pos = Position - Origin + new Vector2i(x, y);
                 var Pixel = new Solid((int)MaterialID, Pos);
                 Pixel.BaseColor = Atlas.MaterialMaps[(int)MaterialID].GetColor(Pos);
                 Pixel.Color = Pixel.BaseColor;
@@ -75,7 +75,7 @@ class PixelMap : Token {
                     var Color = PixelColors[Index];
                     int ID = Atlas.GetIDFromColor(MaterialColors[Index]);
 
-                    var Pos = Position + new Vector2i(x, y);
+                    var Pos = Position - Origin + new Vector2i(x, y);
                     var Pixel = new Pixel();
                     if (ID > -1) {
                         var STRID = ID.ToString();

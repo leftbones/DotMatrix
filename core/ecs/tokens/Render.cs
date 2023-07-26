@@ -41,5 +41,6 @@ class Render : Token {
         float Rotation = Transform!.Rotation;
 
         // DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, Color.WHITE);
+        DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, new Color(255, 255, 255, 100));
     }
 }

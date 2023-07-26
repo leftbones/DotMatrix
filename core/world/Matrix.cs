@@ -31,7 +31,7 @@ class Matrix {
     private int ChunkHeight = 64;                                               // Height of each Chunk in Pixels
 
     // ECS
-    public List<Entity> PixelMapEntities { get; private set; }                  // List of all PixelMap Tokens added to the Matrix during UpdateStart
+    public List<PixelMap> ActivePixelMaps { get; private set; }                 // List of all PixelMap Tokens added to the Matrix during UpdateStart
 
 
     // Statistics
@@ -116,7 +116,7 @@ class Matrix {
         TotalChunks = MaxChunksX * MaxChunksY;
 
         // ECS
-        PixelMapEntities = new List<Entity>();
+        ActivePixelMaps = new List<PixelMap>();
 
         // Finish
         Pepper.Log("Matrix initialized", LogType.MATRIX);
@@ -334,22 +334,29 @@ class Matrix {
             }
         }
 
-        // Add PixelMap entities into Matrix
-        PixelMapEntities.Clear();
-        foreach (var T in PixelMapSystem.Tokens) {
-            var E = T.Entity!;
-            var Transform = E.GetToken<Transform>()!;
-            var EntityPos = Transform.Position - T.Origin;
-            PixelMapEntities.Add(E);
+        // Add PixelMap Pixels into the Matrix
+        ActivePixelMaps.Clear();
+        foreach (var PixelMap in PixelMapSystem.Tokens) {
+            ActivePixelMaps.Add(PixelMap);
 
-            for (int x = 0; x < T.Width; x++) {
-                for (int y = 0; y < T.Height; y++) {
-                    var Pixel = T.Pixels[x, y];
-                    if (Pixel is not null) {
-                        var AdjPos = (EntityPos + new Vector2i(x, y));
-                        if (InBoundsAndEmpty(AdjPos))
-                            Set(AdjPos, Pixel, wake_chunk: true);
-                    }
+            var Start = PixelMap.Position - PixelMap.Origin;
+            var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
+
+            for (int x = Start.X; x < End.X; x++) {
+                for (int y = Start.Y; y < End.Y; y++) {
+                    var MPos = new Vector2i(x, y);
+                    if (!InBounds(MPos)) continue;
+
+                    var MPixel = Get(MPos);
+
+                    var PX = x - Start.X;
+                    var PY = y - Start.Y;
+
+                    var PMPixel = PixelMap.Pixels[PX, PY];
+                    if (PMPixel is null) continue;
+
+                    if (IsEmpty(MPos))
+                        Set(MPos, PMPixel, wake_chunk: true);
                 }
             }
         }
@@ -410,22 +417,25 @@ class Matrix {
 
     // Actions performed at the end of the normal Update
     public void UpdateEnd() {
-        // Remove PixelMap entities from Matrix
-        foreach (var E in PixelMapEntities) {
-            var T = E.GetToken<PixelMap>()!;
-            var EntityPos = E.GetToken<Transform>()!.Position - T.Origin;
+        // Remove PixelMap Pixels from the Matrix
+        foreach (var PixelMap in ActivePixelMaps) {
+            var Start = PixelMap.Position - PixelMap.Origin;
+            var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
 
-            for (int x = 0; x < T.Width; x++) {
-                for (int y = 0; y < T.Height; y++) {
-                    var PixelPos = EntityPos + new Vector2i(x, y);
-                    if (InBounds(PixelPos)) {
-                        var MPixel = Get(PixelPos);
-                        var TPixel = T.Pixels[x, y];
-                        if (TPixel is not null) {
-                            // T.Pixels[x, y] = MPixel;
-                            Set(PixelPos, new Pixel(-1, PixelPos), wake_chunk: true);
-                        }
-                    }
+            for (int x = Start.X; x < End.X; x++) {
+                for (int y = Start.Y; y < End.Y; y++) {
+                    var MPos = new Vector2i(x, y);
+                    if (!InBounds(MPos)) continue;
+
+                    var MPixel = Get(MPos);
+
+                    var PX = x - Start.X;
+                    var PY = y - Start.Y;
+
+                    if (PixelMap.Pixels[PX, PY] is null) continue;
+
+                    PixelMap.Pixels[PX, PY] = MPixel;
+                    Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
                 }
             }
         }

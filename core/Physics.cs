@@ -51,7 +51,7 @@ class Physics {
         var Platform = new Entity();
         var PlatformPos = new Vector2i(150, 150);
         Platform.AddToken(new Render());
-        Platform.AddToken(new PixelMap(new Vector2i(100, 200), 100, 200, 20));
+        Platform.AddToken(new PixelMap(PlatformPos, 100, 200, 20));
         Platform.AddToken(new Transform(PlatformPos));
         Platform.AddToken(new Box2D(World, PlatformPos, BodyType.Static, false, HitboxShape.Box, 25f, 2.5f));
 
