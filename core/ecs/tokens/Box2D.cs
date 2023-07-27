@@ -82,12 +82,24 @@ class Box2D : Token {
     }
 
     public override void Update(float delta) {
-        var Transform = Entity?.GetToken<Transform>();
+        var Transform = Entity?.GetToken<Transform>()!;
+        var PixelMap = Entity?.GetToken<PixelMap>();
 
-        Transform!.Position = new Vector2i(
+        Transform.Position = new Vector2i(
             Math.Ceiling(Position.X * Global.MatrixScale),
             Math.Ceiling(Position.Y * Global.MatrixScale)
         );
+
+        if (PixelMap is not null) {
+            for (int x = 0; x < PixelMap.Width; x++) {
+                for (int y = 0; y < PixelMap.Height; y++) {
+                    var Pixel = PixelMap.Pixels[x, y];
+                    if (Pixel is null) continue;
+
+                    Pixel.Position = Transform.Position - PixelMap.Origin + new Vector2i(x, y);
+                }
+            }
+        }
 
         Transform!.Rotation = Body.GetAngle() * RAD2DEG;
     }

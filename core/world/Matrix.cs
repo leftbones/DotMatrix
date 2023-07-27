@@ -334,11 +334,10 @@ class Matrix {
             }
         }
 
-        // Add PixelMap Pixels into the Matrix
-        ActivePixelMaps.Clear();
-        foreach (var PixelMap in PixelMapSystem.Tokens) {
-            var Transform = PixelMap.Entity!.GetToken<Transform>()!;
-            ActivePixelMaps.Add(PixelMap);
+        // Remove PixelMap Pixels from the Matrix
+        foreach (var PixelMap in ActivePixelMaps) {
+            var Entity = PixelMap.Entity!;
+            var Transform = Entity.GetToken<Transform>()!;
 
             var Start = PixelMap.Position - PixelMap.Origin;
             var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
@@ -354,11 +353,10 @@ class Matrix {
                     var PX = x - Start.X;
                     var PY = y - Start.Y;
 
-                    var PMPixel = PixelMap.Pixels[PX, PY];
-                    if (PMPixel is null) continue;
+                    if (PixelMap.Pixels[PX, PY] is null) continue;
 
-                    if (IsEmpty(MPos))
-                        Set(MPos, PMPixel, wake_chunk: true);
+                    PixelMap.Pixels[PX, PY] = MPixel;
+                    Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
                 }
             }
         }
@@ -419,9 +417,14 @@ class Matrix {
 
     // Actions performed at the end of the normal Update
     public void UpdateEnd() {
-        // Remove PixelMap Pixels from the Matrix
-        foreach (var PixelMap in ActivePixelMaps) {
-            var Transform = PixelMap.Entity!.GetToken<Transform>()!;
+        // Add PixelMap Pixels into the Matrix
+        ActivePixelMaps.Clear();
+        foreach (var PixelMap in PixelMapSystem.Tokens) {
+            var Entity = PixelMap!.Entity!;
+            var Transform = Entity.GetToken<Transform>()!;
+
+            ActivePixelMaps.Add(PixelMap);
+
             var Start = PixelMap.Position - PixelMap.Origin;
             var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
 
@@ -436,10 +439,11 @@ class Matrix {
                     var PX = x - Start.X;
                     var PY = y - Start.Y;
 
-                    if (PixelMap.Pixels[PX, PY] is null) continue;
+                    var PMPixel = PixelMap.Pixels[PX, PY];
+                    if (PMPixel is null) continue;
 
-                    PixelMap.Pixels[PX, PY] = MPixel;
-                    Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
+                    if (IsEmpty(MPos))
+                        Set(MPos, PMPixel, wake_chunk: true);
                 }
             }
         }
