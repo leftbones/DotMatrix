@@ -355,8 +355,11 @@ class Matrix {
 
                     if (PixelMap.Pixels[PX, PY] is null) continue;
 
-                    PixelMap.Pixels[PX, PY] = MPixel;
-                    Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
+                    var PMPixel = PixelMap.Pixels[PX, PY];
+
+                    PMPixel.LastPosition = PMPixel.Position;
+                    PMPixel.Position = MPos;
+                    Set(PMPixel.LastPosition, new Pixel(-1, PMPixel.LastPosition), wake_chunk: true);
                 }
             }
         }
