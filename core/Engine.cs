@@ -190,16 +190,16 @@ class Engine {
 
         // ECS Updates
         PixelMapSystem.Update(Delta);
+        Box2DSystem.Update(Delta);
 
         // Matrix + Canvas Updates
         Matrix.UpdateStart();
         Matrix.Update();
-        Physics.Update();
-        Box2DSystem.Update(Delta);
         Canvas.Update();
         Matrix.UpdateEnd();
 
         // Other Updates
+        Physics.Update();
         Interface.Update();
         Camera.Update();
 

@@ -40,7 +40,7 @@ class Render : Token {
 
         float Rotation = Transform!.Rotation;
 
-        // DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, Color.WHITE);
+        DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, Color.WHITE);
 
         // foreach (var Pixel in PixelMap!.Pixels) {
         //     if (Pixel is null) continue;
