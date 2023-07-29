@@ -56,13 +56,6 @@ class Matrix {
     private Shader BlurShader = LoadShader(null, "res/shaders/blur.fs");        // Blur shader (experimental)
     private Shader BloomShader = LoadShader(null, "res/shaders/bloom.fs");      // Bloom shader (experimental)
 
-	// Tests
-	private bool SpoutTestEnabled = false;										// Create Pixels in the center of the top of the Matrix
-	private bool RainTestEnabled = false;										// Create Pixels across the top of the Matrix
-
-	private bool PauseAfterTest = false;										// Pause the simulation when the test finishes
-	private int TestLength = 1000;                                              // Length of the tests (in ticks)
-
     // Settings
     private bool UseMultithreading = true;
 
@@ -374,41 +367,6 @@ class Matrix {
             P.LastPosition = P.Position;
         }
 
-		// Spout Test
-		if (SpoutTestEnabled) {
-			if (Engine.Tick == TestLength) {
-				if (PauseAfterTest)
-					Engine.ToggleActive();
-				SpoutTestEnabled = false;
-			} else {
-				int Width = 5;
-				for (int i = 0; i < Width; i++) {
-					if (RNG.CoinFlip()) {
-						var Pos = new Vector2i((Size.X / 2) - Width + i, 0);
-						if (IsEmpty(Pos))
-							Set(Pos, new Powder(400, Pos));
-					}
-				}
-			}
-		}
-
-		// Rain Test
-		if (RainTestEnabled) {
-			if (Engine.Tick == TestLength) {
-				if (PauseAfterTest)
-					Engine.ToggleActive();
-				RainTestEnabled = false;
-			} else {
-				for (int i = 0; i < Size.X; i++) {
-					if (RNG.Roll(25)) {
-						var Pos = new Vector2i(i, 0);
-						if (IsEmpty(Pos))
-							Set(Pos, new Liquid(200, Pos));
-					}
-				}
-			}
-		}
-
 		// FPS Statistics
 		if (Engine.Tick > 150) {
 			var FPS = GetFPS();
@@ -444,7 +402,6 @@ class Matrix {
 
                     var PMPixel = PixelMap.Pixels[PX, PY];
 
-                    // PMPixel.LastPosition = PMPixel.Position;
                     PMPixel.Position = MPos;
                     Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
                 }
