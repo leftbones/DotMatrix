@@ -398,11 +398,6 @@ class Matrix {
                     var PX = x - Start.X;
                     var PY = y - Start.Y;
 
-                    if (PixelMap.Pixels[PX, PY] is null) continue;
-
-                    var PMPixel = PixelMap.Pixels[PX, PY];
-
-                    PMPixel.Position = MPos;
                     Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
                 }
             }
