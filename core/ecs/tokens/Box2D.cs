@@ -59,21 +59,24 @@ class Box2D : Token {
 
 
         // BodyDef + Body
-        BodyDef = new BodyDef();
-        BodyDef.type = body_type;
-        BodyDef.position = position.ToVector2() / Global.MatrixScale;
+        BodyDef = new BodyDef
+        {
+            type = body_type,
+            position = position.ToVector2() / Global.MatrixScale
+        };
 
         Body = World.CreateBody(BodyDef);
         Body.SetFixedRotation(fixed_rotation);
 
 
         // Fixture
-        FixtureDef = new FixtureDef();
-
-        FixtureDef.shape = HitboxShape == HitboxShape.Box ? BoxShape : BallShape;
-        FixtureDef.density = 1.0f;
-        FixtureDef.friction = 0.3f;
-        FixtureDef.restitution = bounciness ?? 0.1f;
+        FixtureDef = new FixtureDef
+        {
+            shape = HitboxShape == HitboxShape.Box ? BoxShape : BallShape,
+            density = 1.0f,
+            friction = 0.3f,
+            restitution = bounciness ?? 0.1f
+        };
 
         Fixture = Body.CreateFixture(FixtureDef);
 

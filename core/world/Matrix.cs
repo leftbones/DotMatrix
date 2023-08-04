@@ -345,6 +345,7 @@ class Matrix {
                     if (!InBounds(MPos)) continue;
 
                     var MPixel = Get(MPos);
+                    if (MPixel.ID > -1) continue;
 
                     var PX = x - Start.X;
                     var PY = y - Start.Y;
@@ -352,8 +353,7 @@ class Matrix {
                     var PMPixel = PixelMap.Pixels[PX, PY];
                     if (PMPixel is null) continue;
 
-                    if (IsEmpty(MPos))
-                        Set(MPos, PMPixel, wake_chunk: true);
+                    Set(MPos, PMPixel, wake_chunk: true);
                 }
             }
         }
@@ -393,10 +393,16 @@ class Matrix {
 
                     if (!InBounds(MPos)) continue;
 
-                    var MPixel = Get(MPos);
-
                     var PX = x - Start.X;
                     var PY = y - Start.Y;
+
+                    if (PixelMap.Pixels[PX, PY] is null)
+                        continue;
+
+                    // FIXME: This allows other Pixels to interact with the PixelMap Pixels, but rotation of the PixelMap causes issues
+
+                    // var MPixel = Get(MPos);
+                    // PixelMap.Pixels[PX, PY] = MPixel;
 
                     Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
                 }
