@@ -401,8 +401,8 @@ class Matrix {
 
                     // FIXME: This allows other Pixels to interact with the PixelMap Pixels, but rotation of the PixelMap causes issues
 
-                    // var MPixel = Get(MPos);
-                    // PixelMap.Pixels[PX, PY] = MPixel;
+                    var MPixel = Get(MPos);
+                    PixelMap.Pixels[PX, PY] = MPixel;
 
                     Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
                 }
