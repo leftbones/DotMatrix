@@ -5,6 +5,11 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+/// <summary>
+/// The main simulation for all Pixel instances, also handles rendering Chunk textures
+/// `Matrix.UpdateStart()` and `Matrix.UpdateEnd()` are called before and after `Matrix.Update()` respectively
+/// </summary>
+
 class Matrix {
     public Engine Engine { get; private set; }                                  // Reference to the parent Engine instance
     public Theme Theme { get { return Engine.Theme; } }                         // Reference to the Theme class instance of the parent Engine

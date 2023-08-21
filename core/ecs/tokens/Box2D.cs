@@ -10,6 +10,12 @@ namespace DotMatrix;
 
 enum HitboxShape { Box, Ball };
 
+/// <summary>
+/// Simulates the entity's physics during the Box2D physics world simulation
+/// Required Tokens: Transform
+/// Optional Tokens: PixelMap
+/// </summary>
+
 class Box2D : Token {
     public World World { get; private set; }
     public BodyType BodyType { get; private set; }

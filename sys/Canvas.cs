@@ -5,6 +5,11 @@ namespace DotMatrix;
 
 // TODO: Add "freeze" mode to brush painting (painted Pixels are static until mouse button is released)
 
+/// <summary>
+/// Handles the debug menus, the brush, and the loading of Pixel Scenes
+/// `Canvas.Update()` is called after `Matrix.Update()` and before `Matrix.UpdateEnd()`
+/// </summary>
+
 class Canvas {
     public Engine Engine { get; private set; }
     public Config Config { get { return Engine.Config; } }

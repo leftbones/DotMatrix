@@ -1,5 +1,11 @@
 namespace DotMatrix;
 
+/// <summary>
+/// Various global variables that don't fit nicely anywhere else but might need to be accessed in a lot of different places
+/// </summary>
+
+// TODO: Document properties
+
 static class Global {
     // General
     public static string VersionString = "1.0.0-alpha";

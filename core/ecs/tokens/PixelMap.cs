@@ -3,12 +3,12 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
-// Creates and stores a miniature matrix of Pixels taken from a material map image and pixel map image
-
-// Pixel Map - An image used to set the colors of the Pixels set by the Material Map image
-// Material Map - An image that denotes which Pixel materials are placed where, like a silhouette of the Pixel Map
-
-// If no material_map path is passed in, it is assumed to be 103 ("Meat"), as in a creature of some kind
+/// <summary>
+/// Creates and stores a miniature matrix of Pixels taken from a material map image and pixel map image
+/// Pixel Map - An image used to set the colors of the Pixels set by the Material Map image
+/// Material Map - An image that denotes which Pixel materials are placed where, like a silhouette of the Pixel Map
+/// If no material_map path is passed in, it is assumed to be 103 ("Meat"), as in a creature of some kind
+/// </summary>
 
 class PixelMap : Token {
     public Vector2i Position { get; private set; }

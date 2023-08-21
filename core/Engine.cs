@@ -3,6 +3,12 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+/// <summary>
+/// The main "handler" class for basically every other system, calls update methods for subsystems like Matrix, Canvas, handles Timers, and tracks ECS entities
+/// Currently handles and dispatches user input, but that will be moved to a subsystem eventually
+/// Also keeps track of the Tick count, Delta time, and the Active state of the Matrix
+/// </summary>
+
 class Engine {
     public Vector2i WindowSize { get; private set; }
     public int MatrixScale { get; private set; }

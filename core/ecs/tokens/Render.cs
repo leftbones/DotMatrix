@@ -4,6 +4,12 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+/// <summary>
+/// Renders an entity's texture to the screen
+/// Required Tokens: Transform, PixelMap (if sprite_path is not specified)
+/// Optional Tokens: Box2D, PixelMap
+/// </summary>
+
 class Render : Token {
     public Texture2D Texture { get; set; }
     public Vector2 Origin { get; set; }

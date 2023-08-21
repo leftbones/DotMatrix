@@ -3,10 +3,15 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+/// <summary>
+/// An area within the Matrix that tracks if it has Pixels within it's bounds that need to be updated, also has it's own texture that is updated when necessary and drawn by the Matrix
+/// Chunks that do not have any changes after 30 steps will go to sleep and won't be processed again by the Matrix until woken up
+/// </summary>
+
 class Chunk {
     public Matrix Matrix { get; private set; }                                                                          // The parent Matrix this Chunk belongs to
     public RNG RNG { get; private set; }                                                                                // Thread safe RNG instance local to this Chunk
-    public Vector2i Position { get; private set; }                                                                      // The position of a Chunk within the parent MatrixA
+    public Vector2i Position { get; private set; }                                                                      // The position of a Chunk within the parent Matrix
     public Vector2i Size { get; private set; }                                                                          // The size of a Chunk, in Pixels
     public int ThreadOrder { get; private set; }                                                                        // The "substep" in which a Chunk is processed when multithreading is enabled (1-4)
 

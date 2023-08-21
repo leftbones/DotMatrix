@@ -3,7 +3,11 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
-// The in-engine debug console, named "Pepper" after my daughter because the name "Console" is used already in .NET
+/// <summary>
+/// The in-engine debug console, named "Pepper" after my daughter because the name "Console" is used already in .NET
+/// Currently only handles .NET console output and can be used for throwing exceptions with an in-game window
+/// Will be used for creating and managing log files in the future
+/// </summary>
 
 // TODO: Implement Colorful.Console for nicer looking output (https://github.com/tomakita/Colorful.Console)
 
