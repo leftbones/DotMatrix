@@ -17,3 +17,4 @@ Over time, it's become more geared towards game development than it's original i
 * Modding API integration using Lua scripting
 * Destructible terrain/objects using the already implemented "PixelMap" component
 * Element interactions such as burning, explosions, rust, electrification, dissolving, and a lot more
+* GLSL shader support (currently WIP)
