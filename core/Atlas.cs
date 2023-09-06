@@ -4,6 +4,10 @@ using Newtonsoft.Json;
 
 namespace DotMatrix;
 
+/// <summary>
+/// An index containing information about all of the Pixel element types and color data used by the Canvas as well as material maps (for elements with repeating material textures like stone)
+/// </summary>
+
 enum ElementType { Solid, Liquid, Gas, Powder };
 
 static class Atlas {
@@ -37,6 +41,7 @@ static class Atlas {
         }
     }
 
+    // Returns an element ID based on the given color
     public static int GetIDFromColor(Color color) {
         if (color.a > 0) {
             string Hex = ColorToInt(color).ToString("X");
@@ -50,6 +55,7 @@ static class Atlas {
     }
 }
 
+// Stores information about elements read from the json files
 struct ElementData {
     public int ID;
     public string Name;
@@ -66,6 +72,7 @@ struct ElementData {
     }
 }
 
+// Stores information about material maps for elements with repeating material textures
 unsafe class MaterialMap {
     public Image Image { get; private set; }
     public int Width { get; private set; }

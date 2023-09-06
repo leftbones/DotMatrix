@@ -8,6 +8,11 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+/// <summary>
+/// Simulates all active Box2D tokens, also handles the creation of new Box2D tokens by calling `Physics.CreateBody()`
+/// `Physics.Update()` is called after `Matrix.UpdateEnd()`, `Physics.Draw()` is only used for debug drawing for Box2D
+/// </summary>
+
 class Physics {
     // Core
     public Engine Engine { get; private set; }

@@ -2,6 +2,12 @@ using Newtonsoft.Json;
 
 namespace DotMatrix;
 
+/// <summary>
+/// Handles loading and saving of user-defined configuration (user_config.json), if this file is not found, loads default_config.json instead
+/// </summary>
+ 
+// TODO: Add a check to create default_config.json if it is not found, currently throws an unhandled exception
+
 class Config {
     public Engine Engine { get; private set; }
 

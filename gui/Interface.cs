@@ -3,6 +3,11 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+/// <summary>
+/// Handles the creation, updating, event firing, and drawing of all interface elements
+/// All input events are sent here first, and if no children respond, the event is sent to the other parts of the Engine
+/// </summary>
+
 enum Anchor { Left, Center, Right, Top, Bottom }; // TODO: Implement TopLeft, BottomLeft, TopCenter, BottomCenter, TopRight, BottomRight
 
 class Interface {

@@ -3,12 +3,16 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+/// <summary>
+/// Simulated materials within the Matrix (or "world") with various different properties that control their behavior and interactions with other materials
+/// </summary>
+
 enum PixelType { Element, Particle };
 
 class Pixel {
     // Attributes
     public int ID { get; set; }                     = -1;                           // Unique identifier for comparison with other Pixels
-    public Entity? Entity { get; set; }             = null;                         // Physics entity this Pixel belongs to (null when not part of an Entity)
+    public Entity? Entity { get; set; }             = null;                         // Entity this Pixel belongs to (null if none)
 
     // Movement
     public Vector2i Position { get; set; }          = Vector2i.Zero;                // Current position within the Matrix
@@ -23,23 +27,23 @@ class Pixel {
     public bool Stepped { get; set; }               = false;                        // If a Pixel has already had it's Step method called in the current tick
     public bool Ticked { get; set; }                = false;                        // If a Pixel has already had it's Tick method called in the current tick
     public bool Acted { get; set; }                 = false;                        // If a Pixel has already had it's ActOnOther method called (successfully) in the current tick
-    public bool Settled { get; set; }               = false;
+    public bool Settled { get; set; }               = false;                        // If the Pixel has not moved since the last time `Step` was called
 
     // Properties
     public int Weight { get; set; }                 = 0;                            // Weight of a Pixel relative to air/empty space, used for Y-sorting
-    public int Friction { get; set; }               = 0;                            // How likely a Pixel is to stop moving when not free falling (0 will stop only when unable to move)
+    public int Friction { get; set; }               = 0;                            // How likely a Pixel is to stop moving when not free falling, or be "unsettled" by neighbors (0 will stop only when unable to move)
     public int Flammable { get; set; }              = 0;                            // Flammability percentage (0-100)
     public int Explosive { get; set; }              = 0;                            // Explosivity percentage (0-100)
     public int Conductive { get; set; }             = 0;                            // Electricity conductivity percentage (0-100)
     public int Dissolve { get; set; }               = 0;                            // Dissolvability percentage in liquids (0-100)
     public int Dillute { get; set; }                = 0;                            // Dillutability percentage in liquids (0-100)
-    public int Fluidity { get; set; }               = 0;                            // How easily a Liquid will flow horizontally
-    public int Diffusion { get; set; }              = 0;                            // How much a Gas will "wiggle" horizontally
+    public int Fluidity { get; set; }               = 0;                            // How easily a Liquid will flow horizontally (acts somewhat like viscosity)
+    public int Diffusion { get; set; }              = 0;                            // How much a Gas will "wiggle" horizontally (higher values cause slower vertical movement as a result)
 
     // Status
     public bool OnFire { get; set; }                = false;                        // Pixel is currently on fire (attempts to spread fire to neighbors)
-    public bool Electrified { get; set; }           = false;                        // Pixel is electrified (attempts to transfer to conductive neighbors)
-    public int Soaked { get; set; }                 = -1;                           // Pixel is soaked in a Liquid, ID of the Liquid type (-1 is none)
+    public bool Electrified { get; set; }           = false;                        // Pixel is electrified (attempts to electrify conductive neighbors)
+    public int Soaked { get; set; }                 = -1;                           // Pixel is soaked in a Liquid, ID of the Liquid type (200-299, -1 is none)
 
     // Rendering
     public Color Color { get; set; }                = new Color(0, 0, 0, 0);        // RGBA color used to render a Pixel
@@ -104,7 +108,7 @@ class Pixel {
 
     // Fade a Pixel's opacity relative to the amount of remaining Lifetime
     public void FadeOpacity() {
-        // ColorFade -= ColorFade / (Lifetime - TicksLived);    FIXME: This line causes race conditions for SOME REASON
+        // ColorFade -= ColorFade / (Lifetime - TicksLived);    FIXME: This line causes race conditions for SOME UNKNOWN REASON
         Color = new Color(Color.r, Color.g, Color.b, (byte)ColorFade);
     }
 
