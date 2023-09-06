@@ -308,8 +308,9 @@ class Matrix {
     public void UpdateStart() {
         // Get Active Chunks
         var PrevActive = new List<Chunk>();
-        foreach (var Chunk in ActiveChunks)
+        foreach (var Chunk in ActiveChunks) {
             PrevActive.Add(Chunk);
+        }
 
         ActiveChunks.Clear();
         var CenterPos = (new Vector2i(Engine.Camera.Position) / Scale) / ChunkSize;
@@ -322,8 +323,9 @@ class Matrix {
                 var Chunk = Chunks[x, y];
                 ActiveChunks.Add(Chunk);
 
-                if (!PrevActive.Contains(Chunk))
+                if (!PrevActive.Contains(Chunk)) {
                     Chunk.ForceRedraw = true;
+                }
             }
         }
 
@@ -345,7 +347,7 @@ class Matrix {
                     if (!InBounds(MPos)) continue;
 
                     var MPixel = Get(MPos);
-                    if (MPixel.ID > -1) continue;
+                    if (MPixel.ID > -1 || MPixel.Entity is not null) continue;
 
                     var PX = x - Start.X;
                     var PY = y - Start.Y;

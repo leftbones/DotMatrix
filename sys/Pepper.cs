@@ -3,7 +3,8 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
-// The in-engine debug console, named "Pepper" after my daughter because the name "Console" is used already in .NET
+// The in-engine debug console, named "Pepper" after my daughter
+// (Also because the name "Console" is used already in .NET)
 
 // TODO: Implement Colorful.Console for nicer looking output (https://github.com/tomakita/Colorful.Console)
 
@@ -39,7 +40,7 @@ class Pepper {
     }
 
     // Throw an exception and write the exception to the current log file
-    public void Throw(string message, LogType type, LogLevel level) {
+    public void Throw(string message, LogType type=LogType.DEBUG, LogLevel level=LogLevel.EXCEPTION) {
         Log(message, type, level);
         Canvas.ExceptionWindow.AddWidget(new Multiline(Canvas.ExceptionWindow, $"{type} {level} %N %N {message}", 750, new Quad(0, 20, 10, 10)));
         Canvas.ExceptionWindow.AddWidget(new Button(Canvas.ExceptionWindow, "Exit", () => { Environment.Exit(0); }, new Vector2i(75, 20), anchor: Anchor.Right));

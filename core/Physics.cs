@@ -80,6 +80,13 @@ class Physics {
         var Render = E.GetToken<Render>()!;
         var PixelMap = E.GetToken<PixelMap>()!;
 
+        if (PixelMap is not null) {
+            foreach (var Pixel in PixelMap.Pixels) {
+                if (Pixel is null) continue;
+                Pixel.Entity = E;
+            }
+        }
+
         float W = (PixelMap is null ? Render.Width : PixelMap.Width / (float)Global.PTM) * 2;
         float H = (PixelMap is null ? Render.Height : PixelMap.Height / (float)Global.PTM) * 2;
         return new Box2D(World, pos, body_type, fixed_rotation, hitbox_shape, W, H);

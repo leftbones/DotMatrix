@@ -25,8 +25,11 @@ class Canvas {
     public bool Painting { get; set; } = false;
     public bool Erasing { get; set; } = false;
 
-    public int ID { get; set; }             = 400;
-    public int BrushSize { get; set; }      = 10;
+    public int BrushID { get; set; }    = 400;
+    public int BrushSize { get; set; }  = 10;
+
+    // Objects
+    public int ObjectID { get; set; }   = 0;
 
     // Menus + Windows
     public Container Toolbar { get; private set; }
@@ -34,6 +37,7 @@ class Canvas {
 
     public Container SceneMenu { get; private set; }
     public Container BrushMenu { get; private set; }
+    public Container ObjectsMenu { get; private set; }
     public Container ViewMenu { get; private set; }
     public Container CheatsMenu { get; private set; }
     public Container DebugMenu { get; private set; }
@@ -104,27 +108,34 @@ class Canvas {
             activated: false
         );
 
-        ViewMenu = new Container(
+        ObjectsMenu = new Container(
             parent: Engine.Interface,
             position: new Vector2i(210, 25),
             activated: false
         );
 
-        CheatsMenu = new Container(
+        ViewMenu = new Container(
             parent: Engine.Interface,
             position: new Vector2i(315, 25),
             activated: false
         );
 
-        DebugMenu = new Container(
+        CheatsMenu = new Container(
             parent: Engine.Interface,
             position: new Vector2i(420, 25),
+            activated: false
+        );
+
+        DebugMenu = new Container(
+            parent: Engine.Interface,
+            position: new Vector2i(525, 25),
             activated: false
         );
 
         Menus = new List<Container>();
         Menus.Add(SceneMenu);
         Menus.Add(BrushMenu);
+        Menus.Add(ObjectsMenu);
         Menus.Add(ViewMenu);
         Menus.Add(CheatsMenu);
         Menus.Add(DebugMenu);
@@ -132,6 +143,7 @@ class Canvas {
         // Toolbar
         Toolbar.AddWidget(new Button(Toolbar, "Scene", () => { ChangeMenu(SceneMenu); }, new Vector2i(100, 20)));
         Toolbar.AddWidget(new Button(Toolbar, "Brush", () => { ChangeMenu(BrushMenu); }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "Objects", () => { ChangeMenu(ObjectsMenu); }, new Vector2i(100, 20)));
         Toolbar.AddWidget(new Button(Toolbar, "View", () => { ChangeMenu(ViewMenu); }, new Vector2i(100, 20)));
         Toolbar.AddWidget(new Button(Toolbar, "Cheats", () => { ChangeMenu(CheatsMenu); }, new Vector2i(100, 20)));
         Toolbar.AddWidget(new Button(Toolbar, "Debug", () => { ChangeMenu(DebugMenu); }, new Vector2i(100, 20)));
@@ -141,10 +153,14 @@ class Canvas {
         SceneMenu.AddWidget(new Button(SceneMenu, "Load", () => { LoadScene(); ChangeMenu(); }, new Vector2i(100, 20), background: false));
 
         // Brush Menu
-        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { ID = 100; ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { ID = 200; ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { ID = 300; ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { ID = 400; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { BrushID = 100; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { BrushID = 200; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { BrushID = 300; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { BrushID = 400; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+
+        // Objects Menu
+        ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Barrel", () => { ObjectID = 0; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Crate", () => { ObjectID = 1; ChangeMenu(); }, new Vector2i(100, 20), background: false));
 
         // Window Menu
         ViewMenu.AddWidget(new Button(ViewMenu, "Statistics", () => { StatsWindow.Toggle(); ChangeMenu(); }, new Vector2i(150, 20), background: false));
@@ -252,7 +268,7 @@ class Canvas {
         var PointCache = new List<Vector2i>();
 
         foreach (var Point in LinePoints) {
-            if (!Erasing && ID >= 200 && RNG.Roll(0.95)) continue;
+            if (!Erasing && BrushID >= 200 && RNG.Roll(0.95)) continue;
 
             var P = ((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Engine.MatrixScale) + Point;
 
@@ -270,12 +286,12 @@ class Canvas {
 
                 var Pixel = new Pixel();
                 if (!Erasing) {
-                    var STRID = ID.ToString();
+                    var STRID = BrushID.ToString();
                     switch (STRID[0]) {
-                        case '1': Pixel = new Solid(ID, P); break;
-                        case '2': Pixel = new Liquid(ID, P); break;
-                        case '3': Pixel = new Gas(ID, P); break;
-                        case '4': Pixel = new Powder(ID, P); break;
+                        case '1': Pixel = new Solid(BrushID, P); break;
+                        case '2': Pixel = new Liquid(BrushID, P); break;
+                        case '3': Pixel = new Gas(BrushID, P); break;
+                        case '4': Pixel = new Powder(BrushID, P); break;
                     }
                 }
                 Matrix.Set(P, Pixel);
