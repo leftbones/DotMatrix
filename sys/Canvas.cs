@@ -54,7 +54,8 @@ class Canvas {
     public Multiline StatsContent { get; private set; }
 
     // Debug
-    public bool DrawChunks          = true;         // Draw lines on the border of each Chunk
+    public bool DrawChunks          = false;        // Draw lines on the border of each Chunk
+    public bool DrawWorldBorder     = true;         // Draw the border of the world
     public bool DrawDirtyRects      = false;        // Draw each Chunk's dirty rectangle
     public bool DrawMovementOverlay = false;        // Draw Pixels in purple when they have not moved since the last tick and yellow when they have
     public bool DrawSettledOverlay  = false;        // Draw Pixels in red when settled and blue when not settled
@@ -267,7 +268,10 @@ class Canvas {
 
     // Paint Pixels to the Matrix using a brush
     public void Paint() {
-        if (Menus.Any(M => M.Active)) ChangeMenu();
+        if (Menus.Any(M => M.Active)) {
+            ChangeMenu();
+            return;
+        }
 
         var LinePoints = GetLinePoints(MousePrev, MousePos, BrushSize);
         var PointCache = new List<Vector2i>();
@@ -355,7 +359,7 @@ class Canvas {
 
     // Set the brush
     public void SetBrushSize(int size) {
-        BrushSize = Math.Clamp(size, 0, 100);
+        BrushSize = Math.Clamp(size, 1, 100);
     }
 
     // Increase the brush size
@@ -371,16 +375,13 @@ class Canvas {
     public void Update() {
         if (Painting || Erasing)
             Paint();
-
-        Painting = false;
-        Erasing = false;
     }
 
     public void Draw() {
         // Brush Indicator
         int Offset = BrushSize % 2 == 0 ? 0 : Engine.MatrixScale / 2;
-        int MX = MousePos.X - ((BrushSize * Engine.MatrixScale) / 2) + Offset;
-        int MY = MousePos.Y - ((BrushSize * Engine.MatrixScale) / 2) + Offset;
+        int MX = MousePos.X - (BrushSize * Engine.MatrixScale / 2) + Offset;
+        int MY = MousePos.Y - (BrushSize * Engine.MatrixScale / 2) + Offset;
 
         var Col = Painting ? Color.RED : Color.WHITE;
         DrawRectangleLines(MX, MY, BrushSize * Engine.MatrixScale, BrushSize * Engine.MatrixScale, Col);

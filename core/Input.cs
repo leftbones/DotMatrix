@@ -30,6 +30,7 @@ namespace DotMatrix;
 
 class Input {
     public Engine Engine { get; private set; }
+    public Interface Interface { get { return Engine.Interface; } }
     public Camera Camera { get { return Engine.Camera; } }
     public Canvas Canvas { get { return Engine.Canvas; } }
     public Config Config { get { return Engine.Config; } }
@@ -86,16 +87,17 @@ class Input {
         if (MouseWheelMove != 0) InputStream.Add(new Key(EventType.Press, MouseWheelMove < 0 ? 7 : 8));
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) InputStream.Add(new Key(EventType.Press, (int)MOUSE_BUTTON_LEFT));
+        else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) InputStream.Add(new Key(EventType.Hold, (int)MOUSE_BUTTON_LEFT));
+        else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) InputStream.Add(new Key(EventType.Release, (int)MOUSE_BUTTON_LEFT));
+
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) InputStream.Add(new Key(EventType.Press, (int)MOUSE_BUTTON_RIGHT));
+        else if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) InputStream.Add(new Key(EventType.Hold, (int)MOUSE_BUTTON_RIGHT));
+        else if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT)) InputStream.Add(new Key(EventType.Release, (int)MOUSE_BUTTON_RIGHT));
+
         if (IsMouseButtonPressed(MOUSE_BUTTON_MIDDLE)) InputStream.Add(new Key(EventType.Press, (int)MOUSE_BUTTON_MIDDLE));
+        else if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) InputStream.Add(new Key(EventType.Hold, (int)MOUSE_BUTTON_MIDDLE));
+        else if (IsMouseButtonReleased(MOUSE_BUTTON_MIDDLE)) InputStream.Add(new Key(EventType.Release, (int)MOUSE_BUTTON_MIDDLE));
 
-        if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) InputStream.Add(new Key(EventType.Release, (int)MOUSE_BUTTON_LEFT));
-        if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT)) InputStream.Add(new Key(EventType.Release, (int)MOUSE_BUTTON_RIGHT));
-        if (IsMouseButtonReleased(MOUSE_BUTTON_MIDDLE)) InputStream.Add(new Key(EventType.Release, (int)MOUSE_BUTTON_MIDDLE));
-
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) InputStream.Add(new Key(EventType.Hold, (int)MOUSE_BUTTON_LEFT));
-        if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) InputStream.Add(new Key(EventType.Hold, (int)MOUSE_BUTTON_RIGHT));
-        if (IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) InputStream.Add(new Key(EventType.Hold, (int)MOUSE_BUTTON_MIDDLE));
 
         // Handle held keys
         foreach (var Code in HeldKeys) {
@@ -105,11 +107,15 @@ class Input {
 
         // Process all Keys in the InputStream, firing their Event if there is an EventType match
         foreach (var Key in InputStream) {
-            if (KeyBindings.ContainsKey(Key.Code)) {
+            // Try sending the key to Interface first, if it returns true, skip further processing
+            if (Interface.FireEvent(Key)) {
+                continue;
+            } else if (KeyBindings.ContainsKey(Key.Code)) {
                 var EventList = KeyBindings[Key.Code];
 
                 foreach (var Event in EventList) {
                     if (Key.Type == Event.Type) {
+                        Pepper.Log($"{Key.Code} ({Key.Type})", LogType.DEBUG);
                         Event.Fire();
                     }
                 }
@@ -125,8 +131,10 @@ class Input {
             { "ToggleActive", new Event(EventType.Press, new Action(Engine.ToggleActive)) },
             { "TickOnce", new Event(EventType.Press, new Action(Engine.TickOnce)) },
 
-            { "Paint", new Event(EventType.Hold, new Action(() => { Canvas.Painting = true; })) },
-            { "Erase", new Event(EventType.Hold, new Action(() => { Canvas.Erasing = true; })) },
+            { "PaintStart", new Event(EventType.Press, new Action(() => { Canvas.Painting = true; })) },
+            { "PaintEnd", new Event(EventType.Release, new Action(() => { Canvas.Painting = false; })) },
+            { "EraseStart", new Event(EventType.Press, new Action(() => { Canvas.Erasing = true; })) },
+            { "EraseEnd", new Event(EventType.Release, new Action(() => { Canvas.Erasing = false; })) },
             { "BrushSizeUp", new Event(EventType.Press, new Action(Canvas.BrushSizeUp)) },
             { "BrushSizeDown", new Event(EventType.Press, new Action(Canvas.BrushSizeDown)) },
 
@@ -137,132 +145,22 @@ class Input {
             { "CameraReset", new Event(EventType.Press, new Action(Camera.Reset)) },
         };
 
-        // All valid input keys/buttons mapped to string names for easier configuration
-        var InputMap = new Dictionary<String, int>() {
-            // Mouse
-            { "mouse_1", (int)MOUSE_BUTTON_LEFT },
-            { "mouse_2", (int)MOUSE_BUTTON_RIGHT },
-            { "mouse_3", (int)MOUSE_BUTTON_MIDDLE },
-            { "mouse_wheel_up", 7 },
-            { "mouse_wheel_down", 8 },
-
-            // Modifiers
-            { "l_shift", (int)KEY_LEFT_SHIFT },
-            { "r_shift", (int)KEY_RIGHT_SHIFT },
-            { "l_ctrl", (int)KEY_LEFT_CONTROL },
-            { "r_ctrl", (int)KEY_RIGHT_CONTROL },
-            { "l_alt", (int)KEY_LEFT_ALT },
-            { "r_alt", (int)KEY_RIGHT_ALT },
-
-            // Special
-            { "escape", (int)KEY_ESCAPE },
-            { "tab", (int)KEY_TAB },
-            { "enter", (int)KEY_ENTER },
-            { "space", (int)KEY_SPACE },
-            { "backspace", (int)KEY_BACKSPACE },
-
-            // Letters
-            { "a", (int)KEY_A },
-            { "b", (int)KEY_B },
-            { "c", (int)KEY_C },
-            { "d", (int)KEY_D },
-            { "e", (int)KEY_E },
-            { "f", (int)KEY_F },
-            { "g", (int)KEY_G },
-            { "h", (int)KEY_H },
-            { "i", (int)KEY_I },
-            { "j", (int)KEY_J },
-            { "k", (int)KEY_K },
-            { "l", (int)KEY_L },
-            { "m", (int)KEY_M },
-            { "n", (int)KEY_N },
-            { "o", (int)KEY_O },
-            { "p", (int)KEY_P },
-            { "q", (int)KEY_Q },
-            { "r", (int)KEY_R },
-            { "s", (int)KEY_S },
-            { "t", (int)KEY_T },
-            { "u", (int)KEY_U },
-            { "v", (int)KEY_V },
-            { "w", (int)KEY_W },
-            { "x", (int)KEY_X },
-            { "y", (int)KEY_Y },
-            { "z", (int)KEY_Z },
-
-            // Numbers
-            { "1", (int)KEY_ONE },
-            { "2", (int)KEY_TWO },
-            { "3", (int)KEY_THREE },
-            { "4", (int)KEY_FOUR },
-            { "5", (int)KEY_FIVE },
-            { "6", (int)KEY_SIX },
-            { "7", (int)KEY_SEVEN },
-            { "8", (int)KEY_EIGHT },
-            { "9", (int)KEY_NINE },
-            { "0", (int)KEY_ZERO },
-
-            // Function keys
-            { "f1", (int)KEY_F1 },
-            { "f2", (int)KEY_F2 },
-            { "f3", (int)KEY_F3 },
-            { "f4", (int)KEY_F4 },
-            { "f5", (int)KEY_F5 },
-            { "f6", (int)KEY_F6 },
-            { "f7", (int)KEY_F7 },
-            { "f8", (int)KEY_F8 },
-            { "f9", (int)KEY_F9 },
-            { "f10", (int)KEY_F10 },
-            { "f11", (int)KEY_F11 },
-            { "f12", (int)KEY_F12 },
-
-            // Symbols
-            { "-", (int)KEY_MINUS },
-            { "=", (int)KEY_EQUAL },
-            { "[", (int)KEY_LEFT_BRACKET },
-            { "]", (int)KEY_RIGHT_BRACKET },
-            { ";", (int)KEY_SEMICOLON },
-            { "'", (int)KEY_APOSTROPHE },
-            { "`", (int)KEY_GRAVE },
-            { "/", (int)KEY_SLASH },
-            { "\\", (int)KEY_BACKSLASH },
-            { ",", (int)KEY_COMMA },
-            { ".", (int)KEY_PERIOD },
-
-            // Keypad
-            { "kp_1", (int)KEY_KP_1 },
-            { "kp_2", (int)KEY_KP_2 },
-            { "kp_3", (int)KEY_KP_3 },
-            { "kp_4", (int)KEY_KP_4 },
-            { "kp_5", (int)KEY_KP_5 },
-            { "kp_6", (int)KEY_KP_6 },
-            { "kp_7", (int)KEY_KP_7 },
-            { "kp_8", (int)KEY_KP_8 },
-            { "kp_9", (int)KEY_KP_9 },
-            { "kp_0", (int)KEY_KP_0 },
-            { "kp_enter", (int)KEY_KP_ENTER },
-            { "kp_add", (int)KEY_KP_ADD },
-            { "kp_subtract", (int)KEY_KP_SUBTRACT },
-            { "kp_multiply", (int)KEY_KP_MULTIPLY },
-            { "kp_divide", (int)KEY_KP_DIVIDE },
-            { "kp_decimal", (int)KEY_KP_DECIMAL },
-        };
-
         // Get the values from keymap.json (falls back to default_keymap.json if none is found)
         var KeyMap = Config.LoadKeymap();
 
         // Map actions to inputs, invalid keys/values are skipped and logged as warnings
         foreach (var Data in KeyMap) {
-            if (InputMap.ContainsKey(Data.Key)) {
+            if (Global.InputMap.ContainsKey(Data.Key)) {
                 var EventList = new List<Event>();
                 foreach (var Event in Data.Value) {
                     if (EventMap.ContainsKey(Event)) {
                         EventList.Add(EventMap[Event]);
-                        Pepper.Log($"Mapped '{Data.Key}' to '{Event}'", LogType.INPUT);
+                        Pepper.Log($"Mapped {Data.Key} ({EventMap[Event].Type}) to {Event}", LogType.INPUT, LogLevel.DEBUG);
                     } else {
-                        Pepper.Log($"Value '{Data.Value}' not found in ActionMap", LogType.INPUT, LogLevel.WARNING);
+                        Pepper.Log($"Value '{Data.Value}' not found in EventMap", LogType.INPUT, LogLevel.WARNING);
                     }
                 }
-                KeyBindings.Add(InputMap[Data.Key], EventList);
+                KeyBindings.Add(Global.InputMap[Data.Key], EventList);
             } else {
                 Pepper.Log($"Key '{Data.Key}' not found in InputMap", LogType.INPUT, LogLevel.WARNING);
             }

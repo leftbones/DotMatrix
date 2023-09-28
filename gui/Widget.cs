@@ -17,7 +17,7 @@ class Widget {
         Parent = parent;
     }
 
-    public virtual bool FireEvent(Event E) {
+    public virtual bool FireEvent(Key K) {
         return false;
     }
 

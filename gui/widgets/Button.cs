@@ -26,11 +26,11 @@ class Button : Widget {
         Background = background;
     }
 
-    public override bool FireEvent(Event E) {
-        // if (E.Name == "MousePress:MOUSE_BUTTON_LEFT" && Hovered) {
-        //     Action.Invoke();
-        //     return true;
-        // }
+    public override bool FireEvent(Key K) {
+        if (K.Type == EventType.Press && K.Code == (int)MouseButton.MOUSE_BUTTON_LEFT && Hovered) {
+            Action.Invoke();
+            return true;
+        }
 
         return false;
     }

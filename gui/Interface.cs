@@ -37,10 +37,10 @@ class Interface {
         Containers.Add(C);
     }
 
-    public bool FireEvent(Event E) {
+    public bool FireEvent(Key K) {
         // Pass event to all containers
         foreach (var C in Containers) {
-            if (C.FireEvent(E))
+            if (C.FireEvent(K))
                 return true;
         }
 

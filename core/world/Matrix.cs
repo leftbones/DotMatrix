@@ -506,5 +506,10 @@ class Matrix {
                 }
             }
         }
+
+        // World Border
+        if (Engine.Canvas.DrawWorldBorder) {
+            DrawRectangleLines(0, 0, Size.X * Scale, Size.Y * Scale, new Color(255, 255, 255, 150));
+        }
     }
 }

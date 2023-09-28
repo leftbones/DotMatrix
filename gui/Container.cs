@@ -50,18 +50,21 @@ class Container {
         Widgets.Add(W);
     }
 
-    public virtual bool FireEvent(Event E) {
+    public virtual bool FireEvent(Key K) {
         if (!Active) return false;
 
-        // Scrolling
-        // if (Scroll && E.Name.Contains("MouseWheel")) {
-        //     ScrollOffset -= ((MouseWheelEvent)E).Amount;
-        //     return true;
-        // }
+        if (K.Type == EventType.Press) {
+            if (Scroll) {
+                if (K.Code == 7 || K.Code == 8) {
+                    ScrollOffset -= K.Code == 7 ? 1 : -1;
+                    return true;
+                }
+            }
+        }
 
         // Widgets
         foreach (var W in Widgets) {
-            if (W.FireEvent(E))
+            if (W.FireEvent(K))
                 return true;
         }
 

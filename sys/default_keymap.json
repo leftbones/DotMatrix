@@ -1,7 +1,7 @@
 {
     // Canvas
-    "mouse_1": ["Paint"],
-    "mouse_2": ["Erase"],
+    "mouse_1": ["PaintStart", "PaintEnd"],
+    "mouse_2": ["EraseStart", "EraseEnd"],
 
     "mouse_wheel_up": ["BrushSizeUp"],
     "mouse_wheel_down": ["BrushSizeDown"],

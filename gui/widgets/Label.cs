@@ -24,8 +24,7 @@ class Label : Widget {
     }
 
     public override void Update() {
-        if (UpdateAction is not null)
-            UpdateAction.Invoke();
+        UpdateAction?.Invoke();
     }
 
     public override void Draw() {
