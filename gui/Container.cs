@@ -54,10 +54,10 @@ class Container {
         if (!Active) return false;
 
         // Scrolling
-        if (Scroll && E.Name.Contains("MouseWheel")) {
-            ScrollOffset -= ((MouseWheelEvent)E).Amount;
-            return true;
-        }
+        // if (Scroll && E.Name.Contains("MouseWheel")) {
+        //     ScrollOffset -= ((MouseWheelEvent)E).Amount;
+        //     return true;
+        // }
 
         // Widgets
         foreach (var W in Widgets) {

@@ -25,6 +25,7 @@ class Engine {
     public Interface Interface { get; private set; }
     public Canvas Canvas { get; private set; }
     public Camera Camera { get; private set; }
+    public Input Input { get; private set; }
 
     public Theme Theme { get { return Interface.Theme; } }
 
@@ -39,9 +40,11 @@ class Engine {
     public bool FullStop { get; private set; }      = false;    // Stop everything except the bare minimum, set only by Pepper.Throw()
     public bool ShouldExit { get; private set; }    = false;    // Program will exit after the current update is completed
 
+    // Config
+    public bool PauseOnStart { get; private set; } = false;     // If the simulation should be paused before tick 0 is started
+
     // Extra
     private List<Timer> Timers = new List<Timer>();
-    private List<KeyboardKey> HeldKeys = new List<KeyboardKey>();
 
 
     public Engine(Vector2i window_size, int matrix_scale) {
@@ -62,122 +65,36 @@ class Engine {
         Interface = new Interface(this);
         Canvas = new Canvas(this);
         Camera = new Camera(this);
+        Input = new Input(this);
 
         // Player = new Entity();
         // Camera.Target = Player;
 
         // Apply Config
-        Matrix.ApplyConfig(Config);
-        Physics.ApplyConfig(Config);
-        Interface.ApplyConfig(Config);
-        Canvas.ApplyConfig(Config);
-        Camera.ApplyConfig(Config);
-    }
+        Config.ApplyChanges();
 
-    public void HandleInput() {
-        var Events = new List<Event>();
-
-        // Key Press/Release
-        var K = GetKeyPressed();
-        while (K != 0) {
-            var Key = (KeyboardKey)K;
-            var E = new KeyPressEvent(Key);
-            Events.Add(E);
-            // Pepper.Log($"{E.Name}");
-
-            if (!HeldKeys.Contains(Key))
-                HeldKeys.Add(Key);
-
-            K = GetKeyPressed();
-        }
-
-        // Key Down
-        for (int i = HeldKeys.Count() - 1; i >= 0; i--) {
-            var Key = HeldKeys[i];
-            if (!IsKeyDown(Key)) {
-                var E = new KeyReleaseEvent(Key);
-                Events.Add(E);
-                // Pepper.Log($"{E.Name}");
-                HeldKeys.Remove(Key);
-            }
-        }
-
-        // Mouse Movement/Buttons/Wheel
-        var MousePos = new Vector2i(
-            (int)Math.Round((double)GetMouseX() / MatrixScale) * MatrixScale,
-            (int)Math.Round((double)GetMouseY() / MatrixScale) * MatrixScale
-        );
-
-        Canvas.MousePrev = Canvas.MousePos;
-        Canvas.MousePos = MousePos;
-
-        int MouseWheelMove = (int)GetMouseWheelMove();
-        if (MouseWheelMove != 0) Events.Add(new MouseWheelEvent(MouseWheelMove));
-
-        if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT)) Events.Add(new MousePressEvent(MouseButton.MOUSE_BUTTON_LEFT, MousePos));
-        if (IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_RIGHT)) Events.Add(new MousePressEvent(MouseButton.MOUSE_BUTTON_RIGHT, MousePos));
-
-        if (IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT)) Events.Add(new MouseReleaseEvent(MouseButton.MOUSE_BUTTON_LEFT, MousePos));
-        if (IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_RIGHT)) Events.Add(new MouseReleaseEvent(MouseButton.MOUSE_BUTTON_RIGHT, MousePos));
-
-        // Handle Held Keys (Temporary)
-        foreach (var Key in HeldKeys) {
-            var E = new KeyDownEvent(Key);
-            Events.Add(E);
-        }
-
-        // Handle Events (Temporary)
-        foreach (var E in Events) {
-            // Interface
-            if (Interface.FireEvent(E))
-                return;
-
-            // Exit
-            else if (E.Name == "KeyPress:KEY_ESCAPE")
-                ShouldExit = true;
-
-            // Pause
-            else if (E.Name == "KeyPress:KEY_SPACE")
-                Active = !Active;
-
-            // Advance
-            else if (!Active && E.Name == "KeyPress:KEY_T") {
-                Active = true;
-                StepOnce = true;
-            }
-
-            // Paint
-            else if (!IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) && E.Name == "MousePress:MOUSE_BUTTON_LEFT") Canvas.Painting = true;
-            else if (E.Name == "MouseRelease:MOUSE_BUTTON_LEFT") Canvas.Painting = false;
-
-            // Erase
-            else if (!IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) && E.Name == "MousePress:MOUSE_BUTTON_RIGHT") { Canvas.Painting = true; Canvas.Erasing = true; }
-            else if (E.Name == "MouseRelease:MOUSE_BUTTON_RIGHT") { Canvas.Painting = false; Canvas.Erasing = false; }
-
-            // Brush Size
-            else if (E.Name.Contains("MouseWheel")) { Canvas.BrushSize = Math.Clamp(Canvas.BrushSize - ((MouseWheelEvent)E).Amount, 1, 100); }
-
-            // Player Controls
-            else if (Player is null && E.Name == "KeyDown:KEY_W") Camera.Pan(Direction.Up);
-            else if (Player is null && E.Name == "KeyDown:KEY_S") Camera.Pan(Direction.Down);
-            else if (Player is null && E.Name == "KeyDown:KEY_A") Camera.Pan(Direction.Left);
-            else if (Player is null && E.Name == "KeyDown:KEY_D") Camera.Pan(Direction.Right);
-            else if (Player is not null && E.Name == "KeyDown:KEY_W") Player.Jump();
-            // else if (Player is not null && E.Name == "KeyDown:KEY_S") Player.Crouch();
-            else if (Player is not null && E.Name == "KeyDown:KEY_A") Player.Move(Direction.Left);
-            else if (Player is not null && E.Name == "KeyDown:KEY_D") Player.Move(Direction.Right);
-
-            else if (Player is null && E.Name == "KeyPress:KEY_MENU") Camera.Reset();
-            else if (Player is not null && E.Name == "KeyPress:KEY_MENU") Player.Respawn();
+        if (PauseOnStart) {
+            ToggleActive();
         }
     }
 
+    // Apply changes to the Config
+    public void ApplyConfig(Config C) {
+        Pepper.Log("Canvas config applied", LogType.SYSTEM);
+    }
+
+    // Main engine update loop
     public void Update() {
+        // Handle input before anything else
+        Input.Update();
+
+        // If engine is hard-stopped, only update the interface
         if (FullStop) {
             Interface.Update();
             return;
         }
 
+        // If simulation is paused, only update the canvas, interface, and camera
         if (!Active) {
             Canvas.Update();
             Interface.Update();
@@ -185,7 +102,7 @@ class Engine {
             return;
         }
 
-        // Timers
+        // Handle timers
         for (int i = Timers.Count() - 1; i >= 0; i--) {
             var T = Timers[i];
             T.Tick();
@@ -212,12 +129,14 @@ class Engine {
         // Advance Tick
         Tick++;
 
+        // If stepping once (while paused) pause again before ending the update
         if (StepOnce) {
             Active = false;
             StepOnce = false;
         }
     }
 
+    // Main engine draw loop
     public void Draw() {
         Camera.Draw();
 
@@ -251,8 +170,23 @@ class Engine {
 		Pepper.Log($"Simulation is now {ActiveStr}", LogType.ENGINE);
 	}
 
+    // Tell the engine to advance one tick and then pause the simulation
+    public void TickOnce() {
+        if (!Active) {
+            Active = true;
+            StepOnce = true;
+        }
+    }
+
     // Completely stop all processing except for Interface (called only by Pepper.Throw)
     public void Halt() {
         FullStop = true;
+        Pepper.Log("Exception thrown.", LogType.ENGINE);
+    }
+
+    // Set the "ShouldExit" flag to true
+    public void Exit() {
+        ShouldExit = true;
+        Pepper.Log("Engine will exit at the beginning of the next update.", LogType.ENGINE);
     }
 }

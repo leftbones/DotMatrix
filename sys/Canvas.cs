@@ -353,9 +353,27 @@ class Canvas {
         return Points.Distinct().ToList();
     }
 
+    // Set the brush
+    public void SetBrushSize(int size) {
+        BrushSize = Math.Clamp(size, 0, 100);
+    }
+
+    // Increase the brush size
+    public void BrushSizeUp() {
+        SetBrushSize(BrushSize + 1);
+    }
+
+    // Decrease the brush size
+    public void BrushSizeDown() {
+        SetBrushSize(BrushSize - 1);
+    }
+
     public void Update() {
-        if (Painting)
+        if (Painting || Erasing)
             Paint();
+
+        Painting = false;
+        Erasing = false;
     }
 
     public void Draw() {

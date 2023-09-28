@@ -4,8 +4,10 @@ using static Raylib_cs.Raylib;
 namespace DotMatrix;
 
 /// <summary>
-/// Handles the creation, updating, event firing, and drawing of all interface elements
-/// All input events are sent here first, and if no children respond, the event is sent to the other parts of the Engine
+/// Handles the creation, updating, event firing, and drawing of all interface elements.
+/// All input is sent here first, and if no children respond, the input is processed further in the Input class. See `Input` for more details.
+/// Inputs are sent to each child Container, and each Container sends it to each child Widget. If any child anywhere in the chain returns true,
+/// that means the input was handled and does not need to be processed further.
 /// </summary>
 
 enum Anchor { Left, Center, Right, Top, Bottom }; // TODO: Implement TopLeft, BottomLeft, TopCenter, BottomCenter, TopRight, BottomRight
@@ -36,18 +38,6 @@ class Interface {
     }
 
     public bool FireEvent(Event E) {
-        // Close any open containers
-        if (E.Name == "KeyPress:KEY_ESCAPE") {
-            bool Fired = false;
-            foreach (Container C in Containers) {
-                if (C.Active && C != Engine.Canvas.Toolbar) {
-                    Fired = true;
-                    C.Toggle();
-                }
-            }
-            if (Fired) return true;
-        }
-
         // Pass event to all containers
         foreach (var C in Containers) {
             if (C.FireEvent(E))

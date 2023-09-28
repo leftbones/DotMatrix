@@ -52,16 +52,16 @@ class Physics {
         // Finish
         Pepper.Log("Physics initialized", LogType.PHYSICS);
 
-        // TESTING
-        var Platform = new Entity();
-        var PlatformPos = new Vector2i(150, 150);
-        Platform.AddToken(new Render());
-        Platform.AddToken(new PixelMap(PlatformPos, 100, 200, 20));
-        Platform.AddToken(new Transform(PlatformPos));
-        Platform.AddToken(new Box2D(World, PlatformPos, BodyType.Static, false, HitboxShape.Box, 25f, 2.5f));
+        // TESTING (Adds a stone platform)
+        // var Platform = new Entity();
+        // var PlatformPos = new Vector2i(150, 150);
+        // Platform.AddToken(new Render());
+        // Platform.AddToken(new PixelMap(PlatformPos, 100, 200, 20));
+        // Platform.AddToken(new Transform(PlatformPos));
+        // Platform.AddToken(new Box2D(World, PlatformPos, BodyType.Static, false, HitboxShape.Box, 25f, 2.5f));
 
-        Engine.Entities.Add(Platform);
-        Bodies.Add(Platform);
+        // Engine.Entities.Add(Platform);
+        // Bodies.Add(Platform);
     }
 
     public void SetActive(bool flag) {
@@ -102,20 +102,20 @@ class Physics {
     public void Update() {
         if (!Active) return;
 
-        // TESTING
-        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) && IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT)) {
-            var MousePosAdj = (((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Matrix.Scale) + (Engine.Canvas.MousePos / Matrix.Scale));
+        // TESTING (Shift + Right click to create barrels)
+        // if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) && IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT)) {
+        //     var MousePosAdj = (((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Matrix.Scale) + (Engine.Canvas.MousePos / Matrix.Scale));
 
-            var Block = new Entity();
-            Block.AddToken(new Render());
-            Block.AddToken(new PixelMap(MousePosAdj, "res/objects/barrel_pm.png", "res/objects/barrel_mm.png"));
-            Block.AddToken(new Transform(MousePosAdj));
+        //     var Block = new Entity();
+        //     Block.AddToken(new Render());
+        //     Block.AddToken(new PixelMap(MousePosAdj, "res/objects/barrel_pm.png", "res/objects/barrel_mm.png"));
+        //     Block.AddToken(new Transform(MousePosAdj));
 
-            Block.AddToken(CreateBody(Block, MousePosAdj, BodyType.Dynamic, false, HitboxShape.Box));
+        //     Block.AddToken(CreateBody(Block, MousePosAdj, BodyType.Dynamic, false, HitboxShape.Box));
 
-            Engine.Entities.Add(Block);
-            Bodies.Add(Block);
-        }
+        //     Engine.Entities.Add(Block);
+        //     Bodies.Add(Block);
+        // }
 
         World.Step(TimeStep, VelocityIterations, PositionIterations);
     }

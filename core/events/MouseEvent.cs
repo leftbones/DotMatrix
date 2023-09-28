@@ -3,45 +3,49 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
+// Abstract Mouse Event
+abstract class MouseEvent : Event {
+    public MouseButton? MouseButton;
+    public MouseEvent(MouseButton? mouse_button, String name, EventType type, Action? action) : base(type, action) {
+        MouseButton = mouse_button;
+    }
+}
+
 // Mouse Press
-class MousePressEvent : Event {
-    public MouseButton MouseButton;
+class MousePressEvent : MouseEvent {
     public Vector2i Position;
 
-    public MousePressEvent(MouseButton mouse_button, Vector2i position) : base($"MousePress:{mouse_button}") {
+    public MousePressEvent(MouseButton mouse_button, Vector2i position, EventType type, Action? action) : base(mouse_button, $"MousePress:{mouse_button}", type, action) {
         MouseButton = mouse_button;
         Position = position;
     }
 }
 
 // Mouse Release
-class MouseReleaseEvent : Event {
-    public MouseButton MouseButton;
+class MouseReleaseEvent : MouseEvent {
     public Vector2i Position;
 
-    public MouseReleaseEvent(MouseButton mouse_button, Vector2i position) : base($"MouseRelease:{mouse_button}") {
+    public MouseReleaseEvent(MouseButton mouse_button, Vector2i position, EventType type, Action? action) : base(mouse_button, $"MouseRelease:{mouse_button}", type, action) {
         MouseButton = mouse_button;
         Position = position;
     }
 }
 
 // Mouse Down
-class MouseDownEvent : Event {
-    public MouseButton MouseButton;
+class MouseDownEvent : MouseEvent {
     public Vector2i Position;
 
-    public MouseDownEvent(MouseButton mouse_button, Vector2i position) : base($"MouseDown:{mouse_button}") {
+    public MouseDownEvent(MouseButton mouse_button, Vector2i position, EventType type, Action? action) : base(mouse_button, $"MouseDown:{mouse_button}", type, action) {
         MouseButton = mouse_button;
         Position = position;
     }
 }
 
-
-// Wheel
-class MouseWheelEvent : Event {
+// Mouse Wheel
+class MouseWheelEvent : MouseEvent {
     public int Amount { get; private set; }
 
-    public MouseWheelEvent(int amount) : base($"MouseWheel:{amount}") {
+    public MouseWheelEvent(int amount, EventType type, Action? action) : base(null, $"MouseWheel:{amount}", type, action) {
         Amount = amount;
     }
 }

@@ -3,14 +3,30 @@ using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
-class Event {
-    public string Name { get; private set; }
+public enum EventType { Press, Release, Hold, Any };
 
-    public Event(string name) { // TODO: Change string name to use the keycode identifier instead, not as nice for debugging purposes but faster to check than comparing strings
-        Name = name;
+class Event {
+    public EventType Type { get; private set; }
+    public Action? Action { get; private set; }
+
+    public Event(EventType type, Action? action) { // TODO: Change string name to use the keycode identifier instead, not as nice for debugging purposes but faster to check than comparing strings
+        Type = type;
+        Action = action;
     }
 
-    public override string ToString() {
-        return Name;
+    public void Fire() {
+        if (Action is not null) {
+            Action.Invoke();
+        }
+    }
+}
+
+class Key {
+    public EventType Type { get; private set; }
+    public int Code { get; private set; }
+
+    public Key(EventType type, int code) {
+        Type = type;
+        Code = code;
     }
 }

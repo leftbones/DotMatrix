@@ -27,10 +27,10 @@ class Button : Widget {
     }
 
     public override bool FireEvent(Event E) {
-        if (E.Name == "MousePress:MOUSE_BUTTON_LEFT" && Hovered) {
-            Action.Invoke();
-            return true;
-        }
+        // if (E.Name == "MousePress:MOUSE_BUTTON_LEFT" && Hovered) {
+        //     Action.Invoke();
+        //     return true;
+        // }
 
         return false;
     }

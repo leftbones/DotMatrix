@@ -28,12 +28,6 @@ class Program {
 
         while (!WindowShouldClose()) {
             ////
-            // Input
-
-            Engine.HandleInput();
-
-
-            ////
             // Update
 
             Engine.Update();

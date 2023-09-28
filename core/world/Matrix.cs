@@ -352,7 +352,7 @@ class Matrix {
                     if (!InBounds(MPos)) continue;
 
                     var MPixel = Get(MPos);
-                    if (MPixel.ID > -1 || MPixel.Entity is not null) continue;
+                    if (MPixel.ID > -1) continue;
 
                     var PX = x - Start.X;
                     var PY = y - Start.Y;
@@ -448,6 +448,7 @@ class Matrix {
                 for (int y = ChunkSize.Y - 1; y >= 0; y--) {
                     for (int x = 0; x < ChunkSize.X; x++) {
                         var P = Get(C.Position.X + x, C.Position.Y + y);
+
                         if (P.ID == -1 && !P.ColorSet) continue;
 
                         if (!P.ColorSet) {

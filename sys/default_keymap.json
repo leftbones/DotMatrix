@@ -1,0 +1,20 @@
+{
+    // Canvas
+    "mouse_1": ["Paint"],
+    "mouse_2": ["Erase"],
+
+    "mouse_wheel_up": ["BrushSizeUp"],
+    "mouse_wheel_down": ["BrushSizeDown"],
+
+    // Simulation
+    "escape": ["ForceQuit"],
+    "space": ["ToggleActive"],
+    "t": ["TickOnce"],
+
+    // Camera
+    "w": ["CameraPanUp"],
+    "s": ["CameraPanDown"],
+    "a": ["CameraPanLeft"],
+    "d": ["CameraPanRight"],
+    "r": ["CameraReset"]
+}

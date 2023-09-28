@@ -1,11 +1,21 @@
 {
+    //
+    // Simulation
+
+    // Engine
+    "PauseOnStart" : false,
+
     // Matrix
     "UseMultithreading" : true,
     "UseFancyGraphics" : true,
 
+
+    //
     // Debug
+
     "DebugModeEnabled" : true,
 
+    // Box2D
     "DrawBox2DSimulation" : false,
     "DrawPhysicsHitboxes" : true,
     "DrawPixelMapBoxes" : false
