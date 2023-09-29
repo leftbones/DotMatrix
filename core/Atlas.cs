@@ -36,8 +36,8 @@ static class Atlas {
 
         // Textures
         foreach (var Data in Solid) {
-            if (Data.Value.Texture != "")
-            MaterialMaps[Data.Value.ID] = new MaterialMap(LoadImage(Data.Value.Texture));
+            var TexturePath = Data.Value.Texture != "" ? Data.Value.Texture : "res/textures/missing.png";
+            MaterialMaps[Data.Value.ID] = new MaterialMap(LoadImage(TexturePath));
         }
     }
 

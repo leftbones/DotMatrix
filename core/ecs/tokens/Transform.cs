@@ -12,6 +12,6 @@ class Transform : Token {
 
     public Transform(Vector2i? position=null, float? rotation=null) {
         Position = position ?? Vector2i.Zero;
-        Rotation = rotation ?? 1.0f;
+        Rotation = rotation ?? 0.0f;
     }
 }

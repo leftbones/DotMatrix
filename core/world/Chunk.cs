@@ -31,10 +31,10 @@ class Chunk {
     private int X2w = 0;                                                                                                // Bottom right X coord for the working dirty rectangle
     private int Y2w = 0;                                                                                                // Bottom right Y coord for the working dirty rectangle
 
-    private int BD = 1;                                                                                                 // "Buffer Distance", how far to extend the dirty rect past the actual active pixels (1 seems fine, 2 if there are floating pixels left behind)
+    private readonly int BD = 1;                                                                                        // "Buffer Distance", how far to extend the dirty rect past the actual active pixels (1 seems fine, 2 if there are floating pixels left behind)
 
     public int SleepTimer { get; private set; }                                                                         // Timer that counts down before a Chunk sleeps
-    private int WaitTime = 30;                                                                                          // Number of ticks used for the SleepTimer
+    private readonly int WaitTime = 30;                                                                                 // Number of ticks used for the SleepTimer
 
     public Rectangle DirtyRect { get { return new Rectangle(Position.X + X1, Position.Y + Y1, X2 - X1, Y2 - Y1); } }    // Area within a Chunk containing active Pixels
 

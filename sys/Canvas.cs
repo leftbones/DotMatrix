@@ -59,6 +59,7 @@ class Canvas {
     public bool DrawDirtyRects      = false;        // Draw each Chunk's dirty rectangle
     public bool DrawMovementOverlay = false;        // Draw Pixels in purple when they have not moved since the last tick and yellow when they have
     public bool DrawSettledOverlay  = false;        // Draw Pixels in red when settled and blue when not settled
+    public bool DrawChunkCollision  = true;         // Draw the calculated collision area for each Chunk
 
     public Canvas(Engine engine) {
         Engine = engine;

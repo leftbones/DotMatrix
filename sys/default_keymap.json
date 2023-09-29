@@ -12,9 +12,9 @@
     "t": ["TickOnce"],
 
     // Camera
-    "w": ["CameraPanUp"],
-    "s": ["CameraPanDown"],
-    "a": ["CameraPanLeft"],
-    "d": ["CameraPanRight"],
+    "up": ["CameraPanUp"],
+    "down": ["CameraPanDown"],
+    "left": ["CameraPanLeft"],
+    "right": ["CameraPanRight"],
     "r": ["CameraReset"]
 }

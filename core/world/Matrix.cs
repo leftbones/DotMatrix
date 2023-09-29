@@ -493,6 +493,11 @@ class Matrix {
             }
         }
 
+        // World Border
+        if (Engine.Canvas.DrawWorldBorder) {
+            DrawRectangleLines(0, 0, Size.X * Scale, Size.Y * Scale, new Color(255, 255, 255, 150));
+        }
+
         // Chunk DirtyRect
         if (Engine.Canvas.DrawDirtyRects) {
             foreach (var C in ActiveChunks) {
@@ -507,9 +512,13 @@ class Matrix {
             }
         }
 
-        // World Border
-        if (Engine.Canvas.DrawWorldBorder) {
-            DrawRectangleLines(0, 0, Size.X * Scale, Size.Y * Scale, new Color(255, 255, 255, 150));
+        // Chunk Collision
+        if (Engine.Canvas.DrawChunkCollision) {
+            foreach (var C in ActiveChunks) {
+                if (C.Awake) {
+
+                }
+            }
         }
     }
 }

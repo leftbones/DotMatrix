@@ -44,12 +44,25 @@ static class Global {
         { "l_alt", (int)KEY_LEFT_ALT },
         { "r_alt", (int)KEY_RIGHT_ALT },
 
+        // Arrows
+        { "up", (int)KEY_UP },
+        { "down", (int)KEY_DOWN },
+        { "left", (int)KEY_LEFT },
+        { "right", (int)KEY_RIGHT },
+
         // Special
         { "escape", (int)KEY_ESCAPE },
         { "tab", (int)KEY_TAB },
         { "enter", (int)KEY_ENTER },
         { "space", (int)KEY_SPACE },
         { "backspace", (int)KEY_BACKSPACE },
+        { "capslock", (int)KEY_CAPS_LOCK },
+        { "delete", (int)KEY_DELETE },
+        { "home", (int)KEY_HOME },
+        { "end", (int)KEY_END },
+        { "insert", (int)KEY_INSERT },
+        { "page_up", (int)KEY_PAGE_UP },
+        { "page_down", (int)KEY_PAGE_DOWN },
 
         // Letters
         { "a", (int)KEY_A },

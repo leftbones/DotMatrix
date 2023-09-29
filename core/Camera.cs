@@ -19,6 +19,8 @@ class Camera {
     public Transform? Target { get; set; }
     public Vector2 TargetPos { get; set; }
 
+    public bool Unlocked { get; private set; }
+
     public Camera2D Viewport;                                                                           // Raylib Camera2D instance
     public Chunk Chunk { get { return Matrix.GetChunk(new Vector2i(Position) / Matrix.Scale); } }                     // Matrix Chunk containing the Camera
 
@@ -38,8 +40,7 @@ class Camera {
         StartPos = Position;
 
         // Viewport
-        Viewport = new Camera2D
-        {
+        Viewport = new Camera2D {
             target = Position,
             offset = new Vector2i(Engine.WindowSize.X / 2, Engine.WindowSize.Y / 2).ToVector2(),
             rotation = 0.0f,
@@ -53,14 +54,16 @@ class Camera {
 
     public void Pan(Vector2i dir) {
         TargetPos = new Vector2(TargetPos.X + (dir.X * 4), TargetPos.Y + (dir.Y * 4));
+        Unlocked = true;
     }
 
     public void Reset() {
-        TargetPos = StartPos;
+        TargetPos = Target is null ? StartPos : Target.Position.ToVector2();
+        Unlocked = false;
     }
 
     public void Update() {
-        var Dest = Target is null ? TargetPos : Target.Position.ToVector2();
+        var Dest = Target is null || Unlocked ? TargetPos : Target.Position.ToVector2();
         if (Position != Dest) {
             Position = Vector2.Lerp(Position, Dest, PanSpeed);
         }
@@ -69,8 +72,9 @@ class Camera {
     }
 
     public void Draw() {
-        // Skybox + Parallax (Temp)
-        if (DrawSkybox)
+        // Skybox (Testing)
+        if (DrawSkybox) {
             DrawTexturePro(Skybox, new Rectangle(0, 0, Skybox.width, Skybox.height), new Rectangle(0, 0, Engine.WindowSize.X, Engine.WindowSize.Y), Vector2.Zero, 0.0f, Color.WHITE);
+        }
     }
 }

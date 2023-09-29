@@ -76,6 +76,25 @@ class Engine {
         if (PauseOnStart) {
             ToggleActive();
         }
+
+
+        //
+        // TESTING
+
+        var Guy = new Entity();
+
+        Guy.AddToken(new Render("res/objects/guy.png"));
+        Guy.AddToken(new Transform(Matrix.Size * Matrix.Scale / 2));
+        Guy.AddToken(new Control(new Dictionary<int, Event>() {
+            { (int)KeyboardKey.KEY_A, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(-2, 0); }))},
+            { (int)KeyboardKey.KEY_D, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(2, 0); }))},
+            { (int)KeyboardKey.KEY_W, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(0, -2); }))},
+            { (int)KeyboardKey.KEY_S, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(0, 2); }))},
+        }));
+
+        Entities.Add(Guy);
+
+        Camera.Target = Guy.GetToken<Transform>();
     }
 
     // Apply changes to the Config

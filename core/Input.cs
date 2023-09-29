@@ -107,15 +107,26 @@ class Input {
 
         // Process all Keys in the InputStream, firing their Event if there is an EventType match
         foreach (var Key in InputStream) {
-            // Try sending the key to Interface first, if it returns true, skip further processing
+            // Try sending the key to Interface first, if it returns true, skip further processing for that key
             if (Interface.FireEvent(Key)) {
                 continue;
-            } else if (KeyBindings.ContainsKey(Key.Code)) {
+            }
+
+            // Try sending the key to each Control token in the Control System, if an event is fired, skip further processing for tha tkey
+            var Fired = false;
+            foreach (var Token in ControlSystem.Tokens) {
+                if (Token.FireEvent(Key)) {
+                    Fired = true;
+                    continue;
+                }
+            }
+
+            if (!Fired && KeyBindings.ContainsKey(Key.Code)) {
                 var EventList = KeyBindings[Key.Code];
 
                 foreach (var Event in EventList) {
                     if (Key.Type == Event.Type) {
-                        Pepper.Log($"{Key.Code} ({Key.Type})", LogType.DEBUG);
+                        // Pepper.Log($"{Key.Code} ({Key.Type})", LogType.DEBUG);
                         Event.Fire();
                     }
                 }
