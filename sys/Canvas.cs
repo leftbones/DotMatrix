@@ -54,7 +54,7 @@ class Canvas {
     public Multiline StatsContent { get; private set; }
 
     // Debug
-    public bool DrawChunks          = false;        // Draw lines on the border of each Chunk
+    public bool DrawChunks          = true;         // Draw lines on the border of each Chunk
     public bool DrawWorldBorder     = true;         // Draw the border of the world
     public bool DrawDirtyRects      = false;        // Draw each Chunk's dirty rectangle
     public bool DrawMovementOverlay = false;        // Draw Pixels in purple when they have not moved since the last tick and yellow when they have

@@ -515,14 +515,18 @@ class Matrix {
         // Chunk Collision
         if (Engine.Canvas.DrawChunkCollision) {
             foreach (var C in ActiveChunks) {
-                var Points = MarchingSquares.Calculate(Pixels, C.Position.X * Scale, C.Position.Y * Scale, ChunkSize.X, ChunkSize.Y);
+                var Points = MarchingSquares.Calculate(Pixels, C.Position.X, C.Position.Y, C.Position.X + ChunkSize.X, C.Position.Y + ChunkSize.Y);
                 if (Points.Count > 0) {
+                    DrawTextEx(Engine.Theme.Font, $"{Points.Count}", new Vector2i((C.Position.X * Scale) + 5, (C.Position.Y * Scale) + 5).ToVector2(), Engine.Theme.FontSize, Engine.Theme.FontSpacing, Color.WHITE);
+
                     Vector2i LP = Points[0];
                     for (int i = 1; i < Points.Count - 1; i++) {
                         var P = Points[i];
-                        DrawTextEx(Engine.Theme.Font, $"{Points.Count}", new Vector2i((C.Position.X * Scale) + 5, (C.Position.Y * Scale) + 5).ToVector2(), Engine.Theme.FontSize, Engine.Theme.FontSpacing, Color.WHITE);
+                        DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 2.0f, Color.WHITE);
                         LP = P;
                     }
+
+                    // DrawLineEx(LP.ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.WHITE);
                 }
             }
         }
