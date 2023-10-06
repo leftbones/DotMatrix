@@ -10,6 +10,7 @@ DotMatrix.sln
 bin/
 obj/
 media/
+logs/
 
 
 # Exclude

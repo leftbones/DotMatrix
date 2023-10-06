@@ -149,4 +149,13 @@ static class Global {
         { "kp_divide", (int)KEY_KP_DIVIDE },
         { "kp_decimal", (int)KEY_KP_DECIMAL },
     };
+
+    /// <summary>
+    /// Check if the passed key code matches the key name in the InputMap
+    /// </summary>
+    /// <param name="name">Name of the key defined in Global.InputMap</param>
+    /// <param name="code">Code of the key defined in Global.InputMap</param>
+    public static bool IsKey(string name, int code) {
+        return InputMap[name] == code;
+    }
 }

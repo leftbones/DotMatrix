@@ -32,8 +32,8 @@ class Matrix {
 
     public bool RedrawAllChunks { get; set; } = true;                           // Draw all Chunks on the next Draw call, including sleeping ones
 
-    private int ChunkWidth = 64;                                                // Width of each Chunk in Pixels
-    private int ChunkHeight = 64;                                               // Height of each Chunk in Pixels
+    private int ChunkWidth = 100;                                                // Width of each Chunk in Pixels
+    private int ChunkHeight = 100;                                               // Height of each Chunk in Pixels
 
     // ECS
     public List<PixelMap> ActivePixelMaps { get; private set; }                 // List of all PixelMap Tokens added to the Matrix during UpdateStart
@@ -72,7 +72,8 @@ class Matrix {
         RNG = new RNG(Seed);
 
 		// Set the Matrix size, scaled
-		Size = new Vector2i(2048 / Scale, 1280 / Scale);
+		// Size = new Vector2i(2048 / Scale, 1280 / Scale);
+        Size = new Vector2i(ChunkWidth * 5, ChunkHeight * 5);
 
         // Size the source and destination rectangles
         SourceRec = new Rectangle(0, 0, Size.X, Size.Y);
@@ -98,7 +99,7 @@ class Matrix {
         MaxChunksY = Size.Y / ChunkSize.Y;
         Chunks = new Chunk[MaxChunksX, MaxChunksY];
         ActiveChunks = new List<Chunk>();
-        ActiveArea = new Vector2i(3, 3);
+        ActiveArea = new Vector2i(2, 2);
 		var ChunkSeed = RNG.Random.Next(int.MinValue, int.MaxValue);
 
         for (int x = 0; x < MaxChunksX; x++) {
@@ -512,21 +513,31 @@ class Matrix {
             }
         }
 
-        // Chunk Collision
+        // Chunk Collision Borders
         if (Engine.Canvas.DrawChunkCollision) {
             foreach (var C in ActiveChunks) {
-                var Points = MarchingSquares.Calculate(Pixels, C.Position.X, C.Position.Y, C.Position.X + ChunkSize.X, C.Position.Y + ChunkSize.Y);
+                var Points = Boundaries.Calculate(Pixels, C.Position.X, C.Position.Y, C.Position.X + ChunkSize.X, C.Position.Y + ChunkSize.Y);
+                var Count = Points.Count;
                 if (Points.Count > 0) {
-                    DrawTextEx(Engine.Theme.Font, $"{Points.Count}", new Vector2i((C.Position.X * Scale) + 5, (C.Position.Y * Scale) + 5).ToVector2(), Engine.Theme.FontSize, Engine.Theme.FontSpacing, Color.WHITE);
+                    // Original
+                    var LP = Points[0];
+                    for (int i = 1; i < Points.Count - 1; i++) {
+                        var P = Points[i];
+                        DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 2.0f, Color.RED);
+                        LP = P;
+                    }
+                    DrawLineEx(Points[^1].ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.RED);
 
-                    Vector2i LP = Points[0];
+                    // Simplified
+                    Points = Boundaries.Simplify(Points, 75, 20.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
+
+                    LP = Points[0];
                     for (int i = 1; i < Points.Count - 1; i++) {
                         var P = Points[i];
                         DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 2.0f, Color.WHITE);
                         LP = P;
                     }
-
-                    // DrawLineEx(LP.ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.WHITE);
+                    DrawLineEx(Points[^1].ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.WHITE);
                 }
             }
         }

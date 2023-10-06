@@ -24,10 +24,6 @@ namespace DotMatrix;
 /// Events have an Action attached to them, and when `Event.Fire()` is called, `Action.Invoke()` is fired as long as `Event.Action` isn't null
 /// </summary>
 
-// TODO
-// - Re-implement interface event priority
-// - Figure out a way to assign multiple events to the same key (press, release, hold)
-
 class Input {
     public Engine Engine { get; private set; }
     public Interface Interface { get { return Engine.Interface; } }
@@ -40,6 +36,9 @@ class Input {
 
     private List<Key> InputStream = new List<Key>();
     private List<int> HeldKeys = new List<int>();
+
+    // Debug
+    private bool LogKeyMapping = false;
 
     public Input(Engine engine) {
         Engine = engine;
@@ -166,9 +165,14 @@ class Input {
                 foreach (var Event in Data.Value) {
                     if (EventMap.ContainsKey(Event)) {
                         EventList.Add(EventMap[Event]);
-                        Pepper.Log($"Mapped {Data.Key} ({EventMap[Event].Type}) to {Event}", LogType.INPUT, LogLevel.DEBUG);
+
+                        if (LogKeyMapping) {
+                            Pepper.Log($"Mapped {Data.Key} ({EventMap[Event].Type}) to {Event}", LogType.INPUT, LogLevel.DEBUG);
+                        }
                     } else {
-                        Pepper.Log($"Value '{Data.Value}' not found in EventMap", LogType.INPUT, LogLevel.WARNING);
+                        if (LogKeyMapping) {
+                            Pepper.Log($"Value '{Data.Value}' not found in EventMap", LogType.INPUT, LogLevel.WARNING);
+                        }
                     }
                 }
                 KeyBindings.Add(Global.InputMap[Data.Key], EventList);
