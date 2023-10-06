@@ -13,10 +13,9 @@ class Label : Widget {
 
     public Vector2i TextSize { get { return new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing)); } }
 
-    public Label(Container parent, string text, Vector2i? size=null, Quad? padding=null, Anchor? anchor=null, Anchor? text_anchor=null, Color? background=null, Action? update_action=null) : base(parent) {
+    public Label(Container parent, string text, Vector2i? size=null, Anchor? anchor=null, Anchor? text_anchor=null, Color? background=null, Action? update_action=null) : base(parent) {
         Text = text;
         Size = size ?? new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing));
-        Padding = padding ?? Padding;
         Anchor = anchor ?? Anchor;
         TextAnchor = text_anchor ?? Anchor.Center;
         Background = background ?? new Color(0, 0, 0, 0);
@@ -35,14 +34,14 @@ class Label : Widget {
         var Pos = Vector2i.Zero;
         switch (TextAnchor) {
             case Anchor.Left:
-                Pos = new Vector2i(Position.X + Padding.L, Position.Y + ((Size.Y + Padding.Y) / 2) - (TextSize.Y / 2));
+                Pos = new Vector2i(Position.X, Position.Y + (Size.Y / 2) - (TextSize.Y / 2));
                 break;
             case Anchor.Center:
-                Pos = new Vector2i(Position.X + (ClickBox.width / 2) - (TextSize.X / 2) + (Padding.L - Padding.R), Position.Y + (ClickBox.height / 2) - (TextSize.Y / 2) + (Padding.U - Padding.D));
+                Pos = new Vector2i(Position.X + (ClickBox.width / 2) - (TextSize.X / 2), Position.Y + (ClickBox.height / 2) - (TextSize.Y / 2));
                 break;
 
             case Anchor.Right:
-                Pos = new Vector2i(Position.X + (Size.X - Padding.R) - TextSize.X, Position.Y + ((Size.Y + Padding.Y) / 2) - (TextSize.Y / 2));
+                Pos = new Vector2i(Position.X + Size.X - TextSize.X, Position.Y + (Size.Y / 2) - (TextSize.Y / 2));
                 break;
         }
 

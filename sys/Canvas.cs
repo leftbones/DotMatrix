@@ -40,6 +40,7 @@ class Canvas {
     public Container Toolbar { get; private set; }
     public List<Container> Menus { get; private set; }
 
+    public Container SystemMenu { get; private set; }
     public Container SceneMenu { get; private set; }
     public Container BrushMenu { get; private set; }
     public Container ObjectsMenu { get; private set; }
@@ -89,98 +90,123 @@ class Canvas {
         StatsWindow.AddWidget(new Label(StatsWindow, "Statistics", new Vector2i(300, 20), background: Theme.HeaderBackground));
         StatsWindow.AddWidget(StatsContent);
 
-        Windows = new List<Container>();
-        Windows.Add(ExceptionWindow);
-        Windows.Add(StatsWindow);
+        Windows = new List<Container> {
+            ExceptionWindow,
+            StatsWindow
+        };
 
 
         ////
         // Containers
-        Toolbar = new Container(
+        Toolbar = new Container( // TODO: Expand Toolbar into a unique Widget somehow
             parent: Engine.Interface,
             position: Vector2i.Zero,
-            background: true,
+            margin: Quad.Zero,
+            background: false,
             horizontal: true
+        );
+
+        SystemMenu = new Container(
+            parent: Engine.Interface,
+            position: new Vector2i(0, 25),
+            margin: Quad.Zero,
+            activated: false
         );
 
         SceneMenu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(0, 25),
+            position: new Vector2i(110, 25),
+            margin: Quad.Zero,
             activated: false
         );
 
         BrushMenu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(105, 25),
+            position: new Vector2i(220, 25),
+            margin: Quad.Zero,
             activated: false
         );
 
         ObjectsMenu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(210, 25),
+            position: new Vector2i(330, 25),
+            margin: Quad.Zero,
             activated: false
         );
 
         ViewMenu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(315, 25),
+            position: new Vector2i(440, 25),
+            margin: Quad.Zero,
             activated: false
         );
 
         CheatsMenu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(420, 25),
+            position: new Vector2i(550, 25),
+            margin: Quad.Zero,
             activated: false
         );
 
         DebugMenu = new Container(
             parent: Engine.Interface,
-            position: new Vector2i(525, 25),
+            position: new Vector2i(660, 25),
+            margin: Quad.Zero,
             activated: false
         );
 
-        Menus = new List<Container>();
-        Menus.Add(SceneMenu);
-        Menus.Add(BrushMenu);
-        Menus.Add(ObjectsMenu);
-        Menus.Add(ViewMenu);
-        Menus.Add(CheatsMenu);
-        Menus.Add(DebugMenu);
+        Menus = new List<Container> {
+            SystemMenu,
+            SceneMenu,
+            BrushMenu,
+            ObjectsMenu,
+            ViewMenu,
+            CheatsMenu,
+            DebugMenu
+        };
 
         // Toolbar
-        Toolbar.AddWidget(new Button(Toolbar, "Scene", () => { ChangeMenu(SceneMenu); }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "Brush", () => { ChangeMenu(BrushMenu); }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "Objects", () => { ChangeMenu(ObjectsMenu); }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "View", () => { ChangeMenu(ViewMenu); }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "Cheats", () => { ChangeMenu(CheatsMenu); }, new Vector2i(100, 20)));
-        Toolbar.AddWidget(new Button(Toolbar, "Debug", () => { ChangeMenu(DebugMenu); }, new Vector2i(100, 20)));
+        Toolbar.AddWidget(new Button(Toolbar, "DotMatrix", () => { ChangeMenu(SystemMenu); }, new Vector2i(100, 25)));
+        Toolbar.AddWidget(new Button(Toolbar, "Scene", () => { ChangeMenu(SceneMenu); }, new Vector2i(100, 25)));
+        Toolbar.AddWidget(new Button(Toolbar, "Brush", () => { ChangeMenu(BrushMenu); }, new Vector2i(100, 25)));
+        Toolbar.AddWidget(new Button(Toolbar, "Objects", () => { ChangeMenu(ObjectsMenu); }, new Vector2i(100, 25)));
+        Toolbar.AddWidget(new Button(Toolbar, "View", () => { ChangeMenu(ViewMenu); }, new Vector2i(100, 25)));
+        Toolbar.AddWidget(new Button(Toolbar, "Cheats", () => { ChangeMenu(CheatsMenu); }, new Vector2i(100, 25)));
+        Toolbar.AddWidget(new Button(Toolbar, "Debug", () => { ChangeMenu(DebugMenu); }, new Vector2i(100, 25)));
+
+        // System Menu
+        SystemMenu.AddWidget(new Button(SystemMenu, "Settings", () => { /* TODO: Open "Settings" window */ ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        SystemMenu.AddWidget(new Button(SystemMenu, "About", () => { /* TODO: Open "About" window */ ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        SystemMenu.AddWidget(new Button(SystemMenu, "Exit", Engine.Exit, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false));
 
         // Scene Menu
-        SceneMenu.AddWidget(new Button(SceneMenu, "Save", () => { SaveScene(); ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        SceneMenu.AddWidget(new Button(SceneMenu, "Load", () => { LoadScene(); ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        SceneMenu.AddWidget(new Button(SceneMenu, "Save", () => { SaveScene(); ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        SceneMenu.AddWidget(new Button(SceneMenu, "Load", () => { LoadScene(); ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
         // Brush Menu
-        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { BrushID = 100; ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { BrushID = 200; ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { BrushID = 300; ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { BrushID = 400; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { BrushID = 100; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { BrushID = 200; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { BrushID = 300; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { BrushID = 400; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
         // Objects Menu
-        ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Barrel", () => { ObjectID = 0; ChangeMenu(); }, new Vector2i(100, 20), background: false));
-        ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Crate", () => { ObjectID = 1; ChangeMenu(); }, new Vector2i(100, 20), background: false));
+        ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Barrel", () => { ObjectID = 0; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Crate", () => { ObjectID = 1; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
         // Window Menu
-        ViewMenu.AddWidget(new Button(ViewMenu, "Statistics", () => { StatsWindow.Toggle(); ChangeMenu(); }, new Vector2i(150, 20), background: false));
-        ViewMenu.AddWidget(new Button(ViewMenu, "Skybox", () => { Camera.DrawSkybox = !Camera.DrawSkybox; }, new Vector2i(150, 20), background: false));
+        ViewMenu.AddWidget(new Button(ViewMenu, "Statistics", () => { StatsWindow.Toggle(); ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        ViewMenu.AddWidget(new Button(ViewMenu, "Test Skybox", () => { Camera.DrawSkybox = !Camera.DrawSkybox; }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
         // Cheats Menu
-        CheatsMenu.AddWidget(new Label(CheatsMenu, "(dust)", new Vector2i(100, 20)));
+        CheatsMenu.AddWidget(new Button(CheatsMenu, "Full Health", () => { ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        CheatsMenu.AddWidget(new Button(CheatsMenu, "God Mode", () => { ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
         // Debug Menu
-        DebugMenu.AddWidget(new Button(DebugMenu, "Movement Overlay", () => { DrawMovementOverlay = !DrawMovementOverlay; if (DrawSettledOverlay) { DrawSettledOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
-        DebugMenu.AddWidget(new Button(DebugMenu, "Settled Overlay", () => { DrawSettledOverlay = !DrawSettledOverlay; if (DrawMovementOverlay) { DrawMovementOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(150, 20), background: false));
-        DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Borders", () => { DrawChunks = !DrawChunks; ChangeMenu(); }, new Vector2i(150, 20), background: false));
-        DebugMenu.AddWidget(new Button(DebugMenu, "Dirty Rects", () => { DrawDirtyRects = !DrawDirtyRects; ChangeMenu(); }, new Vector2i(150, 20), background: false));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Movement Overlay", () => { DrawMovementOverlay = !DrawMovementOverlay; if (DrawSettledOverlay) { DrawSettledOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Settled Overlay", () => { DrawSettledOverlay = !DrawSettledOverlay; if (DrawMovementOverlay) { DrawMovementOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Borders", () => { DrawChunks = !DrawChunks; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Dirty Rects", () => { DrawDirtyRects = !DrawDirtyRects; ChangeMenu(); }, new Vector2i(100, 25),  text_anchor: Anchor.Left, background: false, fit_width: true));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Colliders", () => { DrawChunkCollision = !DrawChunkCollision; ChangeMenu(); }, new Vector2i(100, 25),  text_anchor: Anchor.Left, background: false, fit_width: true));
 
 
         ////

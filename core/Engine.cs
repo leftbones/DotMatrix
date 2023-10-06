@@ -206,6 +206,6 @@ class Engine {
     // Set the "ShouldExit" flag to true
     public void Exit() {
         ShouldExit = true;
-        Pepper.Log("Engine will exit at the end of the current tick.", LogType.ENGINE);
+        Pepper.Log("Engine will exit at the end of the current tick", LogType.ENGINE);
     }
 }

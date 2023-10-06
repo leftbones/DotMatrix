@@ -16,10 +16,9 @@ class Multiline : Widget {
 
     public Vector2i TextSize { get { return new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing)); } }
 
-    public Multiline(Container parent, string text, int width, Quad? padding=null, Color? background=null, Action? update_action=null) : base(parent) {
+    public Multiline(Container parent, string text, int width, Color? background=null, Action? update_action=null) : base(parent) {
         Text = text;
         Width = width;
-        Padding = padding ?? Padding;
         Background = background ?? new Color(0, 0, 0, 0);
         UpdateAction = update_action;
     }
@@ -33,7 +32,7 @@ class Multiline : Widget {
         DrawRectangleRec(ClickBox, Background);
 
         // Text
-        var StartPos = new Vector2i(Position.X + Padding.L, Position.Y + Padding.U + (TextSize.Y / 2));
+        var StartPos = new Vector2i(Position.X, Position.Y + (TextSize.Y / 2));
         string[] Words = Regex.Split(Text, @"(?=(?<=[^\s])\s+)");
         float LineLen = 0.0f;
         int LineNum = 1;
@@ -50,7 +49,7 @@ class Multiline : Widget {
             var WordSize = MeasureTextEx(Theme.Font, WordStr, Theme.FontSize, Theme.FontSpacing);
 
             // Advance to the next line if the line length exceeds the max width or if %N is found
-            if (Word.Trim() == "%N" || LineLen + WordSize.X > Width - Padding.X) {
+            if (Word.Trim() == "%N" || LineLen + WordSize.X > Width) {
                 LineNum++;
                 LineLen = 0.0f;
 
