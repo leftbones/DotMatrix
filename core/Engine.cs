@@ -84,7 +84,7 @@ class Engine {
         var Guy = new Entity();
 
         Guy.AddToken(new Render("res/objects/guy.png"));
-        Guy.AddToken(new Transform(Matrix.Size * Matrix.Scale / 2));
+        Guy.AddToken(new Transform(new Vector2i(Matrix.Size.X / 2, 425) * MatrixScale));
         Guy.AddToken(new Control(new Dictionary<int, Event>() {
             { (int)KeyboardKey.KEY_A, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(-2, 0); }))},
             { (int)KeyboardKey.KEY_D, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(2, 0); }))},
