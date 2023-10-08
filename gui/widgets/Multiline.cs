@@ -9,16 +9,19 @@ namespace DotMatrix;
 class Multiline : Widget {
     public string Text { get; set; }
     public int Width { get; set; }
+    public Quad Margin { get; set; }
     public Color Background { get; set; }
+    public bool FitWidth { get; set; }
+    public bool FitHeight { get; set; }
     public Action? UpdateAction { get; set; }
 
     public Theme Theme { get { return Parent.Parent.Theme; } }
 
     public Vector2i TextSize { get { return new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing)); } }
 
-    public Multiline(Container parent, string text, int width, Color? background=null, Action? update_action=null) : base(parent) {
+    public Multiline(Container parent, string text, int? width=0, Color? background=null, bool fit_width=false, bool fit_height=false, Action? update_action=null) : base(parent) {
         Text = text;
-        Width = width;
+        Width = width ?? 0;
         Background = background ?? new Color(0, 0, 0, 0);
         UpdateAction = update_action;
     }
@@ -29,7 +32,14 @@ class Multiline : Widget {
 
     public override void Draw() {
         // Background
-        DrawRectangleRec(ClickBox, Background);
+        var Rec = ClickBox;
+        Rec = new Rectangle(
+            ClickBox.x, ClickBox.y,
+            FitWidth ? Parent.Size.X : ClickBox.width,
+            FitHeight ? Parent.Size.Y : ClickBox.height
+        );
+
+        DrawRectangleRec(Rec, Background);
 
         // Text
         var StartPos = new Vector2i(Position.X, Position.Y + (TextSize.Y / 2));
