@@ -6,7 +6,6 @@ namespace DotMatrix;
 class Label : Widget {
     public string Text { get; set; }
     public Anchor TextAnchor { get; set; }
-    public Quad Margin { get; set; }
     public Color Background { get; set; }
     public bool FitWidth { get; set; }
     public bool FitHeight { get; set; }
@@ -26,6 +25,10 @@ class Label : Widget {
         FitWidth = fit_width;
         FitHeight = fit_height;
         UpdateAction = update_action;
+
+        // Margin = new Quad(2, 2, 2, 2);
+        Margin = Quad.Zero;
+        Padding = new Quad(5, 5, 5, 5);
     }
 
     public override void Update() {
@@ -33,12 +36,19 @@ class Label : Widget {
     }
 
     public override void Draw() {
+        // Size Calculation
+        var TextSize = MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing);
+
+        int MinWidth = (int)TextSize.X + Margin.X;
+        int MinHeight = (int)TextSize.Y + Margin.Y;
+
+        Size = new Vector2i(Math.Max(Size.X, MinWidth), Math.Max(Size.Y, MinHeight));
+
         // Background
-        var Rec = ClickBox;
-        Rec = new Rectangle(
+        var Rec = new Rectangle(
             ClickBox.x, ClickBox.y,
-            FitWidth ? Parent.Size.X : ClickBox.width,
-            FitHeight ? Parent.Size.Y : ClickBox.height
+            FitWidth ? Parent.Size.X - Parent.Margin.X : ClickBox.width,
+            FitHeight ? Parent.Size.Y - Parent.Margin.Y : ClickBox.height
         );
 
         DrawRectangleRec(Rec, Background);
@@ -70,9 +80,14 @@ class Label : Widget {
 
         DrawTextEx(Theme.Font, Text, Pos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.ButtonForeground);
 
-        var Center = new Vector2i(
-            Position.X + Size.X / 2 + Padding.X,
-            Position.Y + Size.Y / 2 + Padding.Y
-        );
+        // Debug
+        // var Center = new Vector2i(
+        //     Position.X + Size.X / 2 + Padding.X,
+        //     Position.Y + Size.Y / 2 + Padding.Y
+        // );
+
+        // DrawRectangleLines(Position.X, Position.Y, Size.X + Padding.X, Size.Y + Padding.Y, Color.WHITE);
+        // DrawCircleV(Center.ToVector2(), 4.0f, Color.GREEN);
+        // DrawCircleV(Pos.ToVector2(), 4.0f, Color.RED);
     }
 }

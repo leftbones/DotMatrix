@@ -9,7 +9,6 @@ namespace DotMatrix;
 class Multiline : Widget {
     public string Text { get; set; }
     public int Width { get; set; }
-    public Quad Margin { get; set; }
     public Color Background { get; set; }
     public bool FitWidth { get; set; }
     public bool FitHeight { get; set; }
@@ -19,11 +18,14 @@ class Multiline : Widget {
 
     public Vector2i TextSize { get { return new Vector2i(MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing)); } }
 
-    public Multiline(Container parent, string text, int? width=0, Color? background=null, bool fit_width=false, bool fit_height=false, Action? update_action=null) : base(parent) {
+    public Multiline(Container parent, string text, int? width=0, Quad? margin=null, Color? background=null, bool fit_width=false, bool fit_height=false, Action? update_action=null) : base(parent) {
         Text = text;
         Width = width ?? 0;
+        Margin = margin ?? Quad.Zero;
         Background = background ?? new Color(0, 0, 0, 0);
         UpdateAction = update_action;
+
+        Padding = Quad.Zero;
     }
 
     public override void Update() {
@@ -35,8 +37,8 @@ class Multiline : Widget {
         var Rec = ClickBox;
         Rec = new Rectangle(
             ClickBox.x, ClickBox.y,
-            FitWidth ? Parent.Size.X : ClickBox.width,
-            FitHeight ? Parent.Size.Y : ClickBox.height
+            FitWidth ? Parent.Size.X + Margin.X : ClickBox.width,
+            FitHeight ? Parent.Size.Y + Margin.Y : ClickBox.height
         );
 
         DrawRectangleRec(Rec, Background);
@@ -78,6 +80,6 @@ class Multiline : Widget {
             LineLen += WordSize.X;
         }
 
-        Size = new Vector2i(Width, LineNum * 20);
+        Size = new Vector2i(Width + Margin.X + Padding.X, LineNum * 20 + Margin.Y + Padding.Y);
     }
 }

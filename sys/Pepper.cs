@@ -69,7 +69,7 @@ class Pepper {
     public void Throw(string message, LogType type=LogType.DEBUG, LogLevel level=LogLevel.FATAL) {
         Log(message, type, level);
         Canvas.ExceptionWindow.AddWidget(new Multiline(Canvas.ExceptionWindow, $"{type} {level} %N %N {message}", 750));
-        Canvas.ExceptionWindow.AddWidget(new Button(Canvas.ExceptionWindow, "Exit", () => { Environment.Exit(0); }, new Vector2i(75, 20), anchor: Anchor.Right));
+        Canvas.ExceptionWindow.AddWidget(new Button(Canvas.ExceptionWindow, "Exit", () => { Environment.Exit(0); }, new Vector2i(75, 25), anchor: Anchor.Right));
         Canvas.ExceptionWindow.Toggle();
         Engine.Halt();
     }

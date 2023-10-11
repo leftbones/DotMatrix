@@ -9,7 +9,6 @@ class Button : Widget {
     public string Text { get; set; }
     public Action Action { get; set; }
     public Anchor TextAnchor { get; set; }
-    public Quad Margin { get; set; }
     public bool Background { get; set; }
     public bool FitWidth { get; set; }
     public bool FitHeight { get; set; }
@@ -48,25 +47,25 @@ class Button : Widget {
         // Size Calculation
         var TextSize = MeasureTextEx(Theme.Font, Text, Theme.FontSize, Theme.FontSpacing);
 
-        int MinWidth = (int)TextSize.X + Padding.X;
-        int MinHeight = (int)TextSize.Y + Padding.Y;
+        int MinWidth = (int)TextSize.X + Margin.X;
+        int MinHeight = (int)TextSize.Y + Margin.Y;
 
         Size = new Vector2i(Math.Max(Size.X, MinWidth), Math.Max(Size.Y, MinHeight));
 
         // Background
+        var Rec = new Rectangle(
+            ClickBox.x, ClickBox.y,
+            FitWidth ? Parent.Size.X - Parent.Margin.X : ClickBox.width,
+            FitHeight ? Parent.Size.Y - Parent.Margin.Y : ClickBox.height
+        );
+
         Color BG = Background ? Theme.ButtonBackground : Theme.Transparent;
         if (Hovered) BG = Theme.ButtonHoverBackground;
         if (Clicked) BG = Theme.ButtonActiveBackground;
 
-        var Rec = ClickBox;
-        Rec = new Rectangle(
-            ClickBox.x, ClickBox.y,
-            FitWidth ? Parent.Size.X : ClickBox.width,
-            FitHeight ? Parent.Size.Y : ClickBox.height
-        );
-
         DrawRectangleRec(Rec, BG);
 
+        // Text
         var Pos = Vector2i.Zero;
         switch (TextAnchor) {
             case Anchor.Left:
@@ -93,12 +92,12 @@ class Button : Widget {
 
         DrawTextEx(Theme.Font, Text, Pos.ToVector2(), Theme.FontSize, Theme.FontSpacing, Theme.ButtonForeground);
 
-        var Center = new Vector2i(
-            Position.X + Size.X / 2 + Padding.X,
-            Position.Y + Size.Y / 2 + Padding.Y
-        );
-
         // Debug
+        // var Center = new Vector2i(
+        //     Position.X + Size.X / 2 + Padding.X,
+        //     Position.Y + Size.Y / 2 + Padding.Y
+        // );
+
         // DrawRectangleLines(Position.X, Position.Y, Size.X + Padding.X, Size.Y + Padding.Y, Color.WHITE);
         // DrawCircleV(Center.ToVector2(), 4.0f, Color.GREEN);
         // DrawCircleV(Pos.ToVector2(), 4.0f, Color.RED);

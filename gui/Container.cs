@@ -22,7 +22,7 @@ class Container {
 
     public Theme Theme { get { return Parent.Theme; } }                 // Theme of the parent Interface class
 
-    public Vector2i Origin { get { return new Vector2i(Position.X + Margin.L, Position.Y + Margin.U); } }
+    public Vector2i Origin { get { return new Vector2i(Position.X + Margin.L, Position.Y); } }
     public Rectangle Rect { get { return new Rectangle(Position.X, Position.Y, Size.X, Size.Y); } }
     public Rectangle Area { get { return new Rectangle(Position.X + Margin.L, Position.Y + Margin.U, Size.X - (Margin.L + Margin.R), Size.Y - (Margin.U + Margin.D)); } }
 
@@ -100,7 +100,7 @@ class Container {
 
         if (DrawAnchor == Anchor.Bottom) {
             DrawOffset = new Vector2i(0, Widgets.Sum(W => W.Size.Y + W.Padding.Y + Spacing.Y) + Margin.U);
-            DrawPos = new Vector2i(Position.X - DrawOffset.X, Position.Y - DrawOffset.Y);
+            DrawPos = new Vector2i(Position.X - DrawOffset.X, Position.Y - DrawOffset.Y - Margin.U);
         }
 
         // Size
@@ -112,8 +112,8 @@ class Container {
         if (Horizontal) {
             // Calculate size -- TODO: Change to use Widgets.MaxBy(W => W.Size.X + W.Padding.X + Spacing.X)
             foreach (var W in Widgets) {
-                MinWidth += W.Size.X + Spacing.X;
-                if (W.Size.Y > MinHeight) MinHeight = W.Size.Y + Spacing.Y;
+                MinWidth += W.Size.X + W.Margin.X + W.Padding.X + Spacing.X;
+                if (W.Size.Y > MinHeight) MinHeight = W.Size.Y + W.Margin.Y + W.Padding.Y + Spacing.Y;
             }
 
             Size = new Vector2i(Math.Max(Size.X, MinWidth + Margin.X + Spacing.X), Math.Max(Size.Y, MinHeight + Margin.Y + Spacing.Y));
@@ -139,16 +139,16 @@ class Container {
         else {
             // Calculate size
             foreach (var W in Widgets) {
-                if (W.Size.X > MinWidth) MinWidth = W.Size.X + W.Padding.X + Spacing.X;
-                MinHeight += W.Size.Y + Spacing.Y;
+                if (W.Size.X > MinWidth) MinWidth = W.Size.X + W.Margin.X + W.Padding.X + Spacing.X;
+                MinHeight += W.Size.Y + W.Margin.Y + W.Padding.Y + Spacing.Y;
             }
 
             if (DrawAnchor == Anchor.Center) {
                 DrawOffset = new Vector2i(MinWidth / 2, (Widgets.Sum(W => W.Size.Y + W.Padding.Y + Spacing.Y) + Margin.U) / 2);
-                DrawPos = new Vector2i(Position.X - DrawOffset.X, Position.Y - DrawOffset.Y);
+                DrawPos = new Vector2i(Position.X - DrawOffset.X, Position.Y - DrawOffset.Y - Margin.Y);
             }
 
-            Size = new Vector2i(Math.Max(Size.X, MinWidth + Spacing.X), Math.Max(Size.Y, MinHeight + Spacing.Y));
+            Size = new Vector2i(Math.Max(Size.X, MinWidth + Margin.X + Spacing.X), Math.Max(Size.Y, MinHeight + Margin.Y + Spacing.Y));
 
             // Background
             if (Background)
@@ -160,22 +160,34 @@ class Container {
             foreach (var W in Widgets) {
                 switch (W.Anchor) {
                     case Anchor.Left:
-                        Pos = new Vector2i(Origin.X, Origin.Y + Offset - ScrollOffset) - DrawOffset;
+                        Pos = new Vector2i(
+                            Origin.X,
+                            Origin.Y + Offset - ScrollOffset
+                        ) - DrawOffset;
+
                         W.Position = Pos;
                         break;
                     case Anchor.Right:
-                        Pos = new Vector2i(Origin.X + Size.X - W.Size.X - Margin.X, Origin.Y + Offset - ScrollOffset) - DrawOffset;
+                        Pos = new Vector2i(
+                            Origin.X + Size.X - W.Size.X - W.Padding.X - W.Margin.X - Margin.X,
+                            Origin.Y + Offset - ScrollOffset
+                        ) - DrawOffset;
+
                         W.Position = Pos;
                         break;
                     case Anchor.Center:
-                        Pos = new Vector2i(Origin.X + (Size.X / 2) - (W.Size.X / 2) - Margin.X, Origin.Y + Offset - ScrollOffset) - DrawOffset;
+                        Pos = new Vector2i(
+                            Origin.X + (Size.X / 2) - (W.Size.X / 2) - Margin.X,
+                            Origin.Y + Offset - ScrollOffset
+                        ) - DrawOffset;
+
                         W.Position = Pos;
                         break;
                 }
 
                 W.Draw();
 
-                Offset += W.Size.Y + Spacing.Y;
+                Offset += W.Size.Y + W.Padding.Y + W.Margin.Y + Spacing.Y;
             }
 
             // Scroll

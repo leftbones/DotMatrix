@@ -75,19 +75,19 @@ class Canvas {
             activated: false
         );
 
-        ExceptionWindow.AddWidget(new Label(ExceptionWindow, "Exception", new Vector2i(750, 20), background: Theme.HeaderBackground));
+        ExceptionWindow.AddWidget(new Label(ExceptionWindow, "Exception", background: Theme.HeaderBackground, fit_width: true));
 
         StatsWindow = new Container(
             parent: Engine.Interface,
             position: new Vector2i(10, Engine.WindowSize.Y - 10),
             draw_anchor: Anchor.Bottom,
             background: true,
-            activated: true
+            activated: false
         );
 
         StatsContent = new Multiline(StatsWindow, "", 300, update_action: UpdateStats);
 
-        StatsWindow.AddWidget(new Label(StatsWindow, "Statistics", new Vector2i(300, 20), background: Theme.HeaderBackground));
+        StatsWindow.AddWidget(new Label(StatsWindow, "Statistics", background: Theme.HeaderBackground, fit_width: true));
         StatsWindow.AddWidget(StatsContent);
 
         Windows = new List<Container> {
