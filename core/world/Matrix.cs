@@ -516,7 +516,7 @@ class Matrix {
         // Chunk Collision Borders
         if (Engine.Canvas.DrawChunkCollision) {
             foreach (var C in ActiveChunks) {
-                var Points = Boundaries.Calculate(Pixels, C.Position.X, C.Position.Y, C.Position.X + ChunkSize.X, C.Position.Y + ChunkSize.Y);
+                var Points = Boundaries.Calculate(this, Pixels, C.Position.X, C.Position.Y, C.Position.X + ChunkSize.X, C.Position.Y + ChunkSize.Y);
                 var Count = Points.Count;
                 if (Points.Count > 0) {
                     // Original
@@ -526,18 +526,18 @@ class Matrix {
                         DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 2.0f, Color.RED);
                         LP = P;
                     }
-                    DrawLineEx(Points[^1].ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.RED);
+                    // DrawLineEx(Points[^1].ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.RED);
 
                     // Simplified
-                    Points = Boundaries.Simplify(Points, 75, 20.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
+                    Points = Boundaries.Simplify(Points, 150, 0.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
 
                     LP = Points[0];
                     for (int i = 1; i < Points.Count - 1; i++) {
                         var P = Points[i];
-                        DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 2.0f, Color.WHITE);
+                        DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 2.0f, Color.BLUE);
                         LP = P;
                     }
-                    DrawLineEx(Points[^1].ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.WHITE);
+                    // DrawLineEx(Points[^1].ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.BLUE);
                 }
             }
         }

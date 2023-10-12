@@ -12,7 +12,7 @@ static class Boundaries {
     // Marching Squares Algorithm
 
     // Use marching squares to find the boundaries of a chunk based on the pixels and how many neighbors they have
-    public static List<Vector2i> Calculate(Pixel[,] Pixels, int X1, int Y1, int X2, int Y2) {
+    public static List<Vector2i> Calculate(Matrix M, Pixel[,] Pixels, int X1, int Y1, int X2, int Y2) {
         var Points = new List<Vector2i>();
 
         for (int x = X1; x < X2; x++) {
@@ -20,16 +20,34 @@ static class Boundaries {
                 var Pixel = Pixels[x, y];
                 if (Pixel.ID > 1 && Pixel.Settled) {
                     var EmptyCount = 0;
-                    if (x - 1 >= 0 && Pixels[x - 1, y].ID > 0) { EmptyCount++; } else if (x - 1 <= X1) { EmptyCount++; }
-                    if (x + 1 < X2 && Pixels[x + 1, y].ID > 0) { EmptyCount++; } else if (x + 1 >= X2) { EmptyCount++; }
-                    if (y - 1 >= 0 && Pixels[x, y - 1].ID > 0) { EmptyCount++; } else if (y - 1 <= Y1) { EmptyCount++; }
-                    if (y + 1 < Y2 && Pixels[x, y + 1].ID > 0) { EmptyCount++; } else if (y + 1 >= Y2) { EmptyCount++; }
 
-                    if (EmptyCount == 2 || EmptyCount == 3) {
+                    if (x - 1 < X1) EmptyCount++;
+                    else if (x + 1 >= X2) EmptyCount++;
+                    else {
+                        if (M.InBoundsAndEmpty(Pixel.Position + Direction.Left)) EmptyCount++;
+                        if (M.InBoundsAndEmpty(Pixel.Position + Direction.Right)) EmptyCount++;
+                    }
+
+                    if (y - 1 < Y1) EmptyCount++;
+                    else if (y + 1 >= Y2) EmptyCount++;
+                    else {
+                        if (M.InBoundsAndEmpty(Pixel.Position + Direction.Up)) EmptyCount++;
+                        if (M.InBoundsAndEmpty(Pixel.Position + Direction.Down)) EmptyCount++;
+                    }
+
+                    if (EmptyCount >= 1 && EmptyCount <= 3) {
                         Points.Add(new Vector2i(x, y));
                     }
                 }
             }
+        }
+
+        // Reorder points around an average point
+        if (Points.Count > 0) {
+            var AveragePoint = new Vector2i(Points.Average(t => t.X), Points.Average(t => t.Y));
+            var Ordered = Points.OrderBy(t => Math.Atan2(AveragePoint.Y - t.Y, AveragePoint.X - t.X)).ToList();
+
+            return Ordered;
         }
 
         return Points;
