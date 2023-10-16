@@ -1,4 +1,6 @@
-using System.Linq;
+using System.Numerics;
+using Raylib_cs;
+using static Raylib_cs.Raylib;
 
 namespace DotMatrix;
 
@@ -11,46 +13,95 @@ static class Boundaries {
     // 
     // Marching Squares Algorithm
 
-    // Use marching squares to find the boundaries of a chunk based on the pixels and how many neighbors they have
+    // Divide a Chunk into a subgrid and determine the state of each cell based on the value of it's corner neighbors
     public static List<Vector2i> Calculate(Matrix M, Pixel[,] Pixels, int X1, int Y1, int X2, int Y2) {
         var Points = new List<Vector2i>();
 
-        for (int x = X1; x < X2; x++) {
-            for (int y = Y1; y < Y2; y++) {
-                var Pixel = Pixels[x, y];
-                if (Pixel.ID > 1 && Pixel.Settled) {
-                    var EmptyCount = 0;
+        for (int x = X1; x < X2 - 1; x++) {
+            for (int y = Y1; y < Y2 - 1; y++) {
+                var A = new Vector2(x + 0.5f, y);
+                var B = new Vector2(x + 1, y + 0.5f);
+                var C = new Vector2(x + 0.5f, y + 1);
+                var D = new Vector2(x, y + 0.5f);
 
-                    if (x - 1 < X1) EmptyCount++;
-                    else if (x + 1 >= X2) EmptyCount++;
-                    else {
-                        if (M.InBoundsAndEmpty(Pixel.Position + Direction.Left)) EmptyCount++;
-                        if (M.InBoundsAndEmpty(Pixel.Position + Direction.Right)) EmptyCount++;
-                    }
+                var State = GetState(
+                    M.InBoundsAndEmpty(x, y) ? 1 : 0,
+                    M.InBoundsAndEmpty(x + 1, y) ? 1 : 0,
+                    M.InBoundsAndEmpty(x + 1, y + 1) ? 1 : 0,
+                    M.InBoundsAndEmpty(x, y + 1) ? 1 : 0
+                );
 
-                    if (y - 1 < Y1) EmptyCount++;
-                    else if (y + 1 >= Y2) EmptyCount++;
-                    else {
-                        if (M.InBoundsAndEmpty(Pixel.Position + Direction.Up)) EmptyCount++;
-                        if (M.InBoundsAndEmpty(Pixel.Position + Direction.Down)) EmptyCount++;
-                    }
-
-                    if (EmptyCount >= 1 && EmptyCount <= 3) {
-                        Points.Add(new Vector2i(x, y));
-                    }
+                switch (State) {
+                    case 1:
+                        DrawLine(D, C);
+                        break;
+                    case 2:
+                        DrawLine(C, B);
+                        break;
+                    case 3:
+                        DrawLine(D, B);
+                        break;
+                    case 4:
+                        DrawLine(A, B);
+                        break;
+                    case 5:
+                        DrawLine(D, A);
+                        DrawLine(C, B);
+                        break;
+                    case 6:
+                        DrawLine(A, C);
+                        break;
+                    case 7:
+                        DrawLine(D, A);
+                        break;
+                    case 8:
+                        DrawLine(D, A);
+                        break;
+                    case 9:
+                        DrawLine(C, A);
+                        break;
+                    case 10:
+                        DrawLine(D, C);
+                        DrawLine(A, B);
+                        break;
+                    case 11:
+                        DrawLine(A, B);
+                        break;
+                    case 12:
+                        DrawLine(D, B);
+                        break;
+                    case 13:
+                        DrawLine(C, B);
+                        break;
+                    case 14:
+                        DrawLine(D, C);
+                        break;
+                    case 15:
+                        break;
                 }
             }
         }
 
-        // Reorder points around an average point
-        if (Points.Count > 0) {
-            var AveragePoint = new Vector2i(Points.Average(t => t.X), Points.Average(t => t.Y));
-            var Ordered = Points.OrderBy(t => Math.Atan2(AveragePoint.Y - t.Y, AveragePoint.X - t.X)).ToList();
 
-            return Ordered;
-        }
+        // Reorder points around an average point
+        // if (Points.Count > 0) {
+        //     var AveragePoint = new Vector2i(Points.Average(t => t.X), Points.Average(t => t.Y));
+        //     var Ordered = Points.OrderBy(t => Math.Atan2(AveragePoint.Y - t.Y, AveragePoint.X - t.X)).ToList();
+
+        //     return Ordered;
+        // }
 
         return Points;
+    }
+
+    public static void DrawLine(Vector2 A, Vector2 B, Color? C=null) {
+        C = C is null ? Color.RED : C;
+        DrawLineEx(A * 4, B * 4, 2.0f, (Color)C);
+    }
+
+    // Get the state of a subgrid square based on the value of it's four corners
+    public static int GetState(int A, int B, int C, int D) {
+        return A * 8 + B * 4 + C * 2 + D * 1;
     }
 
 

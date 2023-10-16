@@ -81,6 +81,8 @@ class Engine {
         //
         // TESTING
 
+        Canvas.BrushID = 100;
+
         var Guy = new Entity();
 
         Guy.AddToken(new Render("res/objects/guy.png"));

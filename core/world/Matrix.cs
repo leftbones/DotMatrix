@@ -32,8 +32,8 @@ class Matrix {
 
     public bool RedrawAllChunks { get; set; } = true;                           // Draw all Chunks on the next Draw call, including sleeping ones
 
-    private int ChunkWidth = 100;                                                // Width of each Chunk in Pixels
-    private int ChunkHeight = 100;                                               // Height of each Chunk in Pixels
+    private readonly int ChunkWidth = 100;                                      // Width of each Chunk in Pixels
+    private readonly int ChunkHeight = 100;                                     // Height of each Chunk in Pixels
 
     // ECS
     public List<PixelMap> ActivePixelMaps { get; private set; }                 // List of all PixelMap Tokens added to the Matrix during UpdateStart
@@ -83,8 +83,9 @@ class Matrix {
         Pixels = new Pixel[Size.X, Size.Y];
         for (int y = Size.Y - 1; y >= 0; y--) {
             for (int x = 0; x < Size.X; x++) {
-                var P = new Pixel();
-                P.Position = new Vector2i(x, y);
+                var P = new Pixel {
+                    Position = new Vector2i(x, y)
+                };
                 Pixels[x, y] = P;
             }
         }
@@ -217,15 +218,31 @@ class Matrix {
         return pos.X >= 0 && pos.X < Size.X && pos.Y >= 0 && pos.Y < Size.Y;
     }
 
+    public bool InBounds(int x, int y) {
+        return x >= 0 && x < Size.X && y >= 0 && y < Size.Y;
+    }
+
     // Check if a position in the Matrix is empty (ID -1)
     public bool IsEmpty(Vector2i pos) {
         return Get(pos).ID == -1;
     }
 
+    public bool IsEmpty(int x, int y) {
+        return Get(x, y).ID == -1;
+    }
+
     // Check if a position is in bounds and empty
     public bool InBoundsAndEmpty(Vector2i pos) {
-        if (InBounds(pos))
+        if (InBounds(pos)) {
             return IsEmpty(pos);
+        }
+        return false;
+    }
+
+    public bool InBoundsAndEmpty(int x, int y) {
+        if (InBounds(x, y)) {
+            return IsEmpty(x, y);
+        }
         return false;
     }
 
@@ -520,23 +537,23 @@ class Matrix {
                 var Count = Points.Count;
                 if (Points.Count > 0) {
                     // Original
-                    var LP = Points[0];
-                    for (int i = 1; i < Points.Count - 1; i++) {
-                        var P = Points[i];
-                        DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 2.0f, Color.RED);
-                        LP = P;
-                    }
+                    // var LP = Points[0];
+                    // for (int i = 1; i < Points.Count - 1; i++) {
+                    //     var P = Points[i];
+                    //     DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 1.0f, Color.RED);
+                    //     LP = P;
+                    // }
                     // DrawLineEx(Points[^1].ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.RED);
 
                     // Simplified
-                    Points = Boundaries.Simplify(Points, 150, 0.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
+                    // Points = Boundaries.Simplify(Points, 150, 0.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
 
-                    LP = Points[0];
-                    for (int i = 1; i < Points.Count - 1; i++) {
-                        var P = Points[i];
-                        DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 2.0f, Color.BLUE);
-                        LP = P;
-                    }
+                    // LP = Points[0];
+                    // for (int i = 1; i < Points.Count - 1; i++) {
+                    //     var P = Points[i];
+                    //     DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 2.0f, Color.BLUE);
+                    //     LP = P;
+                    // }
                     // DrawLineEx(Points[^1].ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.BLUE);
                 }
             }
