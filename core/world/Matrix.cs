@@ -3,6 +3,8 @@ using System.Reflection.Metadata.Ecma335;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 
+using Box2D.NetStandard.Collision.Shapes;
+
 namespace DotMatrix;
 
 /// <summary>
@@ -533,28 +535,31 @@ class Matrix {
         // Chunk Collision Borders
         if (Engine.Canvas.DrawChunkCollision) {
             foreach (var C in ActiveChunks) {
-                var Points = Boundaries.Calculate(this, Pixels, C.Position.X, C.Position.Y, C.Position.X + ChunkSize.X, C.Position.Y + ChunkSize.Y);
-                var Count = Points.Count;
-                if (Points.Count > 0) {
+                var Lines = Boundaries.Calculate(this, Pixels, C.Position.X, C.Position.Y, C.Position.X + ChunkSize.X, C.Position.Y + ChunkSize.Y);
+                if (Lines.Count > 0) {
                     // Original
+                    for (int i = 1; i < Lines.Count - 1; i++) {
+                        var Pair = Lines[i];
+                        DrawLineEx(Pair.Item1 * Scale, Pair.Item2 * Scale, 1.0f, Color.RED);
+                    }
+
+                    // C.Mesh = Engine.Physics.CreateChunkMesh(Lines);
+
+                    // Simplified -- FIXME: Totally broken, need to find a way to order the points such that they retain the order in which they need to be connected
+                    // var LinePoints = new List<Vector2>();
+                    // foreach (var Pair in Lines) {
+                    //     LinePoints.Add(Pair.Item1);
+                    //     LinePoints.Add(Pair.Item2);
+                    // }
+
+                    // var Points = Boundaries.Simplify(LinePoints, 75, 0.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
+
                     // var LP = Points[0];
                     // for (int i = 1; i < Points.Count - 1; i++) {
                     //     var P = Points[i];
-                    //     DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 1.0f, Color.RED);
+                    //     DrawLineEx(LP * Scale, P * Scale, 2.0f, Color.BLUE);
                     //     LP = P;
                     // }
-                    // DrawLineEx(Points[^1].ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.RED);
-
-                    // Simplified
-                    // Points = Boundaries.Simplify(Points, 150, 0.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
-
-                    // LP = Points[0];
-                    // for (int i = 1; i < Points.Count - 1; i++) {
-                    //     var P = Points[i];
-                    //     DrawLineEx(LP.ToVector2() * Scale, P.ToVector2() * Scale, 2.0f, Color.BLUE);
-                    //     LP = P;
-                    // }
-                    // DrawLineEx(Points[^1].ToVector2() * Scale, Points[0].ToVector2() * Scale, 2.0f, Color.BLUE);
                 }
             }
         }

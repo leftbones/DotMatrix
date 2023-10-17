@@ -27,9 +27,9 @@ class Physics {
 
     public List<Entity> Bodies { get; private set; }
 
-    private float TimeStep = 1.0f / 144.0f;
-    private int VelocityIterations = 6;
-    private int PositionIterations = 2;
+    private readonly float TimeStep = 1.0f / 144.0f;
+    private readonly int VelocityIterations = 6;
+    private readonly int PositionIterations = 2;
 
     private bool Active = true;
 
@@ -97,6 +97,26 @@ class Physics {
         return new Box2D(World, pos, body_type, fixed_rotation, hitbox_shape, W, H);
 
         // TODO Implement HitboxShape.Ball
+    }
+
+    public Body CreateChunkMesh(List<Tuple<Vector2, Vector2>> Lines) {
+        var BodyDef = new BodyDef();
+        var Body = World.CreateBody(BodyDef);
+
+        var LinePoints = new List<Vector2>();
+        foreach (var Pair in Lines) {
+            LinePoints.Add(Pair.Item1);
+            LinePoints.Add(Pair.Item2);
+        }
+
+        Body.CreateFixture(new FixtureDef {
+            shape = new PolygonShape(LinePoints.ToArray()),
+            density = 1.0f,
+            friction = 0.3f,
+            restitution = 0.1f
+        });
+
+        return Body;
     }
 
     public void Update() {

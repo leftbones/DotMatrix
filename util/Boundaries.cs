@@ -13,9 +13,9 @@ static class Boundaries {
     // 
     // Marching Squares Algorithm
 
-    // Divide a Chunk into a subgrid and determine the state of each cell based on the value of it's corner neighbors
-    public static List<Vector2i> Calculate(Matrix M, Pixel[,] Pixels, int X1, int Y1, int X2, int Y2) {
-        var Points = new List<Vector2i>();
+    // Find the state of a cell based on it's contents and the contents of it's neighbors, then add the appropriate points to a pair in a list of pairs which make up boundaries
+    public static List<Tuple<Vector2, Vector2>> Calculate(Matrix M, Pixel[,] Pixels, int X1, int Y1, int X2, int Y2) {
+        var Lines = new List<Tuple<Vector2, Vector2>>();
 
         for (int x = X1; x < X2 - 1; x++) {
             for (int y = Y1; y < Y2 - 1; y++) {
@@ -33,48 +33,48 @@ static class Boundaries {
 
                 switch (State) {
                     case 1:
-                        DrawLine(D, C);
+                        Lines.Add(new Tuple<Vector2, Vector2>(C, D));
                         break;
                     case 2:
-                        DrawLine(C, B);
+                        Lines.Add(new Tuple<Vector2, Vector2>(C, B));
                         break;
                     case 3:
-                        DrawLine(D, B);
+                        Lines.Add(new Tuple<Vector2, Vector2>(D, B));
                         break;
                     case 4:
-                        DrawLine(A, B);
+                        Lines.Add(new Tuple<Vector2, Vector2>(A, B));
                         break;
                     case 5:
-                        DrawLine(D, A);
-                        DrawLine(C, B);
+                        Lines.Add(new Tuple<Vector2, Vector2>(D, A));
+                        Lines.Add(new Tuple<Vector2, Vector2>(C, B));
                         break;
                     case 6:
-                        DrawLine(A, C);
+                        Lines.Add(new Tuple<Vector2, Vector2>(A, C));
                         break;
                     case 7:
-                        DrawLine(D, A);
+                        Lines.Add(new Tuple<Vector2, Vector2>(D, A));
                         break;
                     case 8:
-                        DrawLine(D, A);
+                        Lines.Add(new Tuple<Vector2, Vector2>(D, A));
                         break;
                     case 9:
-                        DrawLine(C, A);
+                        Lines.Add(new Tuple<Vector2, Vector2>(C, A));
                         break;
                     case 10:
-                        DrawLine(D, C);
-                        DrawLine(A, B);
+                        Lines.Add(new Tuple<Vector2, Vector2>(D, C));
+                        Lines.Add(new Tuple<Vector2, Vector2>(A, B));
                         break;
                     case 11:
-                        DrawLine(A, B);
+                        Lines.Add(new Tuple<Vector2, Vector2>(A, B));
                         break;
                     case 12:
-                        DrawLine(D, B);
+                        Lines.Add(new Tuple<Vector2, Vector2>(D, B));
                         break;
                     case 13:
-                        DrawLine(C, B);
+                        Lines.Add(new Tuple<Vector2, Vector2>(C, B));
                         break;
                     case 14:
-                        DrawLine(D, C);
+                        Lines.Add(new Tuple<Vector2, Vector2>(D, C));
                         break;
                     case 15:
                         break;
@@ -82,16 +82,7 @@ static class Boundaries {
             }
         }
 
-
-        // Reorder points around an average point
-        // if (Points.Count > 0) {
-        //     var AveragePoint = new Vector2i(Points.Average(t => t.X), Points.Average(t => t.Y));
-        //     var Ordered = Points.OrderBy(t => Math.Atan2(AveragePoint.Y - t.Y, AveragePoint.X - t.X)).ToList();
-
-        //     return Ordered;
-        // }
-
-        return Points;
+        return Lines;
     }
 
     public static void DrawLine(Vector2 A, Vector2 B, Color? C=null) {
@@ -118,7 +109,7 @@ static class Boundaries {
     }
 
     // Create a new line segment with the given start and end indices
-    private static Segment CreateSegment(int Start, int End, List<Vector2i> Points) {
+    private static Segment CreateSegment(int Start, int End, List<Vector2> Points) {
         var Count = End - Start;
         
         if (Count >= MinPointsToSimplify - 1) {
@@ -147,12 +138,12 @@ static class Boundaries {
     }
 
     // Check if the values of a point are valid, returns false if not (conditions may change in the future)
-    private static bool IsValid(Vector2i Point) {
+    private static bool IsValid(Vector2 Point) {
         return Point.X >= 0 && Point.Y >= 0;
     }
 
     // Split a segment at the furthest (perpendicular) index and return the two resulting segments
-    private static IEnumerable<Segment> SplitSegment(Segment Segment, List<Vector2i> Points) {
+    private static IEnumerable<Segment> SplitSegment(Segment Segment, List<Vector2> Points) {
         return new[] {
             CreateSegment(Segment.Start, Segment.Furthest, Points),
             CreateSegment(Segment.Furthest, Segment.End, Points)
@@ -160,7 +151,7 @@ static class Boundaries {
     }
 
     // Returns the initial segment for the algorithm, if any points contain invalid values, returns multiple segments for each side of the null point
-    private static IEnumerable<Segment> GetSegments(List<Vector2i> Points) {
+    private static IEnumerable<Segment> GetSegments(List<Vector2> Points) {
         var Previous = 0;
 
         foreach (var P in Points.Select((P, I) => new {
@@ -175,7 +166,7 @@ static class Boundaries {
     }
 
     // Calculate the perpendicular distance of a point relative to two other points
-    private static float GetDistance(Vector2i Start, Vector2i End, Vector2i Point) {
+    private static float GetDistance(Vector2 Start, Vector2 End, Vector2 Point) {
         var X = End.X - Start.X;
         var Y = End.Y - Start.Y;
 
@@ -200,7 +191,7 @@ static class Boundaries {
     }
 
     // Returns the reduced points from the given segment
-    private static IEnumerable<Vector2i> GetPoints(Segment Segment, int Count, int Index, List<Vector2i> Points) {
+    private static IEnumerable<Vector2> GetPoints(Segment Segment, int Count, int Index, List<Vector2> Points) {
         yield return Points[Segment.Start];
 
         var Next = Segment.End + 1;
@@ -217,7 +208,7 @@ static class Boundaries {
     }
 
     // Reduce the segments until the specified maximum, the tolerance has been met, or the points can no longer be reduced
-    private static void Reduce(ref List<Segment> Segments, List<Vector2i> Points, int max, float tolerance) {
+    private static void Reduce(ref List<Segment> Segments, List<Vector2> Points, int max, float tolerance) {
         var Gaps = Points.Count(P => !IsValid(P));
 
         while (Segments.Count + Gaps < max - 1) {
@@ -238,7 +229,7 @@ static class Boundaries {
     }
 
     // Use the Douglas Puecker line simplification algorithm to reduce the number of vertices in a bounding area calculatede above
-    public static IEnumerable<Vector2i> Simplify(List<Vector2i> Points, int max, float tolerance=0.0f) {
+    public static IEnumerable<Vector2> Simplify(List<Vector2> Points, int max, float tolerance=0.0f) {
         if (max < MinPointsToSimplify || Points.Count < max) {
             return Points;
         }

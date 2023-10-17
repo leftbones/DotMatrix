@@ -1,6 +1,8 @@
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 
+using Box2D.NetStandard.Dynamics.Bodies;
+
 namespace DotMatrix;
 
 /// <summary>
@@ -14,6 +16,8 @@ class Chunk {
     public Vector2i Position { get; private set; }                                                                      // The position of a Chunk within the parent Matrix
     public Vector2i Size { get; private set; }                                                                          // The size of a Chunk, in Pixels
     public int ThreadOrder { get; private set; }                                                                        // The "substep" in which a Chunk is processed when multithreading is enabled (1-4)
+
+    public Body? Mesh { get; set; }                                                                                     // The Box2D Body generated for this Chunk based on its contents (null until generated for the first time)
 
     public Texture2D Texture { get; set; }                                                                              // Texture that Pixels are drawn to
     public Image Buffer;                                                                                                // Buffer image used to create the texture
