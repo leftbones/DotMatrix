@@ -99,26 +99,6 @@ class Physics {
         // TODO Implement HitboxShape.Ball
     }
 
-    public Body CreateChunkMesh(List<Tuple<Vector2, Vector2>> Lines) {
-        var BodyDef = new BodyDef();
-        var Body = World.CreateBody(BodyDef);
-
-        var LinePoints = new List<Vector2>();
-        foreach (var Pair in Lines) {
-            LinePoints.Add(Pair.Item1);
-            LinePoints.Add(Pair.Item2);
-        }
-
-        Body.CreateFixture(new FixtureDef {
-            shape = new PolygonShape(LinePoints.ToArray()),
-            density = 1.0f,
-            friction = 0.3f,
-            restitution = 0.1f
-        });
-
-        return Body;
-    }
-
     public void Update() {
         if (!Active) return;
 

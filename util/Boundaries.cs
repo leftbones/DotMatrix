@@ -85,10 +85,10 @@ static class Boundaries {
         return Lines;
     }
 
-    public static void DrawLine(Vector2 A, Vector2 B, Color? C=null) {
-        C = C is null ? Color.RED : C;
-        DrawLineEx(A * 4, B * 4, 2.0f, (Color)C);
-    }
+    // public static void DrawLine(Vector2 A, Vector2 B, Color? C=null) {
+    //     C = C is null ? Color.RED : C;
+    //     DrawLineEx(A * 4, B * 4, 2.0f, (Color)C);
+    // }
 
     // Get the state of a subgrid square based on the value of it's four corners
     public static int GetState(int A, int B, int C, int D) {

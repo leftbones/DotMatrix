@@ -543,15 +543,16 @@ class Matrix {
                         DrawLineEx(Pair.Item1 * Scale, Pair.Item2 * Scale, 1.0f, Color.RED);
                     }
 
-                    // C.Mesh = Engine.Physics.CreateChunkMesh(Lines);
-
                     // Simplified -- FIXME: Totally broken, need to find a way to order the points such that they retain the order in which they need to be connected
                     // var LinePoints = new List<Vector2>();
-                    // foreach (var Pair in Lines) {
-                    //     LinePoints.Add(Pair.Item1);
-                    //     LinePoints.Add(Pair.Item2);
-                    // }
+                    // for (int i = 0; i < Lines.Count - 1; i++) {
+                    //     LinePoints.Add(Lines[i].Item1);
+                    //     LinePoints.Add(Lines[i].Item2);
 
+                    //     if (i < Lines.Count - 1) {
+                    //         LinePoints.Add(Lines[i + 1].Item1);
+                    //     }
+                    // }
                     // var Points = Boundaries.Simplify(LinePoints, 75, 0.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
 
                     // var LP = Points[0];

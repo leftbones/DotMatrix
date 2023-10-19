@@ -15,7 +15,7 @@ class Engine {
 
     public int Seed { get; private set; }
     public int Tick { get; private set; }
-    public float Delta { get { return GetFrameTime(); } }
+    public static float Delta { get { return GetFrameTime(); } }
 
     // Core
     public Pepper Pepper { get; private set; }
