@@ -82,6 +82,10 @@ static class Boundaries {
             }
         }
 
+        if (Lines.Count > 0) {
+            Lines.Add(new Tuple<Vector2, Vector2>(Lines[0].Item2, Lines[1].Item2)); // TODO: Not sure if this is necessary
+        }
+
         return Lines;
     }
 

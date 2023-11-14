@@ -97,6 +97,7 @@ class Engine {
         Entities.Add(Guy);
 
         Camera.Target = Guy.GetToken<Transform>();
+        Camera.Position = Guy.GetToken<Transform>()!.Position.ToVector2();
     }
 
     // Apply changes to the Config

@@ -6,14 +6,14 @@ namespace DotMatrix;
 
 /// <summary>
 /// The player's view into the world, it smoothly follows whatever Transform token is assigned to `Camera.Target`
-/// Currently handles drawing the skybox (testing only), this will likely be moved elsewhere later
+/// Currently handles drawing the skybox (experimental testing only), this will likely be moved elsewhere later
 /// </summary>
 
 class Camera {
     public Engine Engine { get; private set; }
     public Pepper Pepper { get { return Engine.Pepper; } }
     public Matrix Matrix { get { return Engine.Matrix; } }
-    public Vector2 Position { get; private set; }
+    public Vector2 Position { get; set; }
     public float PanSpeed { get; private set; }
 
     public Transform? Target { get; set; }
