@@ -26,8 +26,8 @@ class Pepper {
 
     private readonly Color MessageColor = Color.Transparent;
     private readonly Color WarningColor = Color.Yellow;
-    private readonly Color ErrorColor = Color.Orange;
-    private readonly Color FatalColor = Color.Red;
+    private readonly Color ErrorColor = Color.OrangeRed;
+    private readonly Color FatalColor = Color.DarkRed;
     private readonly Color DebugColor = Color.Magenta;
 
     // Settings
@@ -66,6 +66,7 @@ class Pepper {
     }
 
     // Throw an exception and write the exception to the current log file
+    public void Yell(string message, LogType type=LogType.DEBUG, LogLevel level=LogLevel.FATAL) { Throw(message, type, level); }
     public void Throw(string message, LogType type=LogType.DEBUG, LogLevel level=LogLevel.FATAL) {
         Log(message, type, level);
         Canvas.ExceptionWindow.AddWidget(new Multiline(Canvas.ExceptionWindow, $"{type} {level} %N %N {message}", 750));
@@ -75,6 +76,7 @@ class Pepper {
     }
 
     // Log a message to the console as well as the current log file
+    public void Sing(string message, LogType type=LogType.OTHER, LogLevel level=LogLevel.MESSAGE) { Log(message, type, level); }
     public void Log(string message, LogType type=LogType.OTHER, LogLevel level=LogLevel.MESSAGE) {
         if (level == LogLevel.MESSAGE && !LogMessage) { return; }
         else if (level == LogLevel.WARNING && !LogWarning) { return; }
@@ -101,6 +103,7 @@ class Pepper {
     }
 
     // Write to the current log file, creating it if it doesn't exist, and delete the oldest log if MaxLogs is exceeded
+    public void Paint(string entry) { Write(entry); }
     public void Write(string entry) {
         var LogDir = new DirectoryInfo("logs");
         var LogFiles = LogDir.GetFiles().Where(F => F.ToString().Contains("_log.txt"));

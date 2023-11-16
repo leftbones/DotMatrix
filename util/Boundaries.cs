@@ -19,6 +19,10 @@ static class Boundaries {
 
         for (int x = X1; x < X2 - 1; x++) {
             for (int y = Y1; y < Y2 - 1; y++) {
+                // if (!Pixels[x, y].Settled) {
+                //     continue;
+                // }
+
                 var A = new Vector2(x + 0.5f, y);
                 var B = new Vector2(x + 1, y + 0.5f);
                 var C = new Vector2(x + 0.5f, y + 1);
@@ -33,7 +37,7 @@ static class Boundaries {
 
                 switch (State) {
                     case 1:
-                        Lines.Add(new Tuple<Vector2, Vector2>(C, D));
+                        Lines.Add(new Tuple<Vector2, Vector2>(D, C));
                         break;
                     case 2:
                         Lines.Add(new Tuple<Vector2, Vector2>(C, B));
@@ -42,23 +46,23 @@ static class Boundaries {
                         Lines.Add(new Tuple<Vector2, Vector2>(D, B));
                         break;
                     case 4:
-                        Lines.Add(new Tuple<Vector2, Vector2>(A, B));
+                        Lines.Add(new Tuple<Vector2, Vector2>(B, A));
                         break;
                     case 5:
                         Lines.Add(new Tuple<Vector2, Vector2>(D, A));
                         Lines.Add(new Tuple<Vector2, Vector2>(C, B));
                         break;
                     case 6:
-                        Lines.Add(new Tuple<Vector2, Vector2>(A, C));
+                        Lines.Add(new Tuple<Vector2, Vector2>(C, A));
                         break;
                     case 7:
                         Lines.Add(new Tuple<Vector2, Vector2>(D, A));
                         break;
                     case 8:
-                        Lines.Add(new Tuple<Vector2, Vector2>(D, A));
+                        Lines.Add(new Tuple<Vector2, Vector2>(A, D));
                         break;
                     case 9:
-                        Lines.Add(new Tuple<Vector2, Vector2>(C, A));
+                        Lines.Add(new Tuple<Vector2, Vector2>(A, C));
                         break;
                     case 10:
                         Lines.Add(new Tuple<Vector2, Vector2>(D, C));
@@ -68,13 +72,13 @@ static class Boundaries {
                         Lines.Add(new Tuple<Vector2, Vector2>(A, B));
                         break;
                     case 12:
-                        Lines.Add(new Tuple<Vector2, Vector2>(D, B));
+                        Lines.Add(new Tuple<Vector2, Vector2>(B, D));
                         break;
                     case 13:
-                        Lines.Add(new Tuple<Vector2, Vector2>(C, B));
+                        Lines.Add(new Tuple<Vector2, Vector2>(B, C));
                         break;
                     case 14:
-                        Lines.Add(new Tuple<Vector2, Vector2>(D, C));
+                        Lines.Add(new Tuple<Vector2, Vector2>(C, D));
                         break;
                     case 15:
                         break;
@@ -82,21 +86,14 @@ static class Boundaries {
             }
         }
 
-        if (Lines.Count > 0) {
-            Lines.Add(new Tuple<Vector2, Vector2>(Lines[0].Item2, Lines[1].Item2)); // TODO: Not sure if this is necessary
-        }
-
         return Lines;
     }
 
-    // public static void DrawLine(Vector2 A, Vector2 B, Color? C=null) {
-    //     C = C is null ? Color.RED : C;
-    //     DrawLineEx(A * 4, B * 4, 2.0f, (Color)C);
-    // }
-
     // Get the state of a subgrid square based on the value of it's four corners
     public static int GetState(int A, int B, int C, int D) {
-        return A * 8 + B * 4 + C * 2 + D * 1;
+        // return A * 8 + B * 4 + C * 2 + D * 1;
+        var Binary = $"{A}{B}{C}{D}";
+        return Convert.ToInt32(Binary, 2);
     }
 
 

@@ -32,7 +32,7 @@ class Config {
             Pepper.Log("Configuration loaded successfully", LogType.SYSTEM);
         } catch {
             Items = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(File.ReadAllText("sys/default_config.json"))!;
-            Pepper.Log("No configuration found, default configuration restored", LogType.SYSTEM, LogLevel.WARNING);
+            Pepper.Log("No configuration found, default configuration restored", LogType.SYSTEM, LogLevel.ERROR);
         }
     }
 
@@ -54,7 +54,7 @@ class Config {
             Pepper.Log("Keymap loaded successfully", LogType.SYSTEM);
         } catch {
             Keymap = JsonConvert.DeserializeObject<Dictionary<String, List<String>>>(File.ReadAllText("sys/default_keymap.json"))!;
-            Pepper.Log("No keymap found, default keymap restored", LogType.SYSTEM, LogLevel.WARNING);
+            Pepper.Log("No keymap found, default keymap restored", LogType.SYSTEM, LogLevel.ERROR);
         }
 
         return Keymap;

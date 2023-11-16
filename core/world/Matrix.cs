@@ -128,6 +128,10 @@ class Matrix {
     public void ApplyConfig(Config C) {
         UseMultithreading = C.Items["UseMultithreading"];
         Pepper.Log("Matrix config applied", LogType.SYSTEM);
+
+        if (UseMultithreading) {
+            Pepper.Log("Experimental multithreading is enabled!", LogType.SYSTEM, LogLevel.WARNING);
+        }
     }
 
     // Get a Pixel from the Matrix (Vector2i pos)
@@ -537,79 +541,41 @@ class Matrix {
             foreach (var C in ActiveChunks) {
                 var Lines = Boundaries.Calculate(this, Pixels, C.Position.X, C.Position.Y, C.Position.X + ChunkSize.X, C.Position.Y + ChunkSize.Y);
                 if (Lines.Count > 0) {
-                    // Raw marching squares output, unordered list of line segments
-                    for (int i = 1; i < Lines.Count; i++) {
-                        var Pair = Lines[i];
-                        DrawLineEx(Pair.Item1 * Scale, Pair.Item2 * Scale, 1.0f, Color.RED);
-                    }
-
-                    // Reorder and flatten list of line segments to they are in the right order and there are no duplicate points
-                    var OrderedPoints = new List<Vector2>() { Lines[0].Item1, Lines[0].Item2 };
-                    Lines.RemoveAt(0);
+                    // Reorder and flatten list of line segments to a list of only points that are in the right order and without duplicates
+                    var OrderedShapes = new List<List<Vector2>>();
+                    var CurrentShape = new List<Vector2>() { Lines[0].Item1, Lines[0].Item2 };
 
                     while (Lines.Any()) {
-                        Tuple<Vector2, Vector2> CurrentLine = Lines.First(x => x.Item1 == OrderedPoints[0]);
+                        if (!Lines.Any(x => x.Item1 == CurrentShape[0])) {
+                            OrderedShapes.Add(CurrentShape);
+                            CurrentShape = new List<Vector2>() {Lines[0].Item1, Lines[0].Item2 };
+                        }
 
-                        OrderedPoints.Insert(0, CurrentLine.Item1);
-                        OrderedPoints.Insert(0, CurrentLine.Item2);
+                        Tuple<Vector2, Vector2> CurrentLine = Lines.First(x => x.Item1 == CurrentShape[0]);
+
+                        CurrentShape.Insert(0, CurrentLine.Item1);
+                        CurrentShape.Insert(0, CurrentLine.Item2);
 
                         Lines.Remove(CurrentLine);
                     }
 
-                    // Reordered line segments
-                    var LastPoint = OrderedPoints[0];
-                    for (int i = 1; i < OrderedPoints.Count; i++) {
-                        var CurrentPoint = OrderedPoints[i];
-                        DrawLineEx(LastPoint * Scale, CurrentPoint * Scale, 2.0f, Color.YELLOW);
-                        LastPoint = CurrentPoint;
+                    OrderedShapes.Add(CurrentShape);
+
+                    var FinalShapes = new List<List<Vector2>>();
+                    foreach (var Shape in OrderedShapes) {
+                        var MaxPointCount = Math.Max(Shape.Count / 2, 10); // 20
+                        var SimplifiedPoints = Boundaries.Simplify(Shape, MaxPointCount, 1.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
+
+                        // After simplifying line points
+                        var LP = SimplifiedPoints[0];
+                        for (int i = 1; i < SimplifiedPoints.Count; i++) {
+                            var P = SimplifiedPoints[i];
+                            DrawLineEx(LP * Scale, P * Scale, 2.0f, Color.BLUE);
+                            LP = P;
+                        }
+
+                        // DrawLineEx(LP * Scale, SimplifiedPoints[0] * Scale, 2.0f, Color.BLUE);
                     }
-
-                    // Flatten list and reorder points to preserve line shape
-                    // var LinePoints = new List<Vector2>() { Lines[0].Item1 };
-                    // var Pairs = new List<Tuple<Vector2, Vector2>>(Lines);
-
-                    // var CurrentPair = Lines[0];
-                    // var CurrentPoint = CurrentPair.Item2;
-                    // for (int i = 0; i < Lines.Count; i++) {
-                    //     foreach (var Pair in Lines) {
-                    //         if (Pair != CurrentPair) {
-                    //             if (Pair.Item1 == CurrentPoint) {
-                    //                 LinePoints.Add(Pair.Item2);
-                    //                 CurrentPair = Pair;
-                    //                 CurrentPoint = CurrentPair.Item2;
-                    //                 break;
-                    //             }
-                    //         }
-                    //     }
-                    // }
-
-                    // Pepper.Log($"{Lines.Count}, {LinePoints.Count}", LogType.DEBUG);
-
-                    // After flattening and reordering points
-                    // var LP = LinePoints[0];
-                    // for (int i = 1; i < LinePoints.Count; i++) {
-                    //     var P = LinePoints[i];
-                    //     DrawLineEx(LP * Scale, P * Scale, 2.0f, Color.GREEN);
-                    //     LP = P;
-                    // }
-
-                    // var SimplifiedPoints = Boundaries.Simplify(LinePoints, 20, 2.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
-
-                    // After simplifying line points
-                    // LP = SimplifiedPoints[0];
-                    // for (int i = 1; i < SimplifiedPoints.Count; i++) {
-                    //     var P = SimplifiedPoints[i];
-                    //     DrawLineEx(LP * Scale, P * Scale, 2.0f, Color.BLUE);
-                    //     DrawTextEx(Engine.Theme.Font, $"{i}", (LP - new Vector2(0, 5)) * Scale, Engine.Theme.FontSize, Engine.Theme.FontSpacing, Color.WHITE);
-                    //     LP = P;
-                    // }
-
-                    // DEBUG
-                    // DrawTextEx(Engine.Theme.Font, $"{SimplifiedPoints.Count}", (LP - new Vector2(0, 5)) * Scale, Engine.Theme.FontSize, Engine.Theme.FontSpacing, Color.WHITE);
-
-                    // var Col = C.Awake ? new Color(255, 255, 255, 150) : new Color(255, 255, 255, 25);
-                    // var Str = $"{SimplifiedPoints.Count}";
-                    // DrawTextEx(Engine.Theme.Font, Str, new Vector2i((C.Position.X * Scale) + 5, (C.Position.Y * Scale) + 20).ToVector2(), Engine.Theme.FontSize, Engine.Theme.FontSpacing, Col);
                 }
             }
         }

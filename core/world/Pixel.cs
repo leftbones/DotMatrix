@@ -58,6 +58,10 @@ class Pixel {
         Position = position ?? Position;
         LastPosition = Position;
         Color = color ?? Color;
+
+        if (ID == -1) {
+            Settled = true;
+        }
     }
 
     // Act on neighboring Pixels
