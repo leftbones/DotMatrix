@@ -67,9 +67,6 @@ class Engine {
         Camera = new Camera(this);
         Input = new Input(this);
 
-        // Player = new Entity();
-        // Camera.Target = Player;
-
         // Apply Config
         Config.ApplyChanges();
 
@@ -81,8 +78,6 @@ class Engine {
         //
         // TESTING
 
-        Canvas.BrushID = 100;
-
         var Guy = new Entity();
 
         Guy.AddToken(new Render("res/objects/guy.png"));
@@ -92,6 +87,7 @@ class Engine {
             /* Move Right   */ { (int)KeyboardKey.KEY_D, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(2, 0); }))},
             /* Move Up      */ { (int)KeyboardKey.KEY_W, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(0, -2); }))},
             /* Move Down    */ { (int)KeyboardKey.KEY_S, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(0, 2); }))},
+            /* Respawn      */ { (int)KeyboardKey.KEY_R, new Event(EventType.Press, new Action(() => { Guy.GetToken<Transform>()!.Position = Matrix.Size * MatrixScale / 2; }))},
         }));
 
         Entities.Add(Guy);

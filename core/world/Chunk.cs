@@ -1,3 +1,4 @@
+using System.Numerics;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 
@@ -17,7 +18,9 @@ class Chunk {
     public Vector2i Size { get; private set; }                                                                          // The size of a Chunk, in Pixels
     public int ThreadOrder { get; private set; }                                                                        // The "substep" in which a Chunk is processed when multithreading is enabled (1-4)
 
-    public Body? Mesh { get; set; }                                                                                     // The Box2D Body generated for this Chunk based on its contents (null until generated for the first time)
+    // public Body? Mesh { get; set; }                                                                                     // The Box2D Body generated for this Chunk based on its contents (null until generated for the first time)
+    public List<List<Vector2>> Bounds { get; private set; }                                                         // List of boundaries (outlines) generated using marching squares based on the contents of the chunk
+    public bool RecalculateBounds { get; set; }                                                                     // When true, recalculate the boundaries contained in the chunk
 
     public Texture2D Texture { get; set; }                                                                              // Texture that Pixels are drawn to
     public Image Buffer;                                                                                                // Buffer image used to create the texture
@@ -40,6 +43,9 @@ class Chunk {
     public int SleepTimer { get; private set; }                                                                         // Timer that counts down before a Chunk sleeps
     private readonly int WaitTime = 30;                                                                                 // Number of ticks used for the SleepTimer
 
+    public int BoundsTimer { get; private set; }
+    private readonly int RecalcTime = 10;
+
     public Rectangle DirtyRect { get { return new Rectangle(Position.X + X1, Position.Y + Y1, X2 - X1, Y2 - Y1); } }    // Area within a Chunk containing active Pixels
 
     public bool Awake { get; private set; } = false;                                                                    // Chunk contains active Pixels
@@ -61,15 +67,19 @@ class Chunk {
         DestRec = new Rectangle(Position.X * Matrix.Scale, Position.Y * Matrix.Scale, Size.X * Matrix.Scale, Size.Y * Matrix.Scale);
 
         SleepTimer = WaitTime;
+
+        Bounds = new List<List<Vector2>>();
     }
 
     // Set the Chunk to be Awake for the next Matrix update
     public void Wake(Vector2i pos) {
-        if (!Awake && !Matrix.Engine.Active)
+        if (!Awake && !Matrix.Engine.Active) {
             ForceRedraw = true;
+        }
 
-        if (!Awake && !WakeNextStep)
+        if (!Awake && !WakeNextStep) {
             Matrix.AwakeChunks++;
+        }
 
         WakeNextStep = true;
         SleepTimer = WaitTime;
@@ -93,6 +103,30 @@ class Chunk {
 
     // Update the dirty rect then update the awake state or tick down the SleepTimer
     public void Step() {
+        if (BoundsTimer == 0) {
+            RecalculateBounds = true;
+            Bounds.Clear();
+            BoundsTimer = RecalcTime;
+        } else {
+            RecalculateBounds = false;
+            BoundsTimer--;
+        }
+
+        if (RecalculateBounds) {
+            var Shapes = Boundaries.Calculate(Matrix, Position.X, Position.Y, Position.X + Size.X, Position.Y + Size.Y);
+            Console.WriteLine(Shapes.Count);
+            if (Shapes.Count > 0) {
+                foreach (var Shape in Shapes) {
+                    var MaxPoints = Math.Max(Shape.Count / 2, 10);
+                    var Simplified = Boundaries.Simplify(Shape, MaxPoints, 1.0f).Distinct().ToList();
+
+                    if (Simplified.Count > 4) {
+                        Bounds.Add(Simplified);
+                    }
+                }
+            }
+        }
+
         UpdateRect();
 
         if (Awake && !WakeNextStep) {

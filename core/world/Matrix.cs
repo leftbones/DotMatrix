@@ -539,42 +539,12 @@ class Matrix {
         // Chunk Collision Borders
         if (Engine.Canvas.DrawChunkCollision) {
             foreach (var C in ActiveChunks) {
-                var Lines = Boundaries.Calculate(this, Pixels, C.Position.X, C.Position.Y, C.Position.X + ChunkSize.X, C.Position.Y + ChunkSize.Y);
-                if (Lines.Count > 0) {
-                    // Reorder and flatten list of line segments to a list of only points that are in the right order and without duplicates
-                    var OrderedShapes = new List<List<Vector2>>();
-                    var CurrentShape = new List<Vector2>() { Lines[0].Item1, Lines[0].Item2 };
-
-                    while (Lines.Any()) {
-                        if (!Lines.Any(x => x.Item1 == CurrentShape[0])) {
-                            OrderedShapes.Add(CurrentShape);
-                            CurrentShape = new List<Vector2>() {Lines[0].Item1, Lines[0].Item2 };
-                        }
-
-                        Tuple<Vector2, Vector2> CurrentLine = Lines.First(x => x.Item1 == CurrentShape[0]);
-
-                        CurrentShape.Insert(0, CurrentLine.Item1);
-                        CurrentShape.Insert(0, CurrentLine.Item2);
-
-                        Lines.Remove(CurrentLine);
-                    }
-
-                    OrderedShapes.Add(CurrentShape);
-
-                    var FinalShapes = new List<List<Vector2>>();
-                    foreach (var Shape in OrderedShapes) {
-                        var MaxPointCount = Math.Max(Shape.Count / 2, 10); // 20
-                        var SimplifiedPoints = Boundaries.Simplify(Shape, MaxPointCount, 1.0f).ToList(); // TODO: Test other values for max points and tolerance for possible better results
-
-                        // After simplifying line points
-                        var LP = SimplifiedPoints[0];
-                        for (int i = 1; i < SimplifiedPoints.Count; i++) {
-                            var P = SimplifiedPoints[i];
-                            DrawLineEx(LP * Scale, P * Scale, 2.0f, Color.BLUE);
-                            LP = P;
-                        }
-
-                        // DrawLineEx(LP * Scale, SimplifiedPoints[0] * Scale, 2.0f, Color.BLUE);
+                foreach (var S in C.Bounds) {
+                    var LP = S[0];
+                    for (int i = 1; i < S.Count; i++) {
+                        var P = S[i];
+                        DrawLineEx(LP * Scale, P * Scale, 2.0f, Color.BLUE);
+                        LP = P;
                     }
                 }
             }

@@ -14,25 +14,21 @@ static class Boundaries {
     // Marching Squares Algorithm
 
     // Find the state of a cell based on it's contents and the contents of it's neighbors, then add the appropriate points to a pair in a list of pairs which make up boundaries
-    public static List<Tuple<Vector2, Vector2>> Calculate(Matrix M, Pixel[,] Pixels, int X1, int Y1, int X2, int Y2) {
+    public static List<List<Vector2>> Calculate(Matrix M, int X1, int Y1, int X2, int Y2) {
         var Lines = new List<Tuple<Vector2, Vector2>>();
 
         for (int x = X1; x < X2 - 1; x++) {
             for (int y = Y1; y < Y2 - 1; y++) {
-                // if (!Pixels[x, y].Settled) {
-                //     continue;
-                // }
-
                 var A = new Vector2(x + 0.5f, y);
                 var B = new Vector2(x + 1, y + 0.5f);
                 var C = new Vector2(x + 0.5f, y + 1);
                 var D = new Vector2(x, y + 0.5f);
 
                 var State = GetState(
-                    M.InBoundsAndEmpty(x, y) ? 1 : 0,
-                    M.InBoundsAndEmpty(x + 1, y) ? 1 : 0,
-                    M.InBoundsAndEmpty(x + 1, y + 1) ? 1 : 0,
-                    M.InBoundsAndEmpty(x, y + 1) ? 1 : 0
+                    GetCollision(M, x, y) ? 1 : 0,
+                    GetCollision(M, x + 1, y) ? 1 : 0,
+                    GetCollision(M, x + 1, y + 1) ? 1 : 0,
+                    GetCollision(M, x, y + 1) ? 1 : 0
                 );
 
                 switch (State) {
@@ -86,14 +82,54 @@ static class Boundaries {
             }
         }
 
-        return Lines;
+        // Flatten the list of line segments and put them in the proper order
+        var Shapes = new List<List<Vector2>>();
+
+        if (Lines.Count > 0) {
+            var CurrentShape = new List<Vector2>() { Lines[0].Item1, Lines[0].Item2 };
+
+            while (Lines.Any()) {
+                if (!Lines.Any(x => x.Item1 == CurrentShape[0])) {
+                    Shapes.Add(CurrentShape);
+                    CurrentShape = new List<Vector2>() {Lines[0].Item1, Lines[0].Item2 };
+                }
+
+                Tuple<Vector2, Vector2> CurrentLine = Lines.First(x => x.Item1 == CurrentShape[0]);
+
+                CurrentShape.Insert(0, CurrentLine.Item1);
+                CurrentShape.Insert(0, CurrentLine.Item2);
+
+                Lines.Remove(CurrentLine);
+            }
+
+            Shapes.Add(CurrentShape);
+        }
+
+        return Shapes;
     }
 
     // Get the state of a subgrid square based on the value of it's four corners
     public static int GetState(int A, int B, int C, int D) {
-        // return A * 8 + B * 4 + C * 2 + D * 1;
-        var Binary = $"{A}{B}{C}{D}";
-        return Convert.ToInt32(Binary, 2);
+        return A * 8 + B * 4 + C * 2 + D * 1;
+    }
+
+    // Check if a Pixel is actually collidable
+    public static bool GetCollision(Matrix M, int X, int Y) {
+        if (M.InBounds(X, Y)) { // Pixel is in bounds
+            if (M.IsEmpty(X, Y)) { // Pixel is empty (Air)
+                return false;
+            }
+
+            var P = M.Pixels[X, Y];
+
+            if (P is Solid) { // Pixel is solid
+                return true;
+            } else if (P is Powder && P.Settled) { // Pixel is powder and settled
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
