@@ -83,10 +83,10 @@ class Engine {
         Guy.AddToken(new Render("res/objects/guy.png"));
         Guy.AddToken(new Transform(new Vector2i(Matrix.Size.X / 2, 425) * MatrixScale));
         Guy.AddToken(new Control(new Dictionary<int, Event>() {
-            /* Move Left    */ { (int)KeyboardKey.KEY_A, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(-2, 0); }))},
-            /* Move Right   */ { (int)KeyboardKey.KEY_D, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(2, 0); }))},
-            /* Move Up      */ { (int)KeyboardKey.KEY_W, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(0, -2); }))},
-            /* Move Down    */ { (int)KeyboardKey.KEY_S, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(0, 2); }))},
+            /* Move Left    */ { (int)KeyboardKey.KEY_A, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(-4, 0); }))},
+            /* Move Right   */ { (int)KeyboardKey.KEY_D, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(4, 0); }))},
+            /* Move Up      */ { (int)KeyboardKey.KEY_W, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(0, -4); }))},
+            /* Move Down    */ { (int)KeyboardKey.KEY_S, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(0, 4); }))},
             /* Respawn      */ { (int)KeyboardKey.KEY_R, new Event(EventType.Press, new Action(() => { Guy.GetToken<Transform>()!.Position = Matrix.Size * MatrixScale / 2; }))},
         }));
 

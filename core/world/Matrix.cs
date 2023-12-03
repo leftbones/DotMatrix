@@ -264,6 +264,7 @@ class Matrix {
         }
     }
 
+    // Update each awake Chunk in the Matrix using multiple threads to improve simulation speed (experimental!)
     public void UpdateParallel() {
         var UpdateA = new List<Task>();
         var UpdateB = new List<Task>();

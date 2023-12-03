@@ -18,9 +18,9 @@ class Chunk {
     public Vector2i Size { get; private set; }                                                                          // The size of a Chunk, in Pixels
     public int ThreadOrder { get; private set; }                                                                        // The "substep" in which a Chunk is processed when multithreading is enabled (1-4)
 
-    // public Body? Mesh { get; set; }                                                                                     // The Box2D Body generated for this Chunk based on its contents (null until generated for the first time)
-    public List<List<Vector2>> Bounds { get; private set; }                                                         // List of boundaries (outlines) generated using marching squares based on the contents of the chunk
-    public bool RecalculateBounds { get; set; }                                                                     // When true, recalculate the boundaries contained in the chunk
+    public List<List<Vector2>> Bounds { get; private set; }                                                             // List of boundaries (outlines) generated using marching squares based on the contents of the chunk
+    public List<Box2D> Bodies { get; set; }                                                                             // The Box2D tokens generated for this Chunk based on its contents
+    public bool RecalculateBounds { get; set; }                                                                         // When true, recalculate the boundaries contained in the chunk
 
     public Texture2D Texture { get; set; }                                                                              // Texture that Pixels are drawn to
     public Image Buffer;                                                                                                // Buffer image used to create the texture
@@ -69,6 +69,7 @@ class Chunk {
         SleepTimer = WaitTime;
 
         Bounds = new List<List<Vector2>>();
+        Bodies = new List<Box2D>();
     }
 
     // Set the Chunk to be Awake for the next Matrix update
@@ -107,6 +108,10 @@ class Chunk {
             RecalculateBounds = true;
             Bounds.Clear();
             BoundsTimer = RecalcTime;
+
+            foreach (var Body in Bodies) {
+                Body.Destroy();
+            }
         } else {
             RecalculateBounds = false;
             BoundsTimer--;
@@ -114,7 +119,6 @@ class Chunk {
 
         if (RecalculateBounds) {
             var Shapes = Boundaries.Calculate(Matrix, Position.X, Position.Y, Position.X + Size.X, Position.Y + Size.Y);
-            Console.WriteLine(Shapes.Count);
             if (Shapes.Count > 0) {
                 foreach (var Shape in Shapes) {
                     var MaxPoints = Math.Max(Shape.Count / 2, 10);
@@ -124,6 +128,8 @@ class Chunk {
                         Bounds.Add(Simplified);
                     }
                 }
+
+                Matrix.Engine.Physics.CreateChunkBodies(this);
             }
         }
 

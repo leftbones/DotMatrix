@@ -34,9 +34,9 @@ class Physics {
     private bool Active = true;
 
     // Settings
-    private bool DebugDraw = false;
+    private bool DebugDraw = true;
     private bool DrawBox2DSimulation = false;
-    private bool DrawPhysicsHitboxes = false;
+    private bool DrawPhysicsHitboxes = true;
     private bool DrawPixelMapBoxes = false;
 
     private Raylib_cs.Color DebugColor = new Raylib_cs.Color(255, 255, 0, 150);
@@ -99,23 +99,36 @@ class Physics {
         // TODO Implement HitboxShape.Ball
     }
 
+    public List<Box2D> CreateChunkBodies(Chunk C) {
+        var Bodies = new List<Box2D>();
+
+        foreach (var Boundary in C.Bounds) {
+            var Chain = new ChainShape();
+            // Chain.CreateChain(Boundary.ToArray(), Boundary.Last(), Boundary.First());
+            Chain.CreateLoop(Boundary.ToArray());
+            Bodies.Add(new Box2D(World, C.Position, BodyType.Static, true, Chain));
+        }
+
+        return Bodies;
+    }
+
     public void Update() {
         if (!Active) return;
 
         // TESTING (Shift + Right click to create barrels)
-        // if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) && IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT)) {
-        //     var MousePosAdj = (((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Matrix.Scale) + (Engine.Canvas.MousePos / Matrix.Scale));
+        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) && IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT)) {
+            var MousePosAdj = (((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Matrix.Scale) + (Engine.Canvas.MousePos / Matrix.Scale));
 
-        //     var Block = new Entity();
-        //     Block.AddToken(new Render());
-        //     Block.AddToken(new PixelMap(MousePosAdj, "res/objects/barrel_pm.png", "res/objects/barrel_mm.png"));
-        //     Block.AddToken(new Transform(MousePosAdj));
+            var Block = new Entity();
+            Block.AddToken(new Render());
+            Block.AddToken(new PixelMap(MousePosAdj, "res/objects/barrel_pm.png", "res/objects/barrel_mm.png"));
+            Block.AddToken(new Transform(MousePosAdj));
 
-        //     Block.AddToken(CreateBody(Block, MousePosAdj, BodyType.Dynamic, false, HitboxShape.Box));
+            Block.AddToken(CreateBody(Block, MousePosAdj, BodyType.Dynamic, false, HitboxShape.Box));
 
-        //     Engine.Entities.Add(Block);
-        //     Bodies.Add(Block);
-        // }
+            Engine.Entities.Add(Block);
+            Bodies.Add(Block);
+        }
 
         World.Step(TimeStep, VelocityIterations, PositionIterations);
     }
@@ -155,8 +168,19 @@ class Physics {
                         new Raylib_cs.Color(0, 255, 255, 50)
                     );
                 }
-            } else {
+            } else if (Box2D!.HitboxShape == HitboxShape.Ball) {
                 // DrawPolyLines((Box2D!.Position * Global.PTM), 16, (float)(Box2D!.Radius! * Global.PTM), (-Box2D!.Body.GetAngle() * RAD2DEG) + 45, DebugColor);
+            } else if (Box2D!.HitboxShape == HitboxShape.Chain) {
+                var Chain = Box2D!.Shape as ChainShape;
+                foreach (var Verts in Chain!.Vertices) {
+                    var LP = Verts[0];
+                    for (int i = 1; i < Chain!.Vertices.Length; i++) {
+                        var P = Verts[i];
+                        // Console.WriteLine($"{LP}, {P}");
+                        // DrawLineEx(LP * Global.MatrixScale, P * Global.MatrixScale, 2.0f, DebugColor);
+                        LP = P;
+                    }
+                }
             }
         }
     }
