@@ -3,8 +3,6 @@ using System.Reflection.Metadata.Ecma335;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 
-using Box2D.NetStandard.Collision.Shapes;
-
 namespace DotMatrix;
 
 /// <summary>
@@ -59,9 +57,6 @@ class Matrix {
 
     private Rectangle SourceRec;                                                // Actual size of the Matrix texture
     private Rectangle DestRec;                                                  // Scaled size of the Matrix texture
-
-    private Shader BlurShader = LoadShader(null, "res/shaders/blur.fs");        // Blur shader (experimental)
-    private Shader BloomShader = LoadShader(null, "res/shaders/bloom.fs");      // Bloom shader (experimental)
 
     // Settings
     private bool UseMultithreading = false;

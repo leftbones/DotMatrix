@@ -15,8 +15,8 @@
 
     "DebugModeEnabled" : true,
 
-    // Box2D
-    "DrawBox2DSimulation" : false,
+    // Physics
+    "DrawPhysicsSimulation" : false,
     "DrawPhysicsHitboxes" : true,
     "DrawPixelMapBoxes" : false
 }

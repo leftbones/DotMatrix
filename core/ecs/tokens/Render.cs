@@ -33,26 +33,12 @@ class Render : Token {
         if (Entity is null) return;
 
         var Transform = Entity!.GetToken<Transform>();
-        var PixelMap = Entity!.GetToken<PixelMap>();
-        var Box2D = Entity!.GetToken<Box2D>();
 
-        Rectangle DestRect;
-        if (Box2D is null) DestRect = new Rectangle(Transform!.Position.X, Transform!.Position.Y, Width * Global.MatrixScale, Height * Global.MatrixScale);
-        else DestRect = Box2D!.ScaledRect;
-
-        Vector2 Orig;
-        if (Box2D is null) Orig = Origin;
-        else Orig = Box2D!.ScaledOrigin;
+        var DestRect = new Rectangle(Transform!.Position.X, Transform!.Position.Y, Width * Global.MatrixScale, Height * Global.MatrixScale);
+        var Orig = Origin;
 
         float Rotation = Transform!.Rotation;
 
         DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, Color.WHITE);
-
-        // foreach (var Pixel in PixelMap!.Pixels) {
-        //     if (Pixel is null) continue;
-
-        //     var MPos = Vector2i.Rotate(Pixel.Position, PixelMap!.Position, Transform!.Rotation * DEG2RAD);
-        //     DrawCircleV(MPos.ToVector2() * Global.MatrixScale, 1.0f, Color.WHITE);
-        // }
     }
 }

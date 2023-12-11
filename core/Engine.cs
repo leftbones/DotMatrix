@@ -21,7 +21,6 @@ class Engine {
     public Pepper Pepper { get; private set; }
     public Config Config { get; private set; }
     public Matrix Matrix { get; private set; }
-    public Physics Physics { get; private set; }
     public Interface Interface { get; private set; }
     public Canvas Canvas { get; private set; }
     public Camera Camera { get; private set; }
@@ -61,7 +60,6 @@ class Engine {
         Pepper.Log("Engine initialized", LogType.ENGINE);
 
         Matrix = new Matrix(this);
-        Physics = new Physics(this);
         Interface = new Interface(this);
         Canvas = new Canvas(this);
         Camera = new Camera(this);
@@ -131,7 +129,6 @@ class Engine {
 
         // ECS Updates
         PixelMapSystem.Update(Delta);
-        Box2DSystem.Update(Delta);
 
         // Matrix + Canvas Updates
         Matrix.UpdateStart();
@@ -140,7 +137,6 @@ class Engine {
         Matrix.UpdateEnd();
 
         // Other Updates
-        Physics.Update();
         Interface.Update();
         Camera.Update();
 
@@ -163,7 +159,6 @@ class Engine {
         Matrix.Draw();
 
         RenderSystem.Update(Delta);
-        Physics.Draw();
 
         EndMode2D();
 

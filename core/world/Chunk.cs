@@ -2,8 +2,6 @@ using System.Numerics;
 using Raylib_cs;
 using static Raylib_cs.Raylib;
 
-using Box2D.NetStandard.Dynamics.Bodies;
-
 namespace DotMatrix;
 
 /// <summary>
@@ -110,7 +108,6 @@ class Chunk {
             BoundsTimer = RecalcTime;
 
             foreach (var E in Bodies) {
-                Matrix.Engine.Physics.Bodies.Remove(E);
                 E.Destroy();
             }
         } else {
@@ -127,20 +124,11 @@ class Chunk {
 
                     if (Simplified.Count > 0) {
                         for (int i = 0; i < Simplified.Count; i++) {
-                            // Simplified[i] /= Global.MatrixScale;
                             Simplified[i] = (Simplified[i] - Position.ToVector2()) / Global.MatrixScale;
                         }
 
                         Bounds.Add(Simplified);
                     }
-                }
-
-                var CB = Matrix.Engine.Physics.CreateChunkBodies(this);
-                foreach (var Box2D in CB) {
-                    var E = new Entity();
-                    E.AddToken(Box2D);
-                    Bodies.Add(E);
-                    Matrix.Engine.Physics.Bodies.Add(E);
                 }
             }
         }

@@ -32,4 +32,3 @@ class System<T> where T : Token {
 class ControlSystem: System<Control> { }
 class RenderSystem : System<Render> { }
 class PixelMapSystem : System<PixelMap> { }
-class Box2DSystem : System<Box2D> { }
