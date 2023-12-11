@@ -35,7 +35,7 @@ class Physics {
 
     // Settings
     private bool DebugDraw = true;
-    private bool DrawBox2DSimulation = false;
+    private bool DrawBox2DSimulation = true;
     private bool DrawPhysicsHitboxes = true;
     private bool DrawPixelMapBoxes = false;
 
@@ -99,14 +99,25 @@ class Physics {
         // TODO Implement HitboxShape.Ball
     }
 
+    // Create and return a list of Box2D tokens for each disconnected boundary found within a Chunk
     public List<Box2D> CreateChunkBodies(Chunk C) {
         var Bodies = new List<Box2D>();
 
         foreach (var Boundary in C.Bounds) {
+            // for (int i = 0; i < Boundary.Count; i++) {
+            //     var Point = Boundary[i] / Global.MatrixScale;
+            //     Boundary[i] = Point;
+            // }
+
             var Chain = new ChainShape();
-            // Chain.CreateChain(Boundary.ToArray(), Boundary.Last(), Boundary.First());
             Chain.CreateLoop(Boundary.ToArray());
-            Bodies.Add(new Box2D(World, C.Position, BodyType.Static, true, Chain));
+
+            try {
+                Bodies.Add(new Box2D(World, C.Position, BodyType.Static, true, Chain));
+            } catch (Exception E) {
+                Pepper.Throw(E.ToString(), LogType.PHYSICS);
+                break;
+            }
         }
 
         return Bodies;
@@ -115,9 +126,9 @@ class Physics {
     public void Update() {
         if (!Active) return;
 
-        // TESTING (Shift + Right click to create barrels)
+        // TESTING (Shift + Left click to create barrels)
         if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT) && IsMouseButtonPressed(MouseButton.MOUSE_BUTTON_LEFT)) {
-            var MousePosAdj = (((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Matrix.Scale) + (Engine.Canvas.MousePos / Matrix.Scale));
+            var MousePosAdj = ((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Matrix.Scale) + (Engine.Canvas.MousePos / Matrix.Scale);
 
             var Block = new Entity();
             Block.AddToken(new Render());
@@ -138,11 +149,15 @@ class Physics {
 
         foreach (var Entity in Bodies) {
             var Box2D = Entity.GetToken<Box2D>();
+            if (Box2D is null) {
+                continue;
+            }
 
             if (Box2D!.HitboxShape == HitboxShape.Box) {
                 // Draw Unscaled Box2D Simulation
-                if (DrawBox2DSimulation)
-                    DrawRectanglePro(Box2D!.Rect, Box2D!.Origin, (Box2D!.Body.GetAngle() * RAD2DEG), DebugColor);
+                if (DrawBox2DSimulation) {
+                    DrawRectanglePro(Box2D!.Rect, Box2D!.Origin, Box2D!.Body.GetAngle() * RAD2DEG, Raylib_cs.Color.SKYBLUE);
+                }
 
                 // Draw Hitbox Debug Outline
                 if (DrawPhysicsHitboxes) {
@@ -150,11 +165,14 @@ class Physics {
                     var Vertices = Shape!.GetVertices();
                     List<Vector2> AdjVerts = new List<Vector2>();
 
-                    for (int i = 0; i < Vertices.Count(); i++) AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[i]) * Global.PTM);
+                    for (int i = 0; i < Vertices.Length; i++) {
+                        AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[i]) * Global.PTM);
+                    }
                     AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[0]) * Global.PTM);
 
-                    for (int i = 1; i < AdjVerts.Count(); i++) DrawLineEx(AdjVerts[i], AdjVerts[i - 1], 1.0f, DebugColor);
-                    DrawLineEx(AdjVerts[AdjVerts.Count() / 2], AdjVerts[AdjVerts.Count() - 1], 1.0f, DebugColor);
+                    for (int i = 1; i < AdjVerts.Count; i++) DrawLineEx(AdjVerts[i], AdjVerts[i - 1], 1.0f, DebugColor); {
+                        DrawLineEx(AdjVerts[AdjVerts.Count / 2], AdjVerts[^1], 1.0f, DebugColor);
+                    }
                 }
 
                 // Draw PixelMap Position in Matrix
@@ -172,13 +190,21 @@ class Physics {
                 // DrawPolyLines((Box2D!.Position * Global.PTM), 16, (float)(Box2D!.Radius! * Global.PTM), (-Box2D!.Body.GetAngle() * RAD2DEG) + 45, DebugColor);
             } else if (Box2D!.HitboxShape == HitboxShape.Chain) {
                 var Chain = Box2D!.Shape as ChainShape;
-                foreach (var Verts in Chain!.Vertices) {
-                    var LP = Verts[0];
-                    for (int i = 1; i < Chain!.Vertices.Length; i++) {
-                        var P = Verts[i];
-                        // Console.WriteLine($"{LP}, {P}");
-                        // DrawLineEx(LP * Global.MatrixScale, P * Global.MatrixScale, 2.0f, DebugColor);
-                        LP = P;
+                var Vertices = Chain!.Vertices;
+                var AdjVerts = new List<Vector2>();
+
+                for (int i = 0; i < Vertices.Length; i++) {
+                    AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[i]) * Global.PTM);
+                }
+                AdjVerts.Add(Box2D!.Body.GetWorldPoint(Vertices[0]) * Global.PTM);
+
+                for (int i = 1; i < AdjVerts.Count; i++) {
+                    DrawLineEx(AdjVerts[i], AdjVerts[i - 1], 1.0f, DebugColor);
+                }
+
+                if (DrawBox2DSimulation) {
+                    for (int i = 1; i < Vertices.Length; i++) {
+                        DrawLineEx(Vertices[i], Vertices[i - 1], 1.0f, Raylib_cs.Color.SKYBLUE);
                     }
                 }
             }

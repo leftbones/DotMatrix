@@ -19,7 +19,7 @@ class Chunk {
     public int ThreadOrder { get; private set; }                                                                        // The "substep" in which a Chunk is processed when multithreading is enabled (1-4)
 
     public List<List<Vector2>> Bounds { get; private set; }                                                             // List of boundaries (outlines) generated using marching squares based on the contents of the chunk
-    public List<Box2D> Bodies { get; set; }                                                                             // The Box2D tokens generated for this Chunk based on its contents
+    public List<Entity> Bodies { get; set; }                                                                             // The Box2D tokens generated for this Chunk based on its contents
     public bool RecalculateBounds { get; set; }                                                                         // When true, recalculate the boundaries contained in the chunk
 
     public Texture2D Texture { get; set; }                                                                              // Texture that Pixels are drawn to
@@ -69,7 +69,7 @@ class Chunk {
         SleepTimer = WaitTime;
 
         Bounds = new List<List<Vector2>>();
-        Bodies = new List<Box2D>();
+        Bodies = new List<Entity>();
     }
 
     // Set the Chunk to be Awake for the next Matrix update
@@ -109,8 +109,9 @@ class Chunk {
             Bounds.Clear();
             BoundsTimer = RecalcTime;
 
-            foreach (var Body in Bodies) {
-                Body.Destroy();
+            foreach (var E in Bodies) {
+                Matrix.Engine.Physics.Bodies.Remove(E);
+                E.Destroy();
             }
         } else {
             RecalculateBounds = false;
@@ -124,12 +125,23 @@ class Chunk {
                     var MaxPoints = Math.Max(Shape.Count / 2, 10);
                     var Simplified = Boundaries.Simplify(Shape, MaxPoints, 1.0f).Distinct().ToList();
 
-                    if (Simplified.Count > 4) {
+                    if (Simplified.Count > 0) {
+                        for (int i = 0; i < Simplified.Count; i++) {
+                            // Simplified[i] /= Global.MatrixScale;
+                            Simplified[i] = (Simplified[i] - Position.ToVector2()) / Global.MatrixScale;
+                        }
+
                         Bounds.Add(Simplified);
                     }
                 }
 
-                Matrix.Engine.Physics.CreateChunkBodies(this);
+                var CB = Matrix.Engine.Physics.CreateChunkBodies(this);
+                foreach (var Box2D in CB) {
+                    var E = new Entity();
+                    E.AddToken(Box2D);
+                    Bodies.Add(E);
+                    Matrix.Engine.Physics.Bodies.Add(E);
+                }
             }
         }
 

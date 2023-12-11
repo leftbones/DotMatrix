@@ -64,7 +64,7 @@ class Matrix {
     private Shader BloomShader = LoadShader(null, "res/shaders/bloom.fs");      // Bloom shader (experimental)
 
     // Settings
-    private bool UseMultithreading = true;
+    private bool UseMultithreading = false;
 
     public Matrix(Engine engine, int? seed=null) {
         Engine = engine;
@@ -332,6 +332,34 @@ class Matrix {
                 }
             }
         }
+
+        foreach (var PixelMap in ActivePixelMaps) {
+            var Entity = PixelMap.Entity!;
+            var Transform = Entity.GetToken<Transform>()!;
+
+            var Start = PixelMap.Position - PixelMap.Origin;
+            var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
+
+            for (int x = Start.X; x < End.X; x++) {
+                for (int y = Start.Y; y < End.Y; y++) {
+                    var MPos = Vector2i.Rotate(new Vector2i(x, y), PixelMap.Position, Transform.Rotation * DEG2RAD);
+
+                    if (!InBounds(MPos)) continue;
+
+                    var PX = x - Start.X;
+                    var PY = y - Start.Y;
+
+                    if (PixelMap.Pixels[PX, PY] is null)
+                        continue;
+
+                    // FIXME: This block allows other Pixels to interact with the PixelMap Pixels, but rotation of the PixelMap causes issues
+                    // var MPixel = Get(MPos);
+                    // PixelMap.Pixels[PX, PY] = MPixel;
+
+                    Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
+                }
+            }
+        }
     }
 
     // Actions performed before the start of the normal Update
@@ -412,33 +440,33 @@ class Matrix {
     // Actions performed at the end of the normal Update
     public void UpdateEnd() {
         // Remove PixelMap Pixels from the Matrix
-        foreach (var PixelMap in ActivePixelMaps) {
-            var Entity = PixelMap.Entity!;
-            var Transform = Entity.GetToken<Transform>()!;
+        // foreach (var PixelMap in ActivePixelMaps) {
+        //     var Entity = PixelMap.Entity!;
+        //     var Transform = Entity.GetToken<Transform>()!;
 
-            var Start = PixelMap.Position - PixelMap.Origin;
-            var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
+        //     var Start = PixelMap.Position - PixelMap.Origin;
+        //     var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
 
-            for (int x = Start.X; x < End.X; x++) {
-                for (int y = Start.Y; y < End.Y; y++) {
-                    var MPos = Vector2i.Rotate(new Vector2i(x, y), PixelMap.Position, Transform.Rotation * DEG2RAD);
+        //     for (int x = Start.X; x < End.X; x++) {
+        //         for (int y = Start.Y; y < End.Y; y++) {
+        //             var MPos = Vector2i.Rotate(new Vector2i(x, y), PixelMap.Position, Transform.Rotation * DEG2RAD);
 
-                    if (!InBounds(MPos)) continue;
+        //             if (!InBounds(MPos)) continue;
 
-                    var PX = x - Start.X;
-                    var PY = y - Start.Y;
+        //             var PX = x - Start.X;
+        //             var PY = y - Start.Y;
 
-                    if (PixelMap.Pixels[PX, PY] is null)
-                        continue;
+        //             if (PixelMap.Pixels[PX, PY] is null)
+        //                 continue;
 
-                    // FIXME: This block allows other Pixels to interact with the PixelMap Pixels, but rotation of the PixelMap causes issues
-                    // var MPixel = Get(MPos);
-                    // PixelMap.Pixels[PX, PY] = MPixel;
+        //             // FIXME: This block allows other Pixels to interact with the PixelMap Pixels, but rotation of the PixelMap causes issues
+        //             // var MPixel = Get(MPos);
+        //             // PixelMap.Pixels[PX, PY] = MPixel;
 
-                    Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
-                }
-            }
-        }
+        //             Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
+        //         }
+        //     }
+        // }
     }
 
     // Return the chunk containing the given position (Vector2i pos)
@@ -541,9 +569,9 @@ class Matrix {
         if (Engine.Canvas.DrawChunkCollision) {
             foreach (var C in ActiveChunks) {
                 foreach (var S in C.Bounds) {
-                    var LP = S[0];
+                    var LP = (S[0] * Scale) + C.Position.ToVector2();
                     for (int i = 1; i < S.Count; i++) {
-                        var P = S[i];
+                        var P = (S[i] * Scale) + C.Position.ToVector2();
                         DrawLineEx(LP * Scale, P * Scale, 2.0f, Color.BLUE);
                         LP = P;
                     }

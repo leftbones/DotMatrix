@@ -60,7 +60,7 @@ class Canvas {
     public bool DrawDirtyRects      = false;        // Draw each Chunk's dirty rectangle
     public bool DrawMovementOverlay = false;        // Draw Pixels in purple when they have not moved since the last tick and yellow when they have
     public bool DrawSettledOverlay  = false;        // Draw Pixels in red when settled and blue when not settled
-    public bool DrawChunkCollision  = false;        // Draw the calculated collision area for each Chunk
+    public bool DrawChunkCollision  = true;        // Draw the calculated collision area for each Chunk
 
     public Canvas(Engine engine) {
         Engine = engine;
@@ -295,6 +295,10 @@ class Canvas {
 
     // Paint Pixels to the Matrix using a brush
     public void Paint() {
+        if (IsKeyDown(KeyboardKey.KEY_LEFT_SHIFT)) { // NOTE: Disable painting while shift is held, for testing physics (test objects like barrels are made with shift + left click)
+            return;
+        }
+
         if (Menus.Any(M => M.Active)) {
             ChangeMenu();
             return;
