@@ -7,16 +7,25 @@
 
     // Matrix
     "UseMultithreading" : true,
-    "UseFancyGraphics" : true,
+    "UseFancyGraphics" : false,
 
 
     //
     // Debug
 
     "DebugModeEnabled" : true,
+    
+    // Windows
+    "ShowStatsWindow" : true,
 
-    // Physics
-    "DrawPhysicsSimulation" : false,
-    "DrawPhysicsHitboxes" : true,
-    "DrawPixelMapBoxes" : false
+    // Overlays
+    "DrawSettledOverlay" : false,
+    "DrawMovementOverlay" : false,
+
+    // Borders + Outlines
+    "DrawWorldBorder" : true,
+    "DrawChunkBorders" : true,
+    "DrawDirtyRects" : false,
+    "DrawChunkCollision" : false,
+    "DrawEntityHitboxes" : false
 }

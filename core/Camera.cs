@@ -66,6 +66,9 @@ class Camera {
         var Dest = Target is null || Unlocked ? TargetPos : Target.Position.ToVector2();
         if (Position != Dest) {
             Position = Vector2.Lerp(Position, Dest, PanSpeed);
+            if (Vector2.Distance(Position, Dest) < 0.5f) {
+                Position = Dest;
+            }
         }
 
         Viewport.target = Position;

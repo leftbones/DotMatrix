@@ -144,8 +144,9 @@ class Matrix {
         Pixels[pos.X, pos.Y] = pixel;
         pixel.Position = pos;
 
-        if (wake_chunk)
+        if (wake_chunk) {
             WakeChunk(pos);
+        }
     }
 
     // Place a Pixel in the Matrix and update it's position
@@ -153,14 +154,16 @@ class Matrix {
         Pixels[x, y] = pixel;
         pixel.Position = new Vector2i(x, y);
 
-        if (wake_chunk)
+        if (wake_chunk) {
             WakeChunk(pixel.Position);
+        }
     }
 
     // Swap two Pixels in the Matrix, checking if the destination is in bounds
     public bool Swap(Vector2i pos1, Vector2i pos2) {
-        if (!InBounds(pos2))
+        if (!InBounds(pos2)) {
             return false;
+        }
 
         var P1 = Get(pos1);
         var P2 = Get(pos2);
@@ -198,8 +201,9 @@ class Matrix {
     // Check if a movement is valid (based on weight/type)
     public bool IsValid(Vector2i pos1, Vector2i pos2) {
         // Destination is out of bounds
-        if (!InBounds(pos2))
+        if (!InBounds(pos2)) {
             return false;
+        }
 
         var P1 = Get(pos1);
         var P2 = Get(pos2);
@@ -207,8 +211,9 @@ class Matrix {
         if (P1.Weight > P2.Weight) {
             return true;
         } else if (P1 is Gas && P2 is not Solid) {
-            if (P1.Weight < P2.Weight || (P1.ColorFade > P2.ColorFade && RNG.CoinFlip()))
+            if (P1.Weight < P2.Weight || (P1.ColorFade > P2.ColorFade && RNG.CoinFlip())) {
                 return true;
+            }
         }
 
         return false;
@@ -294,7 +299,9 @@ class Matrix {
     // Update all of the Pixels within a Chunk's dirty rect
     public void UpdateChunk(Chunk C) {
         // Skip sleeping Chunks
-        if (!C.Awake) return;
+        if (!C.Awake) {
+            return;
+        }
 
         bool IsEvenTick = Engine.Tick % 2 == 0;
 
@@ -306,8 +313,9 @@ class Matrix {
 
                 if (P.ID > -1) {
                     // Skip already stepped Pixels
-                    if (P.Stepped)
+                    if (P.Stepped) {
                         continue;
+                    }
 
                     P.Step(this, C.RNG);
                     P.Tick(this);
@@ -319,39 +327,12 @@ class Matrix {
 
                     if (!P.Settled) {
                         P.ActOnNeighbors(this, C.RNG);
-                        if (P.Position == P.LastPosition)
+                        if (P.Position == P.LastPosition) {
                             P.Settled = true;
+                        }
                     }
 
                     PixelsProcessed++;
-                }
-            }
-        }
-
-        foreach (var PixelMap in ActivePixelMaps) {
-            var Entity = PixelMap.Entity!;
-            var Transform = Entity.GetToken<Transform>()!;
-
-            var Start = PixelMap.Position - PixelMap.Origin;
-            var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
-
-            for (int x = Start.X; x < End.X; x++) {
-                for (int y = Start.Y; y < End.Y; y++) {
-                    var MPos = Vector2i.Rotate(new Vector2i(x, y), PixelMap.Position, Transform.Rotation * DEG2RAD);
-
-                    if (!InBounds(MPos)) continue;
-
-                    var PX = x - Start.X;
-                    var PY = y - Start.Y;
-
-                    if (PixelMap.Pixels[PX, PY] is null)
-                        continue;
-
-                    // FIXME: This block allows other Pixels to interact with the PixelMap Pixels, but rotation of the PixelMap causes issues
-                    // var MPixel = Get(MPos);
-                    // PixelMap.Pixels[PX, PY] = MPixel;
-
-                    Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
                 }
             }
         }
@@ -366,7 +347,7 @@ class Matrix {
         }
 
         ActiveChunks.Clear();
-        var CenterPos = (new Vector2i(Engine.Camera.Position) / Scale) / ChunkSize;
+        var CenterPos = new Vector2i(Engine.Camera.Position) / Scale / ChunkSize;
         var SX = Math.Max(0, CenterPos.X - ActiveArea.X);
         var SY = Math.Max(0, CenterPos.Y - ActiveArea.Y);
         var EX = Math.Min(CenterPos.X + ActiveArea.X + 1, MaxChunksX);
@@ -435,33 +416,33 @@ class Matrix {
     // Actions performed at the end of the normal Update
     public void UpdateEnd() {
         // Remove PixelMap Pixels from the Matrix
-        // foreach (var PixelMap in ActivePixelMaps) {
-        //     var Entity = PixelMap.Entity!;
-        //     var Transform = Entity.GetToken<Transform>()!;
+        foreach (var PixelMap in ActivePixelMaps) {
+            var Entity = PixelMap.Entity!;
+            var Transform = Entity.GetToken<Transform>()!;
 
-        //     var Start = PixelMap.Position - PixelMap.Origin;
-        //     var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
+            var Start = PixelMap.Position - PixelMap.Origin;
+            var End = Start + new Vector2i(PixelMap.Width, PixelMap.Height);
 
-        //     for (int x = Start.X; x < End.X; x++) {
-        //         for (int y = Start.Y; y < End.Y; y++) {
-        //             var MPos = Vector2i.Rotate(new Vector2i(x, y), PixelMap.Position, Transform.Rotation * DEG2RAD);
+            for (int x = Start.X; x < End.X; x++) {
+                for (int y = Start.Y; y < End.Y; y++) {
+                    var MPos = Vector2i.Rotate(new Vector2i(x, y), PixelMap.Position, Transform.Rotation * DEG2RAD);
 
-        //             if (!InBounds(MPos)) continue;
+                    if (!InBounds(MPos)) continue;
 
-        //             var PX = x - Start.X;
-        //             var PY = y - Start.Y;
+                    var PX = x - Start.X;
+                    var PY = y - Start.Y;
 
-        //             if (PixelMap.Pixels[PX, PY] is null)
-        //                 continue;
+                    if (PixelMap.Pixels[PX, PY] is null)
+                        continue;
 
-        //             // FIXME: This block allows other Pixels to interact with the PixelMap Pixels, but rotation of the PixelMap causes issues
-        //             // var MPixel = Get(MPos);
-        //             // PixelMap.Pixels[PX, PY] = MPixel;
+                    // FIXME: This block allows other Pixels to interact with the PixelMap Pixels, but rotation of the PixelMap causes issues
+                    // var MPixel = Get(MPos);
+                    // PixelMap.Pixels[PX, PY] = MPixel;
 
-        //             Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
-        //         }
-        //     }
-        // }
+                    Set(MPos, new Pixel(-1, MPos), wake_chunk: true);
+                }
+            }
+        }
     }
 
     // Return the chunk containing the given position (Vector2i pos)
@@ -532,7 +513,7 @@ class Matrix {
             RedrawAllChunks = false;
 
         // Chunk Borders + Info
-        if (Engine.Canvas.DrawChunks) {
+        if (Engine.Canvas.DrawChunkBorders) {
             foreach (var C in ActiveChunks) {
                 var Col = C.Awake ? new Color(255, 255, 255, 150) : new Color(255, 255, 255, 25);
                 var Str = $"{C.Position.X / ChunkSize.X}, {C.Position.Y / ChunkSize.Y} ({C.Position.X}, {C.Position.Y})";

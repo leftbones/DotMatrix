@@ -55,12 +55,14 @@ class Canvas {
     public Multiline StatsContent { get; private set; }
 
     // Debug
-    public bool DrawChunks          = true;         // Draw lines on the border of each Chunk
-    public bool DrawWorldBorder     = true;         // Draw the border of the world
-    public bool DrawDirtyRects      = false;        // Draw each Chunk's dirty rectangle
+    public bool ShowStatsWindow = false;            // Show the statistics window by default
     public bool DrawMovementOverlay = false;        // Draw Pixels in purple when they have not moved since the last tick and yellow when they have
     public bool DrawSettledOverlay  = false;        // Draw Pixels in red when settled and blue when not settled
-    public bool DrawChunkCollision  = false;        // Draw the calculated collision area for each Chunk
+    public bool DrawWorldBorder     = true;         // Draw the border of the world
+    public bool DrawChunkBorders    = true;         // Draw lines on the border of each Chunk
+    public bool DrawDirtyRects      = false;        // Draw each Chunk's dirty rectangle
+    public bool DrawChunkCollision  = false;        // Draw the calculated collision boundaries for each Chunk
+    public bool DrawEntityHitboxes  = false;        // Draw hitboxes for entities with a Hitbox token
 
     public Canvas(Engine engine) {
         Engine = engine;
@@ -82,7 +84,7 @@ class Canvas {
             position: new Vector2i(10, Engine.WindowSize.Y - 10),
             draw_anchor: Anchor.Bottom,
             background: true,
-            activated: false
+            activated: ShowStatsWindow
         );
 
         StatsContent = new Multiline(StatsWindow, "", 300, update_action: UpdateStats);
@@ -204,7 +206,7 @@ class Canvas {
         // Debug Menu
         DebugMenu.AddWidget(new Button(DebugMenu, "Movement Overlay", () => { DrawMovementOverlay = !DrawMovementOverlay; if (DrawSettledOverlay) { DrawSettledOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         DebugMenu.AddWidget(new Button(DebugMenu, "Settled Overlay", () => { DrawSettledOverlay = !DrawSettledOverlay; if (DrawMovementOverlay) { DrawMovementOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
-        DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Borders", () => { DrawChunks = !DrawChunks; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Borders", () => { DrawChunkBorders = !DrawChunkBorders; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         DebugMenu.AddWidget(new Button(DebugMenu, "Dirty Rects", () => { DrawDirtyRects = !DrawDirtyRects; ChangeMenu(); }, new Vector2i(100, 25),  text_anchor: Anchor.Left, background: false, fit_width: true));
         DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Colliders", () => { DrawChunkCollision = !DrawChunkCollision; ChangeMenu(); }, new Vector2i(100, 25),  text_anchor: Anchor.Left, background: false, fit_width: true));
 
@@ -221,6 +223,19 @@ class Canvas {
 
     // Apply changes to the Config
     public void ApplyConfig(Config C) {
+        ShowStatsWindow = C.Items["ShowStatsWindow"];
+        DrawMovementOverlay = C.Items["DrawMovementOverlay"];
+        DrawSettledOverlay  = C.Items["DrawSettledOverlay"];
+        DrawWorldBorder     = C.Items["DrawWorldBorder"];
+        DrawChunkBorders    = C.Items["DrawChunkBorders"];
+        DrawDirtyRects      = C.Items["DrawDirtyRects"];
+        DrawChunkCollision  = C.Items["DrawChunkCollision"];
+        DrawEntityHitboxes  = C.Items["DrawEntityHitboxes"];
+
+        if (ShowStatsWindow && !StatsWindow.Active) {
+            StatsWindow.Toggle();
+        }
+
         Pepper.Log("Canvas config applied", LogType.SYSTEM);
     }
 

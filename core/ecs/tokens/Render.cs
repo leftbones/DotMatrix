@@ -7,12 +7,11 @@ namespace DotMatrix;
 /// <summary>
 /// Renders an entity's texture to the screen
 /// Required Tokens: Transform, PixelMap (if sprite_path is not specified)
-/// Optional Tokens: Box2D, PixelMap
+/// Optional Tokens: PixelMap
 /// </summary>
 
 class Render : Token {
     public Texture2D Texture { get; set; }
-    public Vector2 Origin { get; set; }
 
     public int Width { get { return Texture.width; } }
     public int Height { get { return Texture.height; } }
@@ -22,7 +21,6 @@ class Render : Token {
     public Render(string? sprite_path=null) {
         if (sprite_path is not null) {
             Texture = LoadTexture(sprite_path);
-            Origin = new Vector2(Texture.width / 2, Texture.height / 2);
         }
 
         // Finish
@@ -34,11 +32,14 @@ class Render : Token {
 
         var Transform = Entity!.GetToken<Transform>();
 
-        var DestRect = new Rectangle(Transform!.Position.X, Transform!.Position.Y, Width * Global.MatrixScale, Height * Global.MatrixScale);
-        var Orig = Origin;
+        var DestRect = new Rectangle(
+            Transform!.Position.X - (Width / 2 * Global.MatrixScale),
+            Transform!.Position.Y - (Height / 2 * Global.MatrixScale),
+            Width * Global.MatrixScale,
+            Height * Global.MatrixScale
+        );
 
         float Rotation = Transform!.Rotation;
-
-        DrawTexturePro(Texture, Rect, DestRect, Orig, Rotation, Color.WHITE);
+        DrawTexturePro(Texture, Rect, DestRect, Vector2.Zero, Rotation, Color.WHITE);
     }
 }

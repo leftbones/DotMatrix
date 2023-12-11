@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Box2D.NetStandard" Version="2.4.7-alpha" />
     <PackageReference Include="Colorful.Console" Version="1.2.15" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Raylib-cs" Version="4.5.0.1" />

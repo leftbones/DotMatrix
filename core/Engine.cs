@@ -28,8 +28,6 @@ class Engine {
 
     public Theme Theme { get { return Interface.Theme; } }
 
-    public TestPlayer? Player { get; private set; }
-
     // ECS
     public List<Entity> Entities { get; private set; }
 
@@ -80,6 +78,7 @@ class Engine {
 
         Guy.AddToken(new Render("res/objects/guy.png"));
         Guy.AddToken(new Transform(new Vector2i(Matrix.Size.X / 2, 425) * MatrixScale));
+        Guy.AddToken(new Hitbox(11, 28, new Vector2i(-1, 0)));
         Guy.AddToken(new Control(new Dictionary<int, Event>() {
             /* Move Left    */ { (int)KeyboardKey.KEY_A, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(-4, 0); }))},
             /* Move Right   */ { (int)KeyboardKey.KEY_D, new Event(EventType.Hold, new Action(() => { Guy.GetToken<Transform>()!.Position = Guy.GetToken<Transform>()!.Position + new Vector2i(4, 0); }))},
@@ -159,6 +158,20 @@ class Engine {
         Matrix.Draw();
 
         RenderSystem.Update(Delta);
+
+        //
+        // Debug Drawing
+
+        // Entity Hitboxes
+        if (Canvas.DrawEntityHitboxes) {
+            foreach (var E in Entities) {
+                var Hitbox = E.GetToken<Hitbox>();
+                if (Hitbox != null) {
+                    // DrawRectangleRec(Hitbox.Rect, new Color(255, 0, 0, 50));
+                    DrawRectangleLinesEx(Hitbox.Rect, 1.0f, Color.RED);
+                }
+            }
+        }
 
         EndMode2D();
 

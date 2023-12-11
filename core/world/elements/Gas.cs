@@ -16,8 +16,9 @@ class Gas : Pixel {
 
     public override void Step(Matrix M, RNG RNG) {
         // Color Shift (even when not Active)
-        if (Lifetime > -1)
+        if (Lifetime > -1) {
             FadeOpacity();
+        }
 
         if (Settled) {
             foreach (var Dir in Direction.Cardinal) {

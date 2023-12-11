@@ -50,7 +50,7 @@ class Pixel {
     public Color BaseColor { get; set; }            = new Color(0, 0, 0, 0);        // Default color of a Pixel
     public bool ColorSet { get; set; }              = false;                        // If a Pixel's color has already been set
     public int ColorOffset { get; set; }            = 0;                            // Maximum offset that can be applied to a Pixel's color (in both directions)
-    public double ColorFade { get; set; }           = 150.0;                        // Used for fading opacity for Pixels with a limited Lifetime
+    public double ColorFade { get; set; }           = 255.0;                        // Used for fading opacity for Pixels with a limited Lifetime
 
 
     public Pixel(int? id=null, Vector2i? position=null, Color? color=null) {
@@ -93,11 +93,13 @@ class Pixel {
     // Performed once each time the Engine updates, after the Step method, as long as Active is set to true
     public void Tick(Matrix M) {
         TicksLived++;
-        if (Lifetime > -1 && TicksLived >= Lifetime)
+        if (Lifetime > -1 && TicksLived >= Lifetime) {
             Expire(M);
+        }
 
-        if (Position != LastPosition)
+        if (Position != LastPosition) {
             LastDirection = Direction.GetMovementDirection(LastPosition, Position);
+        }
     }
 
     // Lighten or darken a Pixel's Color by the given amount
@@ -111,9 +113,10 @@ class Pixel {
     }
 
     // Fade a Pixel's opacity relative to the amount of remaining Lifetime
+    // FIXME: This method causes a very strange bug that disallows painting of anything but solids? Possible race condition? Still happens with multithreading disabled
     public void FadeOpacity() {
-        // ColorFade -= ColorFade / (Lifetime - TicksLived);    FIXME: This line causes race conditions for SOME UNKNOWN REASON
-        Color = new Color(Color.r, Color.g, Color.b, (byte)ColorFade);
+        // ColorFade -= ColorFade / (Lifetime - TicksLived); 
+        // Color = new Color(Color.r, Color.g, Color.b, (byte)ColorFade);
     }
 
     // Remove a Pixel from the Matrix
