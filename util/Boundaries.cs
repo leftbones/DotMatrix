@@ -120,7 +120,7 @@ static class Boundaries {
                 return false;
             }
 
-            var P = M.Pixels[X, Y];
+            var P = M.Pixels[(X, Y)];
 
             if (P is Solid) { // Pixel is solid
                 return true;

@@ -282,7 +282,7 @@ class Canvas {
     // Update the Statistics menu Multiline widget
     public void UpdateStats() {
         var MousePosMatrix = ((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Matrix.Scale) + (MousePos / Matrix.Scale);
-        var MousePixelID = Matrix.InBounds(MousePosMatrix) ? Matrix.Pixels[MousePosMatrix.X, MousePosMatrix.Y].ID : -1;
+        var MousePixelID = Matrix.InBounds(MousePosMatrix) ? Matrix.Pixels[(MousePosMatrix.X, MousePosMatrix.Y)].ID : -1;
         var MousePixelName = MousePixelID == -1 ? "Air" : Atlas.Elements[MousePixelID].Name;
         StatsContent.Text = $"Mouse Pos (Screen): {MousePos / Engine.MatrixScale} %N " +
                             $"Mouse Pos (Matrix): {MousePosMatrix} %N " +

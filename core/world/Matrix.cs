@@ -20,7 +20,7 @@ class Matrix {
     public RNG RNG { get; private set; }                                        // RNG instance used for non-Chunk operations
 
     public Vector2i Size { get; private set; }                                  // Size of the Matrix (in Pixels)
-    public Pixel[,] Pixels { get; private set; }                                // 2D array that stores the Pixels
+    public Dictionary<(int, int), Pixel> Pixels { get;private set; }            // Dictionary that stores the Pixels
 
     // Chunks
     public Chunk[,] Chunks { get; private set; }                                // 2D array that stores Chunks
@@ -77,13 +77,13 @@ class Matrix {
         DestRec = new Rectangle(0, 0, Engine.WindowSize.X, Engine.WindowSize.Y);
 
         // Create and populate the Pixel array
-        Pixels = new Pixel[Size.X, Size.Y];
+        Pixels = new Dictionary<(int, int), Pixel>();
         for (int y = Size.Y - 1; y >= 0; y--) {
             for (int x = 0; x < Size.X; x++) {
                 var P = new Pixel {
                     Position = new Vector2i(x, y)
                 };
-                Pixels[x, y] = P;
+                Pixels.Add((x,y), P);
             }
         }
 
@@ -131,17 +131,17 @@ class Matrix {
 
     // Get a Pixel from the Matrix (Vector2i pos)
     public Pixel Get(Vector2i pos) {
-        return Pixels[pos.X, pos.Y];
+        return Pixels[(pos.X, pos.Y)];
     }
 
     // Get a Pixel from the Matrix (int pos)
     public Pixel Get(int x, int y) {
-        return Pixels[x, y];
+        return Pixels[(x, y)];
     }
 
     // Place a Pixel in the Matrix and update it's position (Vector2i pos)
     public void Set(Vector2i pos, Pixel pixel, bool wake_chunk=true) {
-        Pixels[pos.X, pos.Y] = pixel;
+        Pixels[(pos.X, pos.Y)] = pixel;
         pixel.Position = pos;
 
         if (wake_chunk) {
@@ -151,7 +151,7 @@ class Matrix {
 
     // Place a Pixel in the Matrix and update it's position
     public void Set(int x, int y, Pixel pixel, bool wake_chunk=true) {
-        Pixels[x, y] = pixel;
+        Pixels[(x, y)] = pixel;
         pixel.Position = new Vector2i(x, y);
 
         if (wake_chunk) {
@@ -395,7 +395,7 @@ class Matrix {
         }
 
         // Reset Pixel Stepped and Ticked flags
-        foreach (var P in Pixels) {
+        foreach (var P in Pixels.Values) {
             P.Stepped = false;
             P.Ticked = false;
             P.Acted = false;
