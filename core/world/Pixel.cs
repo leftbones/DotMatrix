@@ -39,6 +39,7 @@ class Pixel {
     public int Dillute { get; set; }                = 0;                            // Dillutability percentage in liquids (0-100)
     public int Fluidity { get; set; }               = 0;                            // How easily a Liquid will flow horizontally (acts somewhat like viscosity)
     public int Diffusion { get; set; }              = 0;                            // How much a Gas will "wiggle" horizontally (higher values cause slower vertical movement as a result)
+    public int Drift { get; set; }                  = 0;                            // How much a powder will float around in the air as it falls
 
     // Status
     public bool OnFire { get; set; }                = false;                        // Pixel is currently on fire (attempts to spread fire to neighbors)

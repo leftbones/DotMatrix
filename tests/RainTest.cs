@@ -1,13 +1,13 @@
 namespace DotMatrix;
 
 /// <summary>
-/// Simulates snowfall!
+/// Simulates rainfall!
 /// </summary>
 
-class SnowTest : Test {
+class RainTest : Test {
     private int Intensity;
 
-    public SnowTest(Engine engine, int duration, int intensity=1) : base(engine, duration) {
+    public RainTest(Engine engine, int duration, int intensity=1) : base(engine, duration) {
         Intensity = intensity;
     }
 
@@ -17,10 +17,10 @@ class SnowTest : Test {
                 Camera.Position.X + RNG.Range(-Engine.WindowSize.X / 2, Engine.WindowSize.X / 2),
                 Camera.Position.Y - Engine.WindowSize.Y / 2
             ) / Global.MatrixScale;
-            var ID = Atlas.GetIDFromName("Snow");
+            var ID = Atlas.GetIDFromName("Water");
 
             if (Matrix.InBoundsAndEmpty(Pos)) {
-                Matrix.Set(Pos, new Powder(ID, Pos));
+                Matrix.Set(Pos, new Liquid(ID, Pos));
             }
         }
 

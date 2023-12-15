@@ -110,9 +110,10 @@ struct ElementData {
     public int Friction;
     public int Fluidity;
     public int Diffusion;
+    public int Drift;
     public ElementType Type;
 
-    public ElementData(int id, string name, string color, int color_offset, string texture, int lifetime, int friction, int fluidity, int diffusion, ElementType type) {
+    public ElementData(int id, string name, string color, int color_offset, string texture, int lifetime, int friction, int fluidity, int diffusion, int drift, ElementType type) {
         ID = id;
         Name = name;
         Color = color;
@@ -122,6 +123,7 @@ struct ElementData {
         Friction = friction;
         Fluidity = fluidity;
         Diffusion = diffusion;
+        Drift = drift;
         Type = type;
     }
 }

@@ -24,7 +24,7 @@
 
     // Borders + Outlines
     "DrawWorldBorder" : true,
-    "DrawChunkBorders" : true,
+    "DrawChunkBorders" : false,
     "DrawDirtyRects" : false,
     "DrawChunkCollision" : false,
     "DrawEntityHitboxes" : false

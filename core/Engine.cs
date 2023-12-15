@@ -93,7 +93,7 @@ class Engine {
         Camera.Target = Guy.GetToken<Transform>();
         Camera.Position = Guy.GetToken<Transform>()!.Position.ToVector2();
 
-        Test = new SmokeTest(this);
+        Test = new SnowTest(this, -1, 1);
     }
 
     // Apply changes to the Config
@@ -122,7 +122,7 @@ class Engine {
 
         // Run Tests (if active)
         if (Test != null) {
-            Test.Tick(this);
+            Test.Tick();
             if (!Test.Active) {
                 Test = null;
             }

@@ -1,7 +1,8 @@
 {
     "Name": "Snow",
-    "Color": "FFFAFAFF",
+    "Color": "FFFFFFFF",
     "ColorOffset": 15,
     "Friction": 5,
+    "Drift": 75,
     "Type": "Powder"
 }

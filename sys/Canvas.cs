@@ -186,20 +186,23 @@ class Canvas {
         SceneMenu.AddWidget(new Button(SceneMenu, "Load", () => { LoadScene(); ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
         // Objects Menu
-        ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Barrel", () => { ObjectID = 0; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
-        ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Crate", () => { ObjectID = 1; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        ObjectsMenu.AddWidget(new Label(ObjectsMenu, "dust", new Vector2i(100, 15), text_anchor: Anchor.Left));
+        // ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Barrel", () => { ObjectID = 0; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        // ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Crate", () => { ObjectID = 1; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
         // Window Menu
         ViewMenu.AddWidget(new Button(ViewMenu, "Statistics", () => { StatsWindow.Toggle(); ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         ViewMenu.AddWidget(new Button(ViewMenu, "Test Skybox", () => { Camera.DrawSkybox = !Camera.DrawSkybox; }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
         // Cheats Menu
-        CheatsMenu.AddWidget(new Button(CheatsMenu, "Full Health", () => { ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
-        CheatsMenu.AddWidget(new Button(CheatsMenu, "God Mode", () => { ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        CheatsMenu.AddWidget(new Label(CheatsMenu, "dust", new Vector2i(100, 15), text_anchor: Anchor.Left));
+        // CheatsMenu.AddWidget(new Button(CheatsMenu, "Full Health", () => { ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        // CheatsMenu.AddWidget(new Button(CheatsMenu, "God Mode", () => { ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
         // Debug Menu
         DebugMenu.AddWidget(new Button(DebugMenu, "Movement Overlay", () => { DrawMovementOverlay = !DrawMovementOverlay; if (DrawSettledOverlay) { DrawSettledOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         DebugMenu.AddWidget(new Button(DebugMenu, "Settled Overlay", () => { DrawSettledOverlay = !DrawSettledOverlay; if (DrawMovementOverlay) { DrawMovementOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        DebugMenu.AddWidget(new Button(DebugMenu, "World Border", () => { DrawWorldBorder = !DrawWorldBorder; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Borders", () => { DrawChunkBorders = !DrawChunkBorders; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         DebugMenu.AddWidget(new Button(DebugMenu, "Dirty Rects", () => { DrawDirtyRects = !DrawDirtyRects; ChangeMenu(); }, new Vector2i(100, 25),  text_anchor: Anchor.Left, background: false, fit_width: true));
         DebugMenu.AddWidget(new Button(DebugMenu, "Chunk Colliders", () => { DrawChunkCollision = !DrawChunkCollision; ChangeMenu(); }, new Vector2i(100, 25),  text_anchor: Anchor.Left, background: false, fit_width: true));
@@ -348,7 +351,7 @@ class Canvas {
         var PointCache = new List<Vector2i>();
 
         foreach (var Point in LinePoints) {
-            if (!Erasing && BrushID >= 200 && RNG.Roll(0.95)) continue;
+            if (!Erasing && BrushID >= 2000 && RNG.Roll(0.95)) continue;
 
             var P = ((new Vector2i(Engine.Camera.Position) - (Engine.WindowSize / 2)) / Engine.MatrixScale) + Point;
 
