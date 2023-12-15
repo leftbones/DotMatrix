@@ -513,43 +513,45 @@ class Matrix {
             RedrawAllChunks = false;
 
         // Chunk Borders + Info
-        if (Engine.Canvas.DrawChunkBorders) {
-            foreach (var C in ActiveChunks) {
-                var Col = C.Awake ? new Color(255, 255, 255, 150) : new Color(255, 255, 255, 25);
-                var Str = $"{C.Position.X / ChunkSize.X}, {C.Position.Y / ChunkSize.Y} ({C.Position.X}, {C.Position.Y})";
-                DrawRectangleLines(C.Position.X * Scale, C.Position.Y * Scale, C.Size.X * Scale, C.Size.Y * Scale, Col);
-                DrawTextEx(Engine.Theme.Font, Str, new Vector2i((C.Position.X * Scale) + 5, (C.Position.Y * Scale) + 5).ToVector2(), Engine.Theme.FontSize, Engine.Theme.FontSpacing, Col);
-            }
-        }
-
-        // World Border
-        if (Engine.Canvas.DrawWorldBorder) {
-            DrawRectangleLines(0, 0, Size.X * Scale, Size.Y * Scale, new Color(255, 255, 255, 150));
-        }
-
-        // Chunk DirtyRect
-        if (Engine.Canvas.DrawDirtyRects) {
-            foreach (var C in ActiveChunks) {
-                if (C.Awake) {
-                    // Skip clean chunks
-                    if (C.X2 == 0 && C.Y2 == 0) continue;
-
-                    var R = C.DirtyRect;
-                    var Rec = new Rectangle(R.x * Scale, R.y * Scale, (R.width + 1) * Scale, (R.height + 1) * Scale);
-                    DrawRectangleLines((int)Rec.x, (int)Rec.y, (int)Rec.width, (int)Rec.height, Color.GREEN);
+        if (Engine.Config.DebugEnabled) {
+            if (Engine.Canvas.DrawChunkBorders) {
+                foreach (var C in ActiveChunks) {
+                    var Col = C.Awake ? new Color(255, 255, 255, 150) : new Color(255, 255, 255, 25);
+                    var Str = $"{C.Position.X / ChunkSize.X}, {C.Position.Y / ChunkSize.Y} ({C.Position.X}, {C.Position.Y})";
+                    DrawRectangleLines(C.Position.X * Scale, C.Position.Y * Scale, C.Size.X * Scale, C.Size.Y * Scale, Col);
+                    DrawTextEx(Engine.Theme.Font, Str, new Vector2i((C.Position.X * Scale) + 5, (C.Position.Y * Scale) + 5).ToVector2(), Engine.Theme.FontSize, Engine.Theme.FontSpacing, Col);
                 }
             }
-        }
 
-        // Chunk Collision Borders
-        if (Engine.Canvas.DrawChunkCollision) {
-            foreach (var C in ActiveChunks) {
-                foreach (var S in C.Bounds) {
-                    var LP = (S[0] * Scale) + C.Position.ToVector2();
-                    for (int i = 1; i < S.Count; i++) {
-                        var P = (S[i] * Scale) + C.Position.ToVector2();
-                        DrawLineEx(LP * Scale, P * Scale, 2.0f, Color.BLUE);
-                        LP = P;
+            // World Border
+            if (Engine.Canvas.DrawWorldBorder) {
+                DrawRectangleLines(0, 0, Size.X * Scale, Size.Y * Scale, new Color(255, 255, 255, 150));
+            }
+
+            // Chunk DirtyRect
+            if (Engine.Canvas.DrawDirtyRects) {
+                foreach (var C in ActiveChunks) {
+                    if (C.Awake) {
+                        // Skip clean chunks
+                        if (C.X2 == 0 && C.Y2 == 0) continue;
+
+                        var R = C.DirtyRect;
+                        var Rec = new Rectangle(R.x * Scale, R.y * Scale, (R.width + 1) * Scale, (R.height + 1) * Scale);
+                        DrawRectangleLines((int)Rec.x, (int)Rec.y, (int)Rec.width, (int)Rec.height, Color.GREEN);
+                    }
+                }
+            }
+
+            // Chunk Collision Borders
+            if (Engine.Canvas.DrawChunkCollision) {
+                foreach (var C in ActiveChunks) {
+                    foreach (var S in C.Bounds) {
+                        var LP = (S[0] * Scale) + C.Position.ToVector2();
+                        for (int i = 1; i < S.Count; i++) {
+                            var P = (S[i] * Scale) + C.Position.ToVector2();
+                            DrawLineEx(LP * Scale, P * Scale, 2.0f, Color.BLUE);
+                            LP = P;
+                        }
                     }
                 }
             }

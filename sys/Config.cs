@@ -23,6 +23,8 @@ class Config {
 
     public Dictionary<string, dynamic> Items = new Dictionary<string, dynamic>();
 
+    public bool DebugEnabled { get; private set; }
+
     public Config(Engine engine) {
         Engine = engine;
 
@@ -38,6 +40,8 @@ class Config {
 
     // Apply all changes to the config file to the subsystems
     public void ApplyChanges() {
+        DebugEnabled = Items["DebugModeEnabled"];
+
         Pepper.ApplyConfig(this);
         Engine.ApplyConfig(this);
         Matrix.ApplyConfig(this);

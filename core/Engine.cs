@@ -174,12 +174,14 @@ class Engine {
         // Debug Drawing
 
         // Entity Hitboxes
-        if (Canvas.DrawEntityHitboxes) {
-            foreach (var E in Entities) {
-                var Hitbox = E.GetToken<Hitbox>();
-                if (Hitbox != null) {
-                    // DrawRectangleRec(Hitbox.Rect, new Color(255, 0, 0, 50));
-                    DrawRectangleLinesEx(Hitbox.Rect, 1.0f, Color.RED);
+        if (Config.DebugEnabled) {
+            if (Canvas.DrawEntityHitboxes) {
+                foreach (var E in Entities) {
+                    var Hitbox = E.GetToken<Hitbox>();
+                    if (Hitbox != null) {
+                        // DrawRectangleRec(Hitbox.Rect, new Color(255, 0, 0, 50));
+                        DrawRectangleLinesEx(Hitbox.Rect, 1.0f, Color.RED);
+                    }
                 }
             }
         }

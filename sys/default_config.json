@@ -13,6 +13,7 @@
     //
     // Debug
 
+    // Required for any debug settings to work
     "DebugModeEnabled" : true,
     
     // Windows
