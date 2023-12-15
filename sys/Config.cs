@@ -23,7 +23,7 @@ class Config {
 
     public Dictionary<string, dynamic> Items = new Dictionary<string, dynamic>();
 
-    public bool DebugEnabled { get; private set; }
+    public bool DebugEnabled { get; set; }
 
     public Config(Engine engine) {
         Engine = engine;

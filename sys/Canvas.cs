@@ -55,6 +55,7 @@ class Canvas {
     public Multiline StatsContent { get; private set; }
 
     // Debug
+    private Button DebugModeButton;
     public bool ShowStatsWindow = false;            // Show the statistics window by default
     public bool DrawMovementOverlay = false;        // Draw Pixels in purple when they have not moved since the last tick and yellow when they have
     public bool DrawSettledOverlay  = false;        // Draw Pixels in red when settled and blue when not settled
@@ -200,6 +201,9 @@ class Canvas {
         // CheatsMenu.AddWidget(new Button(CheatsMenu, "God Mode", () => { ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
         // Debug Menu
+        DebugModeButton = new Button(DebugMenu, "Debug: ", () => { Config.DebugEnabled = !Config.DebugEnabled; if (Config.DebugEnabled) { DebugModeButton!.Text = "Debug: Enabled"; } else { DebugModeButton!.Text = "Debug: Disabled"; } }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true);
+        DebugMenu.AddWidget(DebugModeButton);
+
         DebugMenu.AddWidget(new Button(DebugMenu, "Movement Overlay", () => { DrawMovementOverlay = !DrawMovementOverlay; if (DrawSettledOverlay) { DrawSettledOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         DebugMenu.AddWidget(new Button(DebugMenu, "Settled Overlay", () => { DrawSettledOverlay = !DrawSettledOverlay; if (DrawMovementOverlay) { DrawMovementOverlay = false; } ChangeMenu(); Matrix.RedrawAllChunks = true; }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         DebugMenu.AddWidget(new Button(DebugMenu, "World Border", () => { DrawWorldBorder = !DrawWorldBorder; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));

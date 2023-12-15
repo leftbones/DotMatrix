@@ -489,10 +489,12 @@ class Matrix {
 
                         var Col = P.Color;
 
-                        if (Engine.Canvas.DrawMovementOverlay)
-                            Col = P.Position == P.LastPosition? Color.PURPLE: Color.YELLOW;
-                        else if (Engine.Canvas.DrawSettledOverlay)
-                            Col = P.Settled ? Color.RED : Color.BLUE;
+                        if (Engine.Config.DebugEnabled) {
+                            if (Engine.Canvas.DrawMovementOverlay)
+                                Col = P.Position == P.LastPosition? Color.PURPLE: Color.YELLOW;
+                            else if (Engine.Canvas.DrawSettledOverlay)
+                                Col = P.Settled ? Color.RED : Color.BLUE;
+                        }
 
                         ImageDrawPixel(ref C.Buffer, P.Position.X - C.Position.X, P.Position.Y - C.Position.Y, Col);
                     }
