@@ -93,7 +93,7 @@ class Engine {
         Camera.Target = Guy.GetToken<Transform>();
         Camera.Position = Guy.GetToken<Transform>()!.Position.ToVector2();
 
-        Test = new SnowTest(this, 1000);
+        Test = new SmokeTest(this);
     }
 
     // Apply changes to the Config

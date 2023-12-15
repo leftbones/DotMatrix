@@ -10,9 +10,9 @@ class SnowTest : Test {
             Camera.Position.X + RNG.Range(-Engine.WindowSize.X / 2, Engine.WindowSize.X / 2),
             Camera.Position.Y - Engine.WindowSize.Y / 2
         ) / Global.MatrixScale;
-        var SnowID = from Element in Atlas.Powder where Element.Name == "Snow" select Element.ID;
+        var SnowID = Atlas.GetIDFromName("Snow");
 
-        E.Matrix.Set(SnowPos, new Powder(SnowID.First(), SnowPos));
+        E.Matrix.Set(SnowPos, new Powder(SnowID, SnowPos));
 
         base.Tick(E);
     }

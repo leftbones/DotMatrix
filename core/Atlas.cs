@@ -92,6 +92,11 @@ static class Atlas {
         }
         return -1;
     }
+
+    // Returns an element ID based on the given string name
+    public static int GetIDFromName(string name) {
+        return (from Element in Elements where Element.Value.Name == name select Element.Value.ID).FirstOrDefault();
+    }
 }
 
 // Stores information about elements read from the json files
