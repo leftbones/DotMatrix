@@ -42,6 +42,7 @@ class Engine {
 
     // Extra
     private List<Timer> Timers = new List<Timer>();
+    private Test? Test;
 
 
     public Engine(Vector2i window_size, int matrix_scale) {
@@ -91,6 +92,8 @@ class Engine {
 
         Camera.Target = Guy.GetToken<Transform>();
         Camera.Position = Guy.GetToken<Transform>()!.Position.ToVector2();
+
+        Test = new SnowTest(this, 1000);
     }
 
     // Apply changes to the Config
@@ -115,6 +118,14 @@ class Engine {
             Interface.Update();
             Camera.Update();
             return;
+        }
+
+        // Run Tests (if active)
+        if (Test != null) {
+            Test.Tick(this);
+            if (!Test.Active) {
+                Test = null;
+            }
         }
 
         // Handle timers
