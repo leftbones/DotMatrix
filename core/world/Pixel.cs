@@ -67,7 +67,7 @@ class Pixel {
     // Act on neighboring Pixels
     public void ActOnNeighbors(Matrix M, RNG RNG) {
         if (!Acted) {
-            foreach (var Dir in Direction.Shuffled(RNG, Direction.Cardinal)) {
+            foreach (var Dir in Direction.Shuffled(RNG, Direction.Full)) {
                 if (M.InBounds(Position + Dir)) {
                     var P = M.Get(Position + Dir);
                     if (ActOnOther(M, RNG, P)) {

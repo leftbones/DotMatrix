@@ -6,7 +6,7 @@
     "PauseOnStart" : false,
 
     // Matrix
-    "UseMultithreading" : true,
+    "UseMultithreading" : false,
     "UseFancyGraphics" : false,
 
 
@@ -16,7 +16,7 @@
     "DebugModeEnabled" : true,
     
     // Windows
-    "ShowStatsWindow" : true,
+    "ShowStatsWindow" : false,
 
     // Overlays
     "DrawSettledOverlay" : false,

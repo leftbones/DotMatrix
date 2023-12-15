@@ -30,7 +30,7 @@ class Canvas {
     public bool Painting { get; set; } = false;
     public bool Erasing { get; set; } = false;
 
-    public int BrushID { get; set; }    = 400;
+    public int BrushID { get; set; }    = 4000;
     public int BrushSize { get; set; }  = 10;
 
     // Objects
@@ -185,12 +185,6 @@ class Canvas {
         SceneMenu.AddWidget(new Button(SceneMenu, "Save", () => { SaveScene(); ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         SceneMenu.AddWidget(new Button(SceneMenu, "Load", () => { LoadScene(); ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
 
-        // Brush Menu
-        BrushMenu.AddWidget(new Button(BrushMenu, "Stone", () => { BrushID = 100; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Water", () => { BrushID = 200; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Smoke", () => { BrushID = 300; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
-        BrushMenu.AddWidget(new Button(BrushMenu, "Sand", () => { BrushID = 400; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
-
         // Objects Menu
         ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Barrel", () => { ObjectID = 0; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         ObjectsMenu.AddWidget(new Button(ObjectsMenu, "Crate", () => { ObjectID = 1; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
@@ -213,6 +207,8 @@ class Canvas {
 
         ////
         // Finish
+        SetupBrushMenu();
+
         Engine.Interface.AddContainer(Toolbar);
 
         foreach (var W in Windows) Engine.Interface.AddContainer(W);
@@ -244,6 +240,35 @@ class Canvas {
         foreach (var M in Menus) {
             if (M == menu) M.Toggle();
             else if (M.Active) M.Toggle();
+        }
+    }
+
+    // Setup the brush menu from the data loaded in the Atlas
+    public void SetupBrushMenu() {
+        // Solid
+        foreach (var Element in Atlas.Solid) {
+            BrushMenu.AddWidget(new Button(BrushMenu, Element.Name, () => { BrushID = Element.ID; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        }
+
+        BrushMenu.AddWidget(new Label(BrushMenu, "---", fit_width: true));
+
+        // Liquid
+        foreach (var Element in Atlas.Liquid) {
+            BrushMenu.AddWidget(new Button(BrushMenu, Element.Name, () => { BrushID = Element.ID; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        }
+
+        BrushMenu.AddWidget(new Label(BrushMenu, "---", fit_width: true));
+
+        // Gas
+        foreach (var Element in Atlas.Gas) {
+            BrushMenu.AddWidget(new Button(BrushMenu, Element.Name, () => { BrushID = Element.ID; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
+        }
+
+        BrushMenu.AddWidget(new Label(BrushMenu, "---", fit_width: true));
+
+        // Powder
+        foreach (var Element in Atlas.Powder) {
+            BrushMenu.AddWidget(new Button(BrushMenu, Element.Name, () => { BrushID = Element.ID; ChangeMenu(); }, new Vector2i(100, 25), text_anchor: Anchor.Left, background: false, fit_width: true));
         }
     }
 

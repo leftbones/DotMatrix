@@ -13,31 +13,70 @@ enum ElementType { Solid, Liquid, Gas, Powder };
 static class Atlas {
     public static Dictionary<int, ElementData> Elements = new Dictionary<int, ElementData>();
 
-    public static Dictionary<string, ElementData> Solid = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Solid.json"))!;
-    public static Dictionary<string, ElementData> Liquid = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Liquid.json"))!;
-    public static Dictionary<string, ElementData> Gas = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Gas.json"))!;
-    public static Dictionary<string, ElementData> Powder = JsonConvert.DeserializeObject<Dictionary<string, ElementData>>(File.ReadAllText("core/world/elements/json/Powder.json"))!;
+    public static List<ElementData> Solid = new List<ElementData>();
+    public static List<ElementData> Liquid = new List<ElementData>();
+    public static List<ElementData> Gas = new List<ElementData>();
+    public static List<ElementData> Powder = new List<ElementData>();
 
     public static Dictionary<int, string> Colors = new Dictionary<int, string>();
     public static Dictionary<int, MaterialMap> MaterialMaps = new Dictionary<int, MaterialMap>();
 
     public static void Initialize() {
-        // Elements
-        foreach (var Data in Solid) Elements[Data.Value.ID] = Data.Value;
-        foreach (var Data in Liquid) Elements[Data.Value.ID] = Data.Value;
-        foreach (var Data in Gas) Elements[Data.Value.ID] = Data.Value;
-        foreach (var Data in Powder) Elements[Data.Value.ID] = Data.Value;
+        // Deserialize Elements
+        int ID;
 
-        // Colors
-        foreach (var Data in Solid) Colors[Data.Value.ID] = Data.Value.Color;
-        foreach (var Data in Liquid) Colors[Data.Value.ID] = Data.Value.Color;
-        foreach (var Data in Gas) Colors[Data.Value.ID] = Data.Value.Color;
-        foreach (var Data in Powder) Colors[Data.Value.ID] = Data.Value.Color;
+        ID = 1000;
+        foreach (var Path in Directory.EnumerateFiles("core/world/elements/json/solid", "*.json")) {
+            var JsonData = File.ReadAllText(Path);
+            var ElementData = JsonConvert.DeserializeObject<ElementData>(JsonData);
+            ElementData.ID = ID;
+            Solid.Add(ElementData);
+            ID++;
+        }
 
-        // Textures
+        ID = 2000;
+        foreach (var Path in Directory.EnumerateFiles("core/world/elements/json/liquid", "*.json")) {
+            var JsonData = File.ReadAllText(Path);
+            var ElementData = JsonConvert.DeserializeObject<ElementData>(JsonData);
+            ElementData.ID = ID;
+            Liquid.Add(ElementData);
+            ID++;
+        }
+
+        ID = 3000;
+        foreach (var Path in Directory.EnumerateFiles("core/world/elements/json/gas", "*.json")) {
+            var JsonData = File.ReadAllText(Path);
+            var ElementData = JsonConvert.DeserializeObject<ElementData>(JsonData);
+            ElementData.ID = ID;
+            Gas.Add(ElementData);
+            ID++;
+        }
+
+        ID = 4000;
+        foreach (var Path in Directory.EnumerateFiles("core/world/elements/json/powder", "*.json")) {
+            var JsonData = File.ReadAllText(Path);
+            var ElementData = JsonConvert.DeserializeObject<ElementData>(JsonData);
+            ElementData.ID = ID;
+            Powder.Add(ElementData);
+            ID++;
+        }
+
+        // Store Elements
+        foreach (var Data in Solid) Elements[Data.ID] = Data;
+        foreach (var Data in Liquid) Elements[Data.ID] = Data;
+        foreach (var Data in Gas) Elements[Data.ID] = Data;
+        foreach (var Data in Powder) Elements[Data.ID] = Data;
+
+        // Store Colors
+        foreach (var Data in Solid) Colors[Data.ID] = Data.Color;
+        foreach (var Data in Liquid) Colors[Data.ID] = Data.Color;
+        foreach (var Data in Gas) Colors[Data.ID] = Data.Color;
+        foreach (var Data in Powder) Colors[Data.ID] = Data.Color;
+
+        // Store Textures
         foreach (var Data in Solid) {
-            var TexturePath = Data.Value.Texture != "" ? Data.Value.Texture : "res/textures/missing.png";
-            MaterialMaps[Data.Value.ID] = new MaterialMap(LoadImage(TexturePath));
+            var TexturePath = Data.Texture != "" ? Data.Texture : "res/textures/missing.png";
+            MaterialMaps[Data.ID] = new MaterialMap(LoadImage(TexturePath));
         }
     }
 
@@ -60,14 +99,24 @@ struct ElementData {
     public int ID;
     public string Name;
     public string Color;
+    public int ColorOffset;
     public string Texture;
+    public int Lifetime;
+    public int Friction;
+    public int Fluidity;
+    public int Diffusion;
     public ElementType Type;
 
-    public ElementData(int id, string name, string color, string texture, ElementType type) {
+    public ElementData(int id, string name, string color, int color_offset, string texture, int lifetime, int friction, int fluidity, int diffusion, ElementType type) {
         ID = id;
         Name = name;
         Color = color;
+        ColorOffset = color_offset;
         Texture = texture;
+        Lifetime = lifetime;
+        Friction = friction;
+        Fluidity = fluidity;
+        Diffusion = diffusion;
         Type = type;
     }
 }

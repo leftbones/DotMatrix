@@ -9,6 +9,7 @@ class Liquid : Pixel {
         Fluidity = 75;
 
         BaseColor = GetColor(Convert.ToUInt32(Atlas.Colors[ID], 16));
+        ColorOffset = Atlas.Elements[ID].ColorOffset;
     }
 
     public override void Step(Matrix M, RNG RNG) {
